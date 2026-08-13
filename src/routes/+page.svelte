@@ -410,6 +410,23 @@
             padding: 18px;
         }
     }
+.welcomeText {
+    color: inherit;
+    line-height: 1.6;
+}
+
+.welcomeText :global(p),
+.welcomeText :global(div),
+.welcomeText :global(span),
+.welcomeText :global(li),
+.welcomeText :global(strong),
+.welcomeText :global(b) {
+    color: inherit;
+}
+
+.welcomeText :global(a) {
+    color: var(--blueOne);
+}
 </style>
 
 <div id="home">
@@ -479,7 +496,9 @@
         <section class="intro">
             <div class="introTitle">Welcome to {leagueName}</div>
 
-            {@html homepageText}
+            <div class="welcomeText">
+    {@html homepageText}
+</div>
         </section>
 
         <!-- NFL STATUS -->
