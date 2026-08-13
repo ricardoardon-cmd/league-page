@@ -161,7 +161,7 @@
     }
 
     .statCard {
-        background: white;
+        background:  var(--f3f3f3);
         border-radius: 14px;
         padding: 20px;
         box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
@@ -189,7 +189,7 @@
     /* INTRO */
 
     .intro {
-        background: white;
+        background:  var(--f3f3f3);
         border-radius: 14px;
         padding: 25px;
         margin-bottom: 30px;
@@ -220,7 +220,7 @@
         display: block;
         text-decoration: none;
         color: inherit;
-        background: white;
+        background:  var(--f3f3f3);
         border-radius: 14px;
         padding: 22px;
         border: 1px solid #e5e5e5;
@@ -259,7 +259,7 @@
     }
 
     .panel {
-        background: white;
+        background:  var(--f3f3f3);
         border-radius: 14px;
         padding: 20px;
         box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
@@ -300,7 +300,7 @@
 
     #currentChamp {
         padding: 25px;
-        background: white;
+        background:  var(--f3f3f3);
         border-radius: 14px;
         box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
         margin-bottom: 25px;
@@ -427,6 +427,93 @@
 .welcomeText :global(a) {
     color: var(--blueOne);
 }
+/* =========================================================
+   GGL DASHBOARD - LIGHT / DARK MODE SUPPORT
+   Uses the existing League Page theme
+   ========================================================= */
+
+/* Cards and dashboard sections */
+.statCard,
+.intro,
+.navCard,
+.panel,
+#currentChamp {
+    background-color: var(--f3f3f3);
+    color: inherit;
+}
+
+/* Dashboard text */
+.statCard,
+.intro,
+.navCard,
+.panel,
+#currentChamp,
+.sectionTitle {
+    color: inherit;
+}
+
+/* Welcome section */
+.welcomeText {
+    color: inherit;
+    line-height: 1.6;
+}
+
+.welcomeText p,
+.welcomeText div,
+.welcomeText span,
+.welcomeText li,
+.welcomeText strong,
+.welcomeText b {
+    color: inherit;
+}
+
+/* Links */
+.welcomeText a,
+.navCard {
+    color: inherit;
+}
+
+/* Card descriptions */
+.navDescription {
+    color: inherit;
+    opacity: 0.75;
+}
+
+/* Stat labels */
+.statLabel {
+    color: inherit;
+    opacity: 0.7;
+}
+
+/* Main dashboard background */
+#home {
+    background-color: var(--f3f3f3);
+    color: inherit;
+}
+
+/* Make headings follow the current theme */
+.sectionTitle,
+.panelTitle,
+.introTitle,
+.statValue,
+.navTitle,
+.champTitle,
+.champTeam,
+.champYear {
+    color: inherit;
+}
+
+/* Keep the league banner readable */
+.nflBanner {
+    background-color: var(--blueOne);
+    color: #fff;
+}
+
+/* Make links visible in both themes */
+a {
+    color: inherit;
+}
+
 </style>
 
 <div id="home">
