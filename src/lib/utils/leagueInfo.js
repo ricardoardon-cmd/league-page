@@ -14,7 +14,7 @@ And to anyone claiming those early-era titles don't count because we were "infan
 <p>Now we’re a rock-solid 10-team league bound by over a decade of real-life friendship, growing older, and refusing to let each other down.</p>
 <p> A Note from Commish Pico:</p>
 <p> "Thanks for everyone's effort in and out every year, this is probably one of the best ways that we all stay connected - it awesome seeing everyone grow together"</p>
- 
+ '
 ;
 
 /*   STEP 3   */
