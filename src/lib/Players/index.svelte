@@ -50,7 +50,7 @@
     }
 
     return map;
-};
+
     };
 
     const playerName = (player) => {
