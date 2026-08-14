@@ -1,13 +1,35 @@
 <script>
-	import Matchup from "$lib/Matchups/Matchup.svelte";
-	import TradeTransaction from "$lib/Transactions/TradeTransaction.svelte";
-	import { getLeagueRecords, getLeagueTransactions, getRivalryMatchups, loadPlayers, round } from "$lib/utils/helper";
-	import { getRosterIDFromManagerIDAndYear } from "$lib/utils/helperFunctions/universalFunctions";
-	import LinearProgress from '@smui/linear-progress';
-	import { onMount } from "svelte";
-	import ComparissonBar from "./ComparissonBar.svelte";
-	import ManagerSelectors from "./ManagerSelectors.svelte";
-	import RivalryControls from "./RivalryControls.svelte";
+<div class="rivalryHeader">
+
+    <div class="rivalryEyebrow">
+        GGL HEAD-TO-HEAD
+    </div>
+
+    <h2>
+        ⚔️ Rivalry Center
+    </h2>
+
+    <p>
+        Compare two managers across league history
+    </p>
+
+</div>
+
+<div class="rivalrySelectorCard">
+
+    <div class="selectorTitle">
+        Choose Two Managers
+    </div>
+
+    <div class="rivalrySelection">
+        <ManagerSelectors
+            bind:playerOne={playerOne}
+            bind:playerTwo={playerTwo}
+            {leagueTeamManagers}
+        />
+    </div>
+
+</div>
 
 	export let leagueTeamManagers, playersInfo, transactionsInfo, recordsInfo, playerOne, playerTwo;
 
@@ -103,14 +125,75 @@
 </script>
 
 <style>
-    .scoreBoard {
-        width: 97%;
-        border-radius: 20px;
-        background-color: var(--rivalryBack);
-        border: 1px solid var(--aaa);
-        margin: 2em auto;
-        padding: 2em 0;
-        max-width: 1000px;
+.rivalryHeader {
+    width: 95%;
+    max-width: 1000px;
+    margin: 30px auto 20px;
+    text-align: center;
+}
+
+.rivalryEyebrow {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    opacity: 0.55;
+    margin-bottom: 6px;
+}
+
+.rivalryHeader h2 {
+    margin: 0;
+    font-size: 2.7rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.rivalryHeader p {
+    margin: 10px 0 0;
+    opacity: 0.65;
+}
+
+.rivalrySelectorCard {
+    width: 95%;
+    max-width: 1000px;
+    margin: 20px auto 30px;
+    padding: 22px;
+    box-sizing: border-box;
+    border-radius: 18px;
+    background: var(--fff);
+    border: 1px solid var(--ccc);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+}
+
+.selectorTitle {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+    .rivalryHeader h2 {
+        font-size: 2rem;
+    }
+
+    .rivalrySelectorCard {
+        padding: 16px 12px;
+    }
+}
+ .scoreBoard {
+    width: 95%;
+    max-width: 1000px;
+    margin: 22px auto;
+    padding: 24px;
+    box-sizing: border-box;
+    border-radius: 18px;
+    background: var(--fff);
+    border: 1px solid var(--ccc);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+}
     }
     h2 {
         text-align: center;
