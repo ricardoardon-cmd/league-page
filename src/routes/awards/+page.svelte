@@ -1,4 +1,5 @@
 <script>
+import { getTeamNameFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
     import { Awards } from '$lib/components';
     import { waitForAll, leagueName } from '$lib/utils/helper';
     import LinearProgress from '@smui/linear-progress';
@@ -8,22 +9,34 @@
     const { awardsData, teamManagersData } = data;
 
     const getChampionshipCounts = (podiums) => {
-        const counts = {};
+    const counts = {};
 
-        for (const podium of podiums || []) {
-            if (!podium?.champion) continue;
+    for (const podium of podiums || []) {
+        if (!podium?.champion) continue;
 
-            counts[podium.champion] =
-                (counts[podium.champion] || 0) + 1;
+        const rosterID = String(podium.champion);
+
+        if (!counts[rosterID]) {
+            counts[rosterID] = {
+                rosterID,
+                championships: 0,
+                latestYear: podium.year
+            };
         }
 
-        return Object.entries(counts)
-            .map(([rosterID, championships]) => ({
-                rosterID,
-                championships
-            }))
-            .sort((a, b) => b.championships - a.championships);
-    };
+        counts[rosterID].championships++;
+
+        if (
+            !counts[rosterID].latestYear ||
+            Number(podium.year) > Number(counts[rosterID].latestYear)
+        ) {
+            counts[rosterID].latestYear = podium.year;
+        }
+    }
+
+    return Object.values(counts)
+        .sort((a, b) => b.championships - a.championships);
+};
 </script>
 
 <style>
@@ -283,8 +296,12 @@
                             </div>
 
                             <div class="championRoster">
-                                Roster #{champion.rosterID}
-                            </div>
+    {getTeamNameFromTeamManagers(
+        leagueTeamManagers,
+        champion.rosterID,
+        champion.latestYear
+    )}
+</div>
 
                             <div class="championshipCount">
                                 {champion.championships}
