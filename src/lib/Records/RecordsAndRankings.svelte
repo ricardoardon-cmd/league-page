@@ -585,20 +585,6 @@
         scroll-margin-top: 130px;
     }
 
-    .recordAnchorExpanded {
-        grid-column: 1 / -1;
-    }
-
-    .recordAnchorExpanded :global(.recordTable) {
-        width: 100%;
-    }
-
-    .recordAnchorExpanded .recordDetail {
-        width: 100%;
-        max-width: 100%;
-        overflow-x: visible;
-    }
-
     .rankingHolder {
         display: block;
         width: 100%;
@@ -938,7 +924,7 @@
 
 <div class="fullFlex">
     {#if weekRecords && weekRecords.length}
-        <div id="scoring-highs" class:recordAnchorExpanded={expandedRecordKey?.startsWith("scoring-high-")} class="recordAnchor">
+        <div id="scoring-highs" class="recordAnchor">
             <DataTable class="recordTable">
             <Head>
                 <Row class="rTableHeader">
@@ -1027,7 +1013,7 @@
     {/if}
 
     {#if weekLows && weekLows.length}
-        <div id="scoring-lows" class:recordAnchorExpanded={expandedRecordKey?.startsWith("scoring-low-")} class="recordAnchor">
+        <div id="scoring-lows" class="recordAnchor">
             <DataTable class="recordTable">
             <Head>
                 <Row>
@@ -1176,7 +1162,7 @@
     {/if}
 
     {#if blowouts && blowouts.length}
-        <div id="blowouts" class:recordAnchorExpanded={expandedRecordKey?.startsWith("blowout-")} class="recordAnchor">
+        <div id="blowouts" class="recordAnchor">
             <DataTable class="recordTable">
             <Head>
                 <Row>
@@ -1265,7 +1251,7 @@
     {/if}
 
     {#if closestMatchups && closestMatchups.length}
-        <div id="closest-wins" class:recordAnchorExpanded={expandedRecordKey?.startsWith("closest-")} class="recordAnchor">
+        <div id="closest-wins" class="recordAnchor">
             <DataTable class="recordTable">
             <Head>
                 <Row>
