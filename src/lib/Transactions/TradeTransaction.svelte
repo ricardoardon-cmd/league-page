@@ -1,8 +1,7 @@
 <script>
     import { gotoManager } from '$lib/utils/helper';
     import {
-    getTeamFromTeamManagers,
-    getManagers
+    getTeamFromTeamManagers
 } from '$lib/utils/helperFunctions/universalFunctions';
 import TransactionMove from './TransactionMove.svelte';
 
