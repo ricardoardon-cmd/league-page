@@ -8,10 +8,11 @@
         loadPlayers,
         round
     } from "$lib/utils/helper";
-   import {
-    getRosterIDFromManagerIDAndYear,
-    getTeamData
-} from "$lib/utils/helperFunctions/universalFunctions";    import LinearProgress from '@smui/linear-progress';
+    import {
+        getRosterIDFromManagerIDAndYear,
+        getTeamData
+    } from "$lib/utils/helperFunctions/universalFunctions";
+    import LinearProgress from '@smui/linear-progress';
     import { onMount } from "svelte";
 
     import ComparissonBar from "./ComparissonBar.svelte";
@@ -493,13 +494,12 @@ const getMatchupTotal = (points) => {
 
 .historyGame {
     display: grid;
-    grid-template-columns: 110px 1fr 90px;
+    grid-template-columns: 95px minmax(0, 1fr);
+    gap: 18px;
     align-items: center;
-    gap: 12px;
 
-    padding: 14px 16px;
-
-    border-radius: 12px;
+    padding: 18px 20px;
+    border-radius: 14px;
     border: 1px solid var(--ccc);
     background: var(--f3f3f3);
 
@@ -513,39 +513,77 @@ const getMatchupTotal = (points) => {
 
 .historyGame:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.08);
     border-color: var(--blueOne);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.08);
 }
 
 .historyGameActive {
     border: 2px solid var(--blueOne);
 }
 
+.historyMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.historyYear,
 .historyWeek {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 800;
+    letter-spacing: 0.3px;
     opacity: 0.6;
     text-transform: uppercase;
 }
 
 .historyTeams {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
     min-width: 0;
 }
 
 .historyTeam {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) 85px;
+    align-items: center;
     gap: 10px;
-    padding: 2px 0;
+
+    width: 100%;
+    padding: 6px 0;
+    box-sizing: border-box;
+}
+
+.winnerIcon {
+    width: 28px;
+    text-align: center;
     font-size: 0.9rem;
 }
 
 .historyTeamName {
+    min-width: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: left;
+
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.historyScore {
+    font-family: "Roboto Mono", monospace;
+    font-size: 1rem;
+    font-weight: 800;
+    text-align: right;
     white-space: nowrap;
 }
+
 .historyTeamWinner {
+    opacity: 1;
+}
+
+.historyTeamWinner .historyTeamName {
     font-weight: 800;
 }
 
@@ -557,30 +595,14 @@ const getMatchupTotal = (points) => {
     opacity: 0.55;
 }
 
-.historyTeamWinner::before {
-    content: "🏆";
-    margin-right: 6px;
-    font-size: 0.8rem;
-}
-
-.historyScore {
-    font-weight: 800;
-    font-family: "Roboto Mono", monospace;
-}
-
-.historyResult {
-    text-align: right;
-    font-size: 0.78rem;
-    font-weight: 800;
-}
-
+.historyResult,
 .historyWinner {
-    color: #2e9d50;
+    display: none;
 }
 
 @media (max-width: 600px) {
     .matchupHistory {
-        padding: 16px 10px;
+        padding: 14px 10px;
     }
 
     .matchupHistoryTitle {
@@ -588,19 +610,40 @@ const getMatchupTotal = (points) => {
     }
 
     .historyGame {
-        grid-template-columns: 75px 1fr;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 15px;
     }
 
-    .historyResult {
-        display: none;
+    .historyMeta {
+        flex-direction: row;
+        gap: 10px;
     }
 
+    .historyYear,
     .historyWeek {
-        font-size: 0.65rem;
+        font-size: 0.68rem;
     }
 
     .historyTeam {
-        font-size: 0.82rem;
+        grid-template-columns: 24px minmax(0, 1fr) 70px;
+        gap: 6px;
+    }
+
+    .winnerIcon {
+        width: 24px;
+        font-size: 0.8rem;
+    }
+
+    .historyTeamName {
+        font-size: 0.86rem;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+    }
+
+    .historyScore {
+        font-size: 0.9rem;
     }
 }
 </style>
@@ -790,54 +833,57 @@ const getMatchupTotal = (points) => {
                 onclick={() => selected = index}
             >
 
-                <div class="historyWeek">
-                    {game.year}<br />
-                    Week {game.week}
+                <div class="historyMeta">
+                    <div class="historyYear">
+                        {game.year}
+                    </div>
+
+                    <div class="historyWeek">
+                        Week {game.week}
+                    </div>
                 </div>
 
-                <div
-    class:historyTeamWinner={scoreOne > scoreTwo}
-    class:historyTeamLoser={scoreOne < scoreTwo}
-    class="historyTeam"
->
-    <span class="historyTeamName">
-        {playerOneData?.name || playerOneManagerName}
-    </span>
+                <div class="historyTeams">
 
-    <span class="historyScore">
-        {scoreOne}
-    </span>
-</div>
+                    <div
+                        class:historyTeamWinner={scoreOne > scoreTwo}
+                        class:historyTeamLoser={scoreOne < scoreTwo}
+                        class="historyTeam"
+                    >
+                        <div class="winnerIcon">
+                            {#if scoreOne > scoreTwo}
+                                🏆
+                            {/if}
+                        </div>
 
-<div
-    class:historyTeamWinner={scoreTwo > scoreOne}
-    class:historyTeamLoser={scoreTwo < scoreOne}
-    class="historyTeam"
->
-    <span class="historyTeamName">
-        {playerTwoData?.name || playerTwoManagerName}
-    </span>
+                        <div class="historyTeamName">
+                            {playerOneData?.name || playerOneManagerName}
+                        </div>
 
-    <span class="historyScore">
-        {scoreTwo}
-    </span>
-</div>
+                        <div class="historyScore">
+                            {scoreOne}
+                        </div>
+                    </div>
 
-                <div class="historyResult">
+                    <div
+                        class:historyTeamWinner={scoreTwo > scoreOne}
+                        class:historyTeamLoser={scoreTwo < scoreOne}
+                        class="historyTeam"
+                    >
+                        <div class="winnerIcon">
+                            {#if scoreTwo > scoreOne}
+                                🏆
+                            {/if}
+                        </div>
 
-                    {#if scoreOne > scoreTwo}
-                        <span class="historyWinner">
-                            🏆 {playerOneData?.name || playerOneManagerName}
-                        </span>
+                        <div class="historyTeamName">
+                            {playerTwoData?.name || playerTwoManagerName}
+                        </div>
 
-                    {:else if scoreTwo > scoreOne}
-                        <span class="historyWinner">
-                            🏆 {playerTwoData?.name || playerTwoManagerName}
-                        </span>
-
-                    {:else}
-                        🤝 Tie
-                    {/if}
+                        <div class="historyScore">
+                            {scoreTwo}
+                        </div>
+                    </div>
 
                 </div>
 
