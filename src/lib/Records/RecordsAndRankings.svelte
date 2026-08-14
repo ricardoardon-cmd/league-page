@@ -12,7 +12,6 @@
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
 	import RecordTeam from './RecordTeam.svelte';
 	import BarChart from '$lib/BarChart.svelte';
-    import Matchup from '$lib/Matchups/Matchup.svelte';
 
     export let key, tradesData, waiversData, weekRecords, weekLows, seasonLongRecords, seasonLongLows, showTies, winPercentages, fptsHistories, lineupIQs, prefix, blowouts, closestMatchups, allTime=false, leagueTeamManagers;
 
@@ -238,6 +237,7 @@
     let matchupLoading = false;
     let matchupError = '';
     let playersInfo = null;
+    let MatchupComponent = null;
 
     const getLeagueIDForYear = async (targetYear) => {
         let currentLeagueID = leagueID;
@@ -309,6 +309,11 @@
         try {
             if (!playersInfo) {
                 playersInfo = await loadPlayers();
+            }
+
+            if (!MatchupComponent) {
+                const matchupModule = await import('$lib/Matchups/Matchup.svelte');
+                MatchupComponent = matchupModule.default;
             }
 
             const historicalLeagueID = await getLeagueIDForYear(targetYear);
@@ -842,8 +847,9 @@
                                         <div class="recordLoading">Loading historical lineup...</div>
                                     {:else if matchupError}
                                         <div class="recordError">{matchupError}</div>
-                                    {:else if expandedMatchup && playersInfo?.players}
-                                        <Matchup
+                                    {:else if expandedMatchup && playersInfo?.players && MatchupComponent}
+                                        <svelte:component
+                                            this={MatchupComponent}
                                             key={`record-blowout-${expandedYear}-${expandedWeek}-${ix}`}
                                             ix={ix}
                                             active={ix}
@@ -928,8 +934,9 @@
                                         <div class="recordLoading">Loading historical lineup...</div>
                                     {:else if matchupError}
                                         <div class="recordError">{matchupError}</div>
-                                    {:else if expandedMatchup && playersInfo?.players}
-                                        <Matchup
+                                    {:else if expandedMatchup && playersInfo?.players && MatchupComponent}
+                                        <svelte:component
+                                            this={MatchupComponent}
                                             key={`record-closest-${expandedYear}-${expandedWeek}-${ix}`}
                                             ix={ix}
                                             active={ix}
