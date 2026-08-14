@@ -25,18 +25,32 @@
     let selectedPlayer = null;
     let visibleCount = 60;
 
-    const buildOwnershipMap = (leagueRosters) => {
-        const map = {};
+   const buildOwnershipMap = (leagueRosters) => {
 
-        for (const roster of leagueRosters || []) {
-            const rosterPlayers = roster?.players || [];
+    const map = {};
 
-            for (const playerID of rosterPlayers) {
-                map[String(playerID)] = Number(roster.roster_id);
-            }
+    const rosterMap =
+        leagueRosters?.rosters || {};
+
+    const rosterList =
+        Object.values(rosterMap);
+
+    for (const roster of rosterList) {
+
+        const rosterPlayers =
+            roster?.players || [];
+
+        for (const playerID of rosterPlayers) {
+
+            map[String(playerID)] =
+                Number(roster.roster_id);
+
         }
 
-        return map;
+    }
+
+    return map;
+};
     };
 
     const playerName = (player) => {
