@@ -1,10 +1,18 @@
 <script>
     import Button, { Group, Label } from '@smui/button';
-    import { generateGraph, gotoManager, round } from '$lib/utils/helper';
+    import {
+        generateGraph,
+        gotoManager,
+        round,
+        getLeagueData,
+        loadPlayers
+    } from '$lib/utils/helper';
+    import { leagueID } from '$lib/utils/leagueInfo';
 
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
 	import RecordTeam from './RecordTeam.svelte';
 	import BarChart from '$lib/BarChart.svelte';
+    import Matchup from '$lib/Matchups/Matchup.svelte';
 
     export let key, tradesData, waiversData, weekRecords, weekLows, seasonLongRecords, seasonLongLows, showTies, winPercentages, fptsHistories, lineupIQs, prefix, blowouts, closestMatchups, allTime=false, leagueTeamManagers;
 
@@ -222,6 +230,123 @@
     $: setTables(lineupIQs)
     
     let innerWidth;
+
+    let expandedRecordKey = null;
+    let expandedMatchup = null;
+    let expandedYear = null;
+    let expandedWeek = null;
+    let matchupLoading = false;
+    let matchupError = '';
+    let playersInfo = null;
+
+    const getLeagueIDForYear = async (targetYear) => {
+        let currentLeagueID = leagueID;
+
+        while (currentLeagueID && currentLeagueID != 0) {
+            const leagueData = await getLeagueData(currentLeagueID);
+
+            if (String(leagueData.season) === String(targetYear)) {
+                return currentLeagueID;
+            }
+
+            currentLeagueID = leagueData.previous_league_id;
+        }
+
+        return null;
+    };
+
+    const buildMatchup = (weekData, homeRosterID, awayRosterID) => {
+        if (!Array.isArray(weekData)) return null;
+
+        const homeRaw = weekData.find(
+            (entry) => Number(entry.roster_id) === Number(homeRosterID)
+        );
+
+        const awayRaw = weekData.find(
+            (entry) => Number(entry.roster_id) === Number(awayRosterID)
+        );
+
+        if (!homeRaw || !awayRaw) return null;
+
+        if (
+            homeRaw.matchup_id == null ||
+            awayRaw.matchup_id == null ||
+            homeRaw.matchup_id !== awayRaw.matchup_id
+        ) {
+            return null;
+        }
+
+        return [homeRaw, awayRaw].map((entry) => ({
+            roster_id: entry.roster_id,
+            starters: entry.starters || [],
+            points: entry.starters_points || []
+        }));
+    };
+
+    const toggleRecordMatchup = async (record, type, index) => {
+        const targetYear = record.year || prefix;
+        const targetWeek = Number(record.week);
+        const recordKey = `${type}-${targetYear}-${record.week}-${index}`;
+
+        if (expandedRecordKey === recordKey) {
+            expandedRecordKey = null;
+            expandedMatchup = null;
+            matchupError = '';
+            return;
+        }
+
+        expandedRecordKey = recordKey;
+        expandedMatchup = null;
+        matchupError = '';
+
+        if (!Number.isFinite(targetWeek)) {
+            matchupError = 'Full lineup details are not available from this record row.';
+            return;
+        }
+
+        matchupLoading = true;
+
+        try {
+            if (!playersInfo) {
+                playersInfo = await loadPlayers();
+            }
+
+            const historicalLeagueID = await getLeagueIDForYear(targetYear);
+
+            if (!historicalLeagueID) {
+                throw new Error(`Could not find the ${targetYear} Sleeper league.`);
+            }
+
+            const response = await fetch(
+                `https://api.sleeper.app/v1/league/${historicalLeagueID}/matchups/${targetWeek}`
+            );
+
+            if (!response.ok) {
+                throw new Error(`Sleeper matchup request failed (${response.status}).`);
+            }
+
+            const weekData = await response.json();
+
+            expandedMatchup = buildMatchup(
+                weekData,
+                record.home.rosterID,
+                record.away.rosterID
+            );
+
+            if (!expandedMatchup) {
+                throw new Error('Could not match these two teams in the historical week.');
+            }
+
+            expandedYear = targetYear;
+            expandedWeek = targetWeek;
+        } catch (error) {
+            console.error(error);
+            matchupError = error?.message || 'Unable to load this historical matchup.';
+            expandedMatchup = null;
+        } finally {
+            matchupLoading = false;
+        }
+    };
 
 </script>
 
@@ -459,6 +584,79 @@
     }
 
     /* END ranking table resizing */
+
+    .recordMatchupRow {
+        cursor: pointer;
+    }
+
+    .recordMatchupRow:hover {
+        background: var(--f3f3f3);
+    }
+
+    .recordMatchupHint {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.65em;
+        font-style: italic;
+        opacity: 0.55;
+    }
+
+    :global(.recordDetailCell) {
+        padding: 0 !important;
+        border-bottom: 1px solid var(--borderOverride);
+    }
+
+    .recordDetail {
+        padding: 18px;
+        background: var(--fff);
+        border-top: 3px solid var(--blueOne);
+    }
+
+    .recordDetailHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .recordDetailTitle {
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        opacity: 0.65;
+    }
+
+    .recordClose {
+        border: 1px solid var(--ccc);
+        background: var(--f3f3f3);
+        color: inherit;
+        border-radius: 999px;
+        padding: 6px 11px;
+        font: inherit;
+        font-size: 0.72rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .recordLoading,
+    .recordError {
+        padding: 18px 8px;
+        text-align: center;
+        opacity: 0.7;
+    }
+
+    @media (max-width: 600px) {
+        .recordDetail {
+            padding: 12px 6px 16px;
+        }
+
+        .recordDetailHeader {
+            padding: 0 6px;
+        }
+    }
+
 </style>
 
 <h4>{prefix} Records</h4>
@@ -595,24 +793,72 @@
             </Head>
             <Body>
                 {#each blowouts as blowout, ix}
-                    <Row>
+                    {@const blowoutKey = `blowout-${blowout.year || prefix}-${blowout.week}-${ix}`}
+
+                    <Row
+                        class="recordMatchupRow"
+                        onclick={() => toggleRecordMatchup(blowout, 'blowout', ix)}
+                    >
                         <Cell class="rank">{ix + 1}</Cell>
                         <Cell class="cellName differentialName">
                             <div class="vsRecord">
-                                <div onclick={() => gotoManager({year: blowout.year || prefix, leagueTeamManagers, rosterID: blowout.home.rosterID})}>
+                                <div>
                                     <RecordTeam {leagueTeamManagers} rosterID={blowout.home.rosterID} year={allTime ? blowout.year : prefix} compressed={true} points={round(blowout.home.fpts)} />
                                 </div>
-                                <p class="vs">
-                                    vs
-                                </p>
-                                <div onclick={() => gotoManager({year: blowout.year || prefix, leagueTeamManagers, rosterID: blowout.away.rosterID})}>
+                                <p class="vs">vs</p>
+                                <div>
                                     <RecordTeam {leagueTeamManagers} rosterID={blowout.away.rosterID} year={allTime ? blowout.year : prefix} compressed={true} points={round(blowout.away.fpts)} />
                                 </div>
                             </div>
+                            <span class="recordMatchupHint">Click to view full matchup</span>
                         </Cell>
                         <Cell>{allTime ? blowout.year + " " : "" }{key == "regularSeasonData" ? "Week " : ""}{blowout.week}</Cell>
                         <Cell>{round(blowout.differential)}</Cell>
                     </Row>
+
+                    {#if expandedRecordKey === blowoutKey}
+                        <Row>
+                            <Cell class="recordDetailCell" colspan=4>
+                                <div class="recordDetail">
+                                    <div class="recordDetailHeader">
+                                        <div class="recordDetailTitle">
+                                            {blowout.year || prefix} Week {blowout.week} · Full Matchup
+                                        </div>
+                                        <button
+                                            class="recordClose"
+                                            type="button"
+                                            onclick={(event) => {
+                                                event.stopPropagation();
+                                                expandedRecordKey = null;
+                                                expandedMatchup = null;
+                                                matchupError = '';
+                                            }}
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+
+                                    {#if matchupLoading}
+                                        <div class="recordLoading">Loading historical lineup...</div>
+                                    {:else if matchupError}
+                                        <div class="recordError">{matchupError}</div>
+                                    {:else if expandedMatchup && playersInfo?.players}
+                                        <Matchup
+                                            key={`record-blowout-${expandedYear}-${expandedWeek}-${ix}`}
+                                            ix={ix}
+                                            active={ix}
+                                            year={expandedYear}
+                                            matchup={expandedMatchup}
+                                            players={playersInfo.players}
+                                            displayWeek={expandedWeek}
+                                            expandOverride={true}
+                                            {leagueTeamManagers}
+                                        />
+                                    {/if}
+                                </div>
+                            </Cell>
+                        </Row>
+                    {/if}
                 {/each}
             </Body>
         </DataTable>
@@ -633,24 +879,72 @@
             </Head>
             <Body>
                 {#each closestMatchups as closestMatchup, ix}
-                    <Row>
+                    {@const closestKey = `closest-${closestMatchup.year || prefix}-${closestMatchup.week}-${ix}`}
+
+                    <Row
+                        class="recordMatchupRow"
+                        onclick={() => toggleRecordMatchup(closestMatchup, 'closest', ix)}
+                    >
                         <Cell class="rank">{ix + 1}</Cell>
                         <Cell class="cellName differentialName">
                             <div class="vsRecord">
-                                <div onclick={() => gotoManager({year: closestMatchup.year || prefix, leagueTeamManagers, rosterID: closestMatchup.home.rosterID})}>
+                                <div>
                                     <RecordTeam {leagueTeamManagers} rosterID={closestMatchup.home.rosterID} year={allTime ? closestMatchup.year : prefix} compressed={true} points={round(closestMatchup.home.fpts)} />
                                 </div>
-                                <p class="vs">
-                                    vs
-                                </p>
-                                <div onclick={() => gotoManager({year: closestMatchup.year || prefix, leagueTeamManagers, rosterID: closestMatchup.away.rosterID})}>
+                                <p class="vs">vs</p>
+                                <div>
                                     <RecordTeam {leagueTeamManagers} rosterID={closestMatchup.away.rosterID} year={allTime ? closestMatchup.year : prefix} compressed={true} points={round(closestMatchup.away.fpts)} />
                                 </div>
                             </div>
+                            <span class="recordMatchupHint">Click to view full matchup</span>
                         </Cell>
                         <Cell>{allTime ? closestMatchup.year + " " : "" }{key == "regularSeasonData" ? "Week " : ""}{closestMatchup.week}</Cell>
                         <Cell>{round(closestMatchup.differential)}</Cell>
                     </Row>
+
+                    {#if expandedRecordKey === closestKey}
+                        <Row>
+                            <Cell class="recordDetailCell" colspan=4>
+                                <div class="recordDetail">
+                                    <div class="recordDetailHeader">
+                                        <div class="recordDetailTitle">
+                                            {closestMatchup.year || prefix} Week {closestMatchup.week} · Full Matchup
+                                        </div>
+                                        <button
+                                            class="recordClose"
+                                            type="button"
+                                            onclick={(event) => {
+                                                event.stopPropagation();
+                                                expandedRecordKey = null;
+                                                expandedMatchup = null;
+                                                matchupError = '';
+                                            }}
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+
+                                    {#if matchupLoading}
+                                        <div class="recordLoading">Loading historical lineup...</div>
+                                    {:else if matchupError}
+                                        <div class="recordError">{matchupError}</div>
+                                    {:else if expandedMatchup && playersInfo?.players}
+                                        <Matchup
+                                            key={`record-closest-${expandedYear}-${expandedWeek}-${ix}`}
+                                            ix={ix}
+                                            active={ix}
+                                            year={expandedYear}
+                                            matchup={expandedMatchup}
+                                            players={playersInfo.players}
+                                            displayWeek={expandedWeek}
+                                            expandOverride={true}
+                                            {leagueTeamManagers}
+                                        />
+                                    {/if}
+                                </div>
+                            </Cell>
+                        </Row>
+                    {/if}
                 {/each}
             </Body>
         </DataTable>
