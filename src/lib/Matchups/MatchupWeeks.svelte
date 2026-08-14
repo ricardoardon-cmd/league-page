@@ -54,54 +54,128 @@
 </script>
 
 <style>
-    .matchups {
-        margin: 2em 0 6em;
-    }
-    .weekContainer {
-        display: flex;
-        width: 95%;
-        max-width: 600px;
-        margin: 0 auto;
-        align-items: center;
-    }
+   .matchups {
 
-    :global(.changeWeek) {
-        font-size: 3em;
-        cursor: pointer;
-        color: #888;
-    }
+    width: 100%;
 
-    :global(.changeWeek:hover) {
-        color: #00316b;
-    }
+    max-width: 1050px;
 
-    .spacer {
-        width: 48px;
-    }
+    margin: 25px auto 70px;
+
+}
+
+
+.weekContainer {
+
+    display: flex;
+
+    width: 100%;
+
+    max-width: 750px;
+
+    margin: 0 auto 25px;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 12px 15px;
+
+    box-sizing: border-box;
+
+    border-radius: 14px;
+
+    background: var(--f3f3f3);
+
+    box-shadow: 0 3px 14px rgba(0,0,0,0.07);
+
+}
+
+
+:global(.changeWeek) {
+
+    font-size: 2.7em;
+
+    cursor: pointer;
+
+    color: inherit;
+
+    opacity: 0.65;
+
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+
+}
+
+
+:global(.changeWeek:hover) {
+
+    opacity: 1;
+
+    color: var(--blueOne);
+
+    transform: scale(1.08);
+
+}
+
+
+.spacer {
+
+    width: 42px;
+
+}
+
+
+.weekText {
+
+    flex-grow: 1;
+
+    text-align: center;
+
+    font-size: 1.7em;
+
+    font-weight: 750;
+
+    margin: 0;
+
+}
+
+
+@media (max-width: 800px) {
 
     .weekText {
-        flex-grow: 1;
-        text-align: center;
-        font-size: 2em;
+
+        font-size: 1.35em;
+
     }
 
-    @media (max-width: 800px) {
-        .weekText {
-            font-size: 1.6em;
-        }
+}
+
+
+@media (max-width: 450px) {
+
+    .weekContainer {
+
+        padding: 8px 10px;
+
     }
 
-    @media (max-width: 400px) {
-        .weekText {
-            font-size: 1.3em;
-        }
+
+    .weekText {
+
+        font-size: 1.05em;
+
     }
 
-    @media (max-width: 350px) {
-        .weekText {
-            font-size: 1.2em;
-        }
+
+    :global(.changeWeek) {
+
+        font-size: 2.1em;
+
     }
+
+}
 </style>
 
 <div class="matchups">
