@@ -1,4 +1,5 @@
 <script>
+import gglBadge from '$lib/Managers/GGL.jpg';
     import LinearProgress from '@smui/linear-progress';
 
     import {
@@ -167,7 +168,14 @@
         box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
         border: 1px solid #e5e5e5;
     }
-
+.leagueBadge {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
     .statIcon {
         font-size: 1.5rem;
     }
@@ -571,10 +579,16 @@ a {
                 </div>
             </div>
 
-            <div class="statCard">
-                <div class="statIcon">🏆</div>
-                <div class="statLabel">League</div>
-                <div class="statValue">GGL</div>
+          <div class="statCard">
+    <img
+        class="leagueBadge"
+        src={gglBadge}
+        alt="GGL League Badge"
+    />
+
+    <div class="statLabel">League</div>
+    <div class="statValue">GGL</div>
+</div>
             </div>
 
         </section>
