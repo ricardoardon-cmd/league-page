@@ -583,7 +583,7 @@ $: seriesLeader =
 
 {/if}
 
-{#if loading}
+
 {#if loading}
     {#if playerOne && playerTwo}
         <div class="loading">
