@@ -217,11 +217,25 @@ let championships = 0;
         }
     }
 
-    const managerRecord =
-        records?.regularSeasonData?.leagueManagerRecords?.[managerID];
+    const findManagerRecord = (recordSet) => {
+    if (!recordSet?.leagueManagerRecords) return null;
 
-    const playoffRecord =
-        records?.playoffData?.leagueManagerRecords?.[managerID];
+    for (const key in recordSet.leagueManagerRecords) {
+        if (checkIfDeservesWithManagerID(key, cRosterID)) {
+            return recordSet.leagueManagerRecords[key];
+        }
+    }
+
+    return null;
+};
+
+const managerRecord = findManagerRecord(
+    records?.regularSeasonData
+);
+
+const playoffRecord = findManagerRecord(
+    records?.playoffData
+);
 
     careerStats = {
         championships,
