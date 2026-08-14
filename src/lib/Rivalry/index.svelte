@@ -17,7 +17,6 @@
 
     import ComparissonBar from "./ComparissonBar.svelte";
     import ManagerSelectors from "./ManagerSelectors.svelte";
-    import RivalryControls from "./RivalryControls.svelte";
 
     export let leagueTeamManagers,
         playersInfo,
@@ -56,7 +55,7 @@
 
     $: analyzeRivalry(playerOne, playerTwo);
 
-    let selected = 0;
+    let selected = -1;
 
     $: matchup = rivalry?.matchups[selected]?.matchup;
     $: displayWeek = rivalry?.matchups[selected]?.week;
@@ -646,6 +645,73 @@ const getMatchupTotal = (points) => {
         font-size: 0.9rem;
     }
 }
+
+.historyEntry {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.historyDetails {
+    padding: 16px;
+    border: 1px solid var(--ccc);
+    border-top: 3px solid var(--blueOne);
+    border-radius: 14px;
+    background: var(--fff);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.historyDetailsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.historyDetailsTitle {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    opacity: 0.65;
+}
+
+.historyClose {
+    border: 1px solid var(--ccc);
+    background: var(--f3f3f3);
+    color: inherit;
+    border-radius: 999px;
+    padding: 6px 11px;
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.historyClose:hover {
+    border-color: var(--blueOne);
+}
+
+.historyGameActive {
+    border: 2px solid var(--blueOne);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 600px) {
+    .historyDetails {
+        padding: 10px 6px 14px;
+    }
+
+    .historyDetailsHeader {
+        padding: 0 6px;
+    }
+
+    .historyDetailsTitle {
+        font-size: 0.72rem;
+    }
+}
+
 </style>
 
 <div class="rivalryHeader">
@@ -827,65 +893,104 @@ const getMatchupTotal = (points) => {
             {@const scoreOne = getMatchupTotal(game.matchup?.[0]?.points)}
             {@const scoreTwo = getMatchupTotal(game.matchup?.[1]?.points)}
 
-            <div
-                class:historyGameActive={selected === index}
-                class="historyGame"
-                onclick={() => selected = index}
-            >
+            <div class="historyEntry">
 
-                <div class="historyMeta">
-                    <div class="historyYear">
-                        {game.year}
+                <div
+                    class:historyGameActive={selected === index}
+                    class="historyGame"
+                    onclick={() => selected = selected === index ? -1 : index}
+                >
+
+                    <div class="historyMeta">
+                        <div class="historyYear">
+                            {game.year}
+                        </div>
+
+                        <div class="historyWeek">
+                            Week {game.week}
+                        </div>
                     </div>
 
-                    <div class="historyWeek">
-                        Week {game.week}
+                    <div class="historyTeams">
+
+                        <div
+                            class:historyTeamWinner={scoreOne > scoreTwo}
+                            class:historyTeamLoser={scoreOne < scoreTwo}
+                            class="historyTeam"
+                        >
+                            <div class="winnerIcon">
+                                {#if scoreOne > scoreTwo}
+                                    🏆
+                                {/if}
+                            </div>
+
+                            <div class="historyTeamName">
+                                {playerOneData?.name || playerOneManagerName}
+                            </div>
+
+                            <div class="historyScore">
+                                {scoreOne}
+                            </div>
+                        </div>
+
+                        <div
+                            class:historyTeamWinner={scoreTwo > scoreOne}
+                            class:historyTeamLoser={scoreTwo < scoreOne}
+                            class="historyTeam"
+                        >
+                            <div class="winnerIcon">
+                                {#if scoreTwo > scoreOne}
+                                    🏆
+                                {/if}
+                            </div>
+
+                            <div class="historyTeamName">
+                                {playerTwoData?.name || playerTwoManagerName}
+                            </div>
+
+                            <div class="historyScore">
+                                {scoreTwo}
+                            </div>
+                        </div>
+
                     </div>
+
                 </div>
 
-                <div class="historyTeams">
+                {#if selected === index}
+                    <div class="historyDetails">
 
-                    <div
-                        class:historyTeamWinner={scoreOne > scoreTwo}
-                        class:historyTeamLoser={scoreOne < scoreTwo}
-                        class="historyTeam"
-                    >
-                        <div class="winnerIcon">
-                            {#if scoreOne > scoreTwo}
-                                🏆
-                            {/if}
+                        <div class="historyDetailsHeader">
+                            <div class="historyDetailsTitle">
+                                {game.year} Week {game.week} · Full Matchup
+                            </div>
+
+                            <button
+                                class="historyClose"
+                                type="button"
+                                onclick={(event) => {
+                                    event.stopPropagation();
+                                    selected = -1;
+                                }}
+                            >
+                                Close
+                            </button>
                         </div>
 
-                        <div class="historyTeamName">
-                            {playerOneData?.name || playerOneManagerName}
-                        </div>
+                        <Matchup
+                            key={`${playerOne}-${playerTwo}-${game.year}-${game.week}`}
+                            ix={index}
+                            active={index}
+                            year={game.year}
+                            matchup={game.matchup}
+                            players={playersInfo.players}
+                            displayWeek={game.week}
+                            expandOverride={true}
+                            {leagueTeamManagers}
+                        />
 
-                        <div class="historyScore">
-                            {scoreOne}
-                        </div>
                     </div>
-
-                    <div
-                        class:historyTeamWinner={scoreTwo > scoreOne}
-                        class:historyTeamLoser={scoreTwo < scoreOne}
-                        class="historyTeam"
-                    >
-                        <div class="winnerIcon">
-                            {#if scoreTwo > scoreOne}
-                                🏆
-                            {/if}
-                        </div>
-
-                        <div class="historyTeamName">
-                            {playerTwoData?.name || playerTwoManagerName}
-                        </div>
-
-                        <div class="historyScore">
-                            {scoreTwo}
-                        </div>
-                    </div>
-
-                </div>
+                {/if}
 
             </div>
 
@@ -894,27 +999,6 @@ const getMatchupTotal = (points) => {
     </div>
 
 </div>
-            <h3>Matchups</h3>
-
-            <RivalryControls
-                bind:selected
-                {year}
-                {displayWeek}
-                length={rivalry.matchups.length}
-            />
-
-            <Matchup
-                key={`${playerOne}-${playerTwo}`}
-                ix={selected}
-                active={selected}
-                {year}
-                {matchup}
-                players={playersInfo.players}
-                {displayWeek}
-                expandOverride={true}
-                {leagueTeamManagers}
-            />
-
         </div>
     {/if}
 
