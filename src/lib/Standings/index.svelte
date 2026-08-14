@@ -1,34 +1,21 @@
 <script>
     import { leagueName } from '$lib/utils/helper';
     import { getTeamFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
-    import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
     import LinearProgress from '@smui/linear-progress';
     import { onMount } from 'svelte';
     import Standing from './Standing.svelte';
 
     export let standingsData, leagueTeamManagersData;
 
-    // Least important → most important.
+    // Least important -> most important.
     // The final sort field has the highest tiebreak priority.
     const sortOrder = [
-        "fptsAgainst",
-        "divisionTies",
-        "divisionWins",
-        "fpts",
-        "ties",
-        "wins"
-    ];
-
-    const columnOrder = [
-        { name: "W", field: "wins" },
-        { name: "T", field: "ties" },
-        { name: "L", field: "losses" },
-        { name: "Div W", field: "divisionWins" },
-        { name: "Div T", field: "divisionTies" },
-        { name: "Div L", field: "divisionLosses" },
-        { name: "FPTS", field: "fpts" },
-        { name: "FPTS Against", field: "fptsAgainst" },
-        { name: "Streak", field: "streak" }
+        'fptsAgainst',
+        'divisionTies',
+        'divisionWins',
+        'fpts',
+        'ties',
+        'wins'
     ];
 
     let loading = true;
@@ -37,25 +24,84 @@
     let year;
     let leagueTeamManagers;
 
+    const buildPreseasonStandings = (teamManagers) => {
+        const currentSeason = teamManagers?.currentSeason;
+        const currentTeams =
+            teamManagers?.teamManagersMap?.[currentSeason] || {};
+
+        return Object.keys(currentTeams)
+            .map((rosterID) => ({
+                rosterID: Number(rosterID),
+                wins: 0,
+                losses: 0,
+                ties: 0,
+                divisionWins: 0,
+                divisionLosses: 0,
+                divisionTies: 0,
+                fpts: 0,
+                fptsAgainst: 0,
+                streak: '—'
+            }))
+            .sort((a, b) => {
+                const teamA =
+                    getTeamFromTeamManagers(
+                        teamManagers,
+                        a.rosterID,
+                        currentSeason
+                    )?.name || '';
+
+                const teamB =
+                    getTeamFromTeamManagers(
+                        teamManagers,
+                        b.rosterID,
+                        currentSeason
+                    )?.name || '';
+
+                return teamA.localeCompare(teamB);
+            });
+    };
+
     onMount(async () => {
+        leagueTeamManagers = await leagueTeamManagersData;
+        year = leagueTeamManagers?.currentSeason;
+
         const asyncStandingsData = await standingsData;
 
-        if (!asyncStandingsData) {
-            loading = false;
+        if (!asyncStandingsData?.standingsInfo) {
+            standings = buildPreseasonStandings(leagueTeamManagers);
             preseason = true;
+            loading = false;
             return;
         }
 
         const { standingsInfo, yearData } = asyncStandingsData;
 
-        leagueTeamManagers = await leagueTeamManagersData;
-        year = yearData;
+        year = yearData || year;
 
         let finalStandings = Object.values(standingsInfo || {});
 
         if (!finalStandings.length) {
-            loading = false;
+            standings = buildPreseasonStandings(leagueTeamManagers);
             preseason = true;
+            loading = false;
+            return;
+        }
+
+        const gamesHaveStarted = finalStandings.some((standing) => {
+            const gamesPlayed =
+                Number(standing.wins || 0) +
+                Number(standing.losses || 0) +
+                Number(standing.ties || 0);
+
+            return gamesPlayed > 0 || Number(standing.fpts || 0) > 0;
+        });
+
+        if (!gamesHaveStarted) {
+            // Sleeper may already return roster rows before Week 1.
+            // Use our zeroed list so every current team still appears.
+            standings = buildPreseasonStandings(leagueTeamManagers);
+            preseason = true;
+            loading = false;
             return;
         }
 
@@ -68,11 +114,12 @@
             }
 
             finalStandings = [...finalStandings].sort(
-                (a, b) => b[sortType] - a[sortType]
+                (a, b) => Number(b[sortType] || 0) - Number(a[sortType] || 0)
             );
         }
 
         standings = finalStandings;
+        preseason = false;
         loading = false;
     });
 </script>
@@ -138,8 +185,7 @@
         background: #d6a029;
     }
 
-    .loadingCard,
-    .preseasonCard {
+    .loadingCard {
         width: 95%;
         max-width: 700px;
         margin: 35px auto;
@@ -158,38 +204,21 @@
         margin: 18px auto 0;
     }
 
-    .preseasonIcon {
-        font-size: 3rem;
-        line-height: 1;
-        margin-bottom: 16px;
-    }
-
-    .preseasonCard h2 {
-        margin: 0;
-        font-size: 1.6rem;
-        font-weight: 800;
-    }
-
-    .preseasonCard p {
-        max-width: 500px;
-        margin: 10px auto 0;
-        line-height: 1.6;
-        opacity: 0.65;
-    }
-
-    .preseasonNote {
-        display: inline-block;
-        margin-top: 20px;
-        padding: 8px 14px;
-        border-radius: 10px;
+    .preseasonMessage {
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0 0 14px;
+        padding: 12px 16px;
+        border-radius: 12px;
         background: var(--f3f3f3);
         border: 1px solid var(--ccc);
-        font-size: 0.75rem;
-        font-weight: 700;
-        opacity: 0.75;
+        text-align: center;
+        font-size: 0.82rem;
+        font-weight: 650;
+        opacity: 0.8;
     }
 
-    .tableCard {
+    .standingsCard {
         width: 100%;
         box-sizing: border-box;
         padding: 16px;
@@ -197,44 +226,37 @@
         background: var(--fff);
         border: 1px solid var(--ccc);
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+        overflow: hidden;
     }
 
-    .standingsTable {
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    :global(.standingsTable .mdc-data-table) {
-        width: 100%;
-        box-shadow: none;
-    }
-
-    :global(.standingsTable table) {
-        width: 100%;
-    }
-
-    :global(.standingsTable th) {
-        font-size: 0.72rem;
+    .columns {
+        display: grid;
+        grid-template-columns:
+            60px
+            minmax(240px, 1fr)
+            120px
+            110px
+            110px
+            100px;
+        align-items: center;
+        gap: 10px;
+        padding: 0 16px 10px;
+        font-size: 0.68rem;
         font-weight: 800;
-        letter-spacing: 0.3px;
+        letter-spacing: 0.55px;
         text-transform: uppercase;
-        white-space: nowrap;
+        opacity: 0.55;
     }
 
-    :global(.standingsTable td) {
-        vertical-align: middle;
-    }
-
-    :global(.center) {
+    .center {
         text-align: center;
     }
 
-    :global(.wrappable) {
-        white-space: normal;
-        line-height: 1.2em;
+    .list {
+        width: 100%;
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 800px) {
         .standingsPage {
             padding: 20px 10px 50px;
         }
@@ -243,13 +265,31 @@
             font-size: 2rem;
         }
 
-        .loadingCard,
-        .preseasonCard {
-            padding: 28px 18px;
+        .standingsCard {
+            padding: 10px;
         }
 
-        .tableCard {
-            padding: 8px;
+        .columns {
+            grid-template-columns: 42px 1fr auto;
+            grid-template-areas: 'rank team record';
+            padding: 0 14px 9px;
+        }
+
+        .columnRank {
+            grid-area: rank;
+        }
+
+        .columnTeam {
+            grid-area: team;
+        }
+
+        .columnRecord {
+            grid-area: record;
+            text-align: right;
+        }
+
+        .columnDesktop {
+            display: none;
         }
     }
 </style>
@@ -270,7 +310,7 @@
             The race for the playoffs starts here
         </p>
 
-        {#if preseason}
+        {#if preseason && !loading}
             <div class="seasonStatus">
                 <span class="statusDot statusDotPreseason"></span>
                 Preseason
@@ -296,73 +336,42 @@
 
         </div>
 
-    {:else if preseason}
-
-        <div class="preseasonCard">
-
-            <div class="preseasonIcon">
-                🏈
-            </div>
-
-            <h2>
-                The standings are waiting for kickoff
-            </h2>
-
-            <p>
-                No regular-season games have been played yet.
-                Once the season begins, team records, points,
-                division results and streaks will populate here automatically.
-            </p>
-
-            <div class="preseasonNote">
-                Standings will update from Sleeper after games begin
-            </div>
-
-        </div>
-
     {:else}
 
-        <div class="tableCard">
+        {#if preseason}
+            <div class="preseasonMessage">
+                Preseason standings · All teams begin 0-0
+            </div>
+        {/if}
 
-            <div class="standingsTable">
+        <div class="standingsCard">
 
-                <DataTable table$aria-label="League Standings">
+            <div class="columns">
+                <div class="columnRank center">#</div>
+                <div class="columnTeam">Team</div>
+                <div class="columnRecord center">Record</div>
+                <div class="columnDesktop center">PF</div>
+                <div class="columnDesktop center">PA</div>
+                <div class="columnDesktop center">Streak</div>
+            </div>
 
-                    <Head>
-                        <Row>
+            <div class="list">
 
-                            <Cell class="center">
-                                Team
-                            </Cell>
+                {#each standings as standing, ix}
 
-                            {#each columnOrder as column}
-                                <Cell class="center wrappable">
-                                    {column.name}
-                                </Cell>
-                            {/each}
+                    <Standing
+                        {standing}
+                        {leagueTeamManagers}
+                        preseason={preseason}
+                        rank={ix + 1}
+                        team={getTeamFromTeamManagers(
+                            leagueTeamManagers,
+                            standing.rosterID,
+                            year
+                        )}
+                    />
 
-                        </Row>
-                    </Head>
-
-                    <Body>
-
-                        {#each standings as standing}
-
-                            <Standing
-                                {columnOrder}
-                                {standing}
-                                {leagueTeamManagers}
-                                team={getTeamFromTeamManagers(
-                                    leagueTeamManagers,
-                                    standing.rosterID
-                                )}
-                            />
-
-                        {/each}
-
-                    </Body>
-
-                </DataTable>
+                {/each}
 
             </div>
 
