@@ -7,18 +7,15 @@ export const enableBlog = false; // requires VITE_CONTENTFUL_ACCESS_TOKEN and VI
 
 /*   STEP 2   */
 export const homepageText = `
-  <p>Welcome to the Gentlemen of the Gridiron League (GGL)!
-15+ years. A decade and a half of questionable draft choices, Sunday heartbreak, and pure fantasy glory.
-We’ve come a long way since the dark ages when we were just an 8-team league forced to roster a GhostTeam. Over the years, this league has seen it all: wild waiver claims, legendary rivalries, and yes... the infamous night someone clogged a toilet and resorted to using BBQ tongs as a plunger.
-And to anyone claiming those early-era titles don't count because we were "infants" at fantasy back then? Nice try. A ring is a ring, baby! The record books don't care if you beat a human, a phantom, or a kitchen utensil—put it on the plaque!
-Now we’re a rock-solid 10-team league bound by over a decade of real-life friendship, growing older, and refusing to let each other down.
-> A Note from Commish Pico:
-> "Thanks for everyone's effort in and out every year, this is probably one of the best ways that we all stay connected - it awesome seeing everyone grow together"</p>
-  <p>Many may claim championships when we were just "infants" at fantasy football but records are records and they will count.</p>
-  <p>Now the league is up to 10 and its close knitted by friendships over 10 years.</p>
-  <p>Words by the commish "Thanks for everyones effort in and out every year, this is probably one of the best ways that we all stay connected - it awesome seeing everyone grow together" -Pico.</p>
-
-`;
+  <p>Welcome to the Gentlemen of the Gridiron League (GGL)!</p>
+<p>15+ years. A decade and a half of questionable draft choices, Sunday heartbreak, and pure fantasy glory.</p>
+<p>We’ve come a long way since the dark ages when we were just an 8-team league forced to roster a GhostTeam. Over the years, this league has seen it all: wild waiver claims, legendary rivalries, and yes... the infamous night someone clogged a toilet and resorted to using BBQ tongs as a plunger.</p>
+And to anyone claiming those early-era titles don't count because we were "infants" at fantasy back then? Nice try. A chip is a chip, baby! The record books don't care if you beat a human, a phantom, or a kitchen utensil—put it on the trophy!</p>
+<p>Now we’re a rock-solid 10-team league bound by over a decade of real-life friendship, growing older, and refusing to let each other down.</p>
+<p> A Note from Commish Pico:</p>
+<p> "Thanks for everyone's effort in and out every year, this is probably one of the best ways that we all stay connected - it awesome seeing everyone grow together"</p>
+ 
+;
 
 /*   STEP 3   */
 /*
