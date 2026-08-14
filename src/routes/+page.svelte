@@ -22,7 +22,7 @@ import gglBadge from '$lib/Managers/GGL.jpg';
     } from '$lib/utils/helperFunctions/universalFunctions';
 
     import { dues, dynasty } from '$lib/utils/leagueInfo';
-
+import gglBadge from '$lib/Managers/GGL.jpg';
     const nflState = getNflState();
     const podiumsData = getAwards();
     const leagueTeamManagersData = getLeagueTeamManagers();
@@ -179,7 +179,14 @@ import gglBadge from '$lib/Managers/GGL.jpg';
     .statIcon {
         font-size: 1.5rem;
     }
-
+leagueBadge {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
     .statLabel {
         color: #777;
         font-size: 0.8rem;
@@ -547,51 +554,51 @@ a {
         </section>
 
         <!-- QUICK STATS -->
-        <section class="stats">
+<section class="stats">
 
-            <div class="statCard">
-                <div class="statIcon">👥</div>
-                <div class="statLabel">Teams</div>
-                <div class="statValue">{managers.length || '—'}</div>
-            </div>
+    <div class="statCard">
+        <div class="statIcon">👥</div>
+        <div class="statLabel">Teams</div>
+        <div class="statValue">{managers.length || '—'}</div>
+    </div>
 
-            <div class="statCard">
-                <div class="statIcon">💰</div>
-                <div class="statLabel">League Dues</div>
-                <div class="statValue">${dues}</div>
-            </div>
+    <div class="statCard">
+        <div class="statIcon">💰</div>
+        <div class="statLabel">League Dues</div>
+        <div class="statValue">${dues}</div>
+    </div>
 
-            <div class="statCard">
-                <div class="statIcon">🏈</div>
-                <div class="statLabel">NFL Status</div>
-                <div class="statValue">
-                    {#await nflState}
-                        ...
-                    {:then state}
-                        {state.season_type === 'regular'
-                            ? `Week ${state.week}`
-                            : state.season_type === 'pre'
-                                ? 'Preseason'
-                                : 'Postseason'}
-                    {:catch}
-                        —
-                    {/await}
-                </div>
-            </div>
+    <div class="statCard">
+        <div class="statIcon">🏈</div>
+        <div class="statLabel">NFL Status</div>
 
-          <div class="statCard">
-    <img
-        class="leagueBadge"
-        src={gglBadge}
-        alt="GGL League Badge"
-    />
+        <div class="statValue">
+            {#await nflState}
+                ...
+            {:then state}
+                {state.season_type === 'regular'
+                    ? `Week ${state.week}`
+                    : state.season_type === 'pre'
+                        ? 'Preseason'
+                        : 'Postseason'}
+            {:catch}
+                —
+            {/await}
+        </div>
+    </div>
 
-    <div class="statLabel">League</div>
-    <div class="statValue">GGL</div>
-</div>
-            </div>
+    <div class="statCard">
+        <img
+            class="leagueBadge"
+            src={gglBadge}
+            alt="GGL League Badge"
+        />
 
-        </section>
+        <div class="statLabel">League</div>
+        <div class="statValue">GGL</div>
+    </div>
+
+</section>
 
         <!-- INTRODUCTION -->
         <section class="intro">
