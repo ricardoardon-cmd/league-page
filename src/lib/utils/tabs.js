@@ -77,6 +77,11 @@ export const tabs = [
                 dest: `https://sleeper.app/leagues/${leagueID}`,
             },
         ]
+        {
+    icon: 'person_search',
+    label: 'Players',
+    dest: '/players',
+},
     },
  
 ];
