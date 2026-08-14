@@ -637,17 +637,30 @@
         opacity: 0.55;
     }
 
-    :global(.recordDetailCell) {
-        padding: 0 !important;
-        border-bottom: 1px solid var(--borderOverride);
-    }
+   :global(.recordDetailCell) {
+    padding: 0 !important;
+    border-bottom: 1px solid var(--borderOverride);
+    overflow: visible !important;
+}
 
+.recordDetail {
+    width: 760px;
+    max-width: calc(100vw - 50px);
+    box-sizing: border-box;
+
+    padding: 18px;
+    background: var(--fff);
+    border-top: 3px solid var(--blueOne);
+
+    overflow-x: auto;
+}
+@media (max-width: 700px) {
     .recordDetail {
-        padding: 18px;
-        background: var(--fff);
-        border-top: 3px solid var(--blueOne);
+        width: 100%;
+        max-width: 100%;
+        padding: 10px 4px 14px;
     }
-
+}
     .recordDetailHeader {
         display: flex;
         justify-content: space-between;
