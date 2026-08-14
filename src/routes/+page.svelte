@@ -1,5 +1,5 @@
 <script>
-import gglBadge from '$lib/Managers/GGL.jpg';
+
     import LinearProgress from '@smui/linear-progress';
 
     import {
@@ -589,10 +589,10 @@ a {
 
     <div class="statCard">
         <img
-            class="leagueBadge"
-            src={gglBadge}
-            alt="GGL League Badge"
-        />
+    class="leagueBadge"
+    src="/managers/GGL.png"
+    alt="GGL League Badge"
+/>
 
         <div class="statLabel">League</div>
         <div class="statValue">GGL</div>
