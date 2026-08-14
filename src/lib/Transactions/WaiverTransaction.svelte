@@ -1,110 +1,150 @@
 <script>
-	import { gotoManager } from '$lib/utils/helper';
-	import { getTeamFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
+    import { gotoManager } from '$lib/utils/helper';
+    import { getTeamFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
 
-	export let transaction, players, leagueTeamManagers;
+    export let transaction, players, leagueTeamManagers;
 
     const owner = transaction.rosters[0];
 
     const getAvatar = (pos, player) => {
-        if(pos == 'DEF') {
+        if (pos == 'DEF') {
             return `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${player.toLowerCase()}.png)`;
         }
+
         return `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${player}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
-    }
+    };
+
+    const historicalTeam =
+        getTeamFromTeamManagers(
+            leagueTeamManagers,
+            owner,
+            transaction.season
+        );
+
+    const currentTeam =
+        getTeamFromTeamManagers(
+            leagueTeamManagers,
+            owner
+        );
 </script>
 
 <style>
     .waiverTransaction {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 1em;
-    }
-    
-    .name {
-        position: relative;
-    }
-
-    .core {
-        display: flex;
-        flex-direction: column;
-        border-radius: 0 0 0 40px;
-        border: 1px solid var(--ddd);
-        border-left: 2px solid var(--blueTwo);
-        border-bottom: none;
-        background-color: var(--fff);
+        width: 100%;
+        margin-bottom: 18px;
+        border-radius: 18px;
+        overflow: hidden;
+        background: var(--fff);
+        border: 1px solid var(--ccc);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+        cursor: pointer;
+        transition:
+            transform 0.15s ease,
+            box-shadow 0.15s ease,
+            border-color 0.15s ease;
     }
 
-    .avatarAndDetails {
+    .waiverTransaction:hover {
+        transform: translateY(-2px);
+        border-color: var(--blueOne);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    }
+
+    .waiverHeader {
         display: flex;
-        padding: 25px 0 0;
-        flex-direction: column;
-        justify-content: end;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 18px;
+        background: var(--f3f3f3);
+        border-bottom: 1px solid var(--ccc);
     }
 
     .avatar {
-        position: absolute;
-        left: 0px;
-        top: 6px;
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
         border-radius: 50%;
-        height: 40px;
-        width: 40px;
         border: 2px solid var(--blueTwo);
-        background-color: var(--fff);
+        background: var(--fff);
+        flex-shrink: 0;
+    }
+
+    .teamInfo {
+        min-width: 0;
+        flex: 1;
     }
 
     .ownerName {
-        display: inline-block;
-        border-bottom: 2px solid var(--blueTwo);
-        margin: 0 0 0 22px;
-        padding-right: 30px;
-        padding-left: 30px;
-    }
-
-    .playerAvatar {
-        display: inline-block;
-        vertical-align: middle;
-        height: 50px;
-        width: 50px;
-        background-position: center;
-        border: 2px solid;
-        border-radius: 100%;
-        background-repeat: no-repeat;
-        background-size: auto 50px;
-        position: relative;
+        font-size: 0.95rem;
+        font-weight: 800;
+        line-height: 1.2;
     }
 
     .currentOwner {
+        display: block;
+        margin-top: 3px;
+        font-size: 0.7rem;
         font-style: italic;
-        color: var(--aaa);
+        opacity: 0.55;
     }
 
-    .clickable {
-        cursor: pointer;
+    .waiverType {
+        margin-top: 5px;
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        opacity: 0.5;
     }
 
-    .details {
-        display: flex;
+    .bid {
+        display: inline-flex;
         align-items: center;
-        justify-content: space-between;
-        width: 80%;
-        padding: 0 10%;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--fff);
+        border: 1px solid var(--ccc);
+        font-size: 0.72rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .moves {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        padding: 18px;
     }
 
     .player {
         display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 14px;
+        background: var(--f3f3f3);
+        border: 1px solid var(--ccc);
     }
 
-    .playerName {
-        font-size: 0.8em;
-        line-height: 1em;
-        text-align: center;
+    .playerAvatar {
+        position: relative;
+        flex-shrink: 0;
+        width: 54px;
+        height: 54px;
+        border: 2px solid;
+        border-radius: 50%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: auto 54px;
     }
 
-    .playerInfo {
-        font-size: 0.6em;
-        color: var(--g555);
-        line-height: 1em;
+    .indicator {
+        position: absolute;
+        right: -6px;
+        bottom: -6px;
+        font-size: 1.2rem;
+        background: var(--fff);
+        border-radius: 50%;
     }
 
     .add {
@@ -115,95 +155,207 @@
         color: #ff2a6d;
     }
 
-    .indicator {
-        position: absolute;
-        bottom: -8px;
-        right: -8px;
+    .playerText {
+        min-width: 0;
     }
 
-    .nameHolder {
+    .playerAction {
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.7px;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+    }
+
+    .playerActionAdd {
+        color: #00a995;
+    }
+
+    .playerActionDrop {
+        color: #ff2a6d;
+    }
+
+    .playerName {
+        font-size: 0.9rem;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    .playerInfo {
+        margin-top: 3px;
+        font-size: 0.7rem;
+        opacity: 0.6;
+    }
+
+    .waiverFooter {
         display: flex;
-        flex-direction: column;
-        padding-left: 0.5em;
         justify-content: center;
-        align-items: center;
-    }
-
-    .bid {
-        color: var(--g555);
-        font-style: italic;
+        padding: 10px 14px 12px;
+        border-top: 1px solid var(--ccc);
     }
 
     .date {
-        color: var(--g999);
-        font-style: italic;
-        font-size: 0.7em;
-        text-align: center;
-        margin-top: 0.7em;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 11px;
+        border-radius: 999px;
+        background: var(--f3f3f3);
+        border: 1px solid var(--ccc);
+        font-size: 0.72rem;
+        font-weight: 700;
+        opacity: 0.65;
     }
 
-    @media (max-width: 410px) {
+    @media (max-width: 600px) {
+        .waiverTransaction {
+            border-radius: 14px;
+        }
+
+        .waiverHeader {
+            padding: 14px 12px;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+        }
+
+        .ownerName {
+            font-size: 0.85rem;
+        }
+
+        .moves {
+            grid-template-columns: 1fr;
+            padding: 12px;
+        }
+
         .player {
-            flex-direction: column;
-            align-items: center;
+            padding: 10px;
         }
 
-        .details {
-            width: 90%;
-            padding: 0 5%;
-        }
-
-        .nameHolder {
-            margin-top: 0.5em;
-            padding-left: 0;
-            font-size: 0.9em;
+        .playerAvatar {
+            width: 48px;
+            height: 48px;
+            background-size: auto 48px;
         }
     }
 </style>
 
-<div class="waiverTransaction clickable" onclick={() => gotoManager({year: transaction.season, leagueTeamManagers, rosterID: owner})}>
-    <div class="name">
-        <span class="ownerName">
-            {getTeamFromTeamManagers(leagueTeamManagers, owner, transaction.season).name}
-            {#if getTeamFromTeamManagers(leagueTeamManagers, owner, transaction.season).name != getTeamFromTeamManagers(leagueTeamManagers, owner).name}
-                <span class="currentOwner">({getTeamFromTeamManagers(leagueTeamManagers, owner).name})</span>
-            {/if}
-            {#if transaction.moves[0][0].bid}
-                <span class="bid">
-                    - {transaction.moves[0][0].bid}$
-                </span>
-            {/if}
-        </span>
-        <img class="avatar" src="{getTeamFromTeamManagers(leagueTeamManagers, owner, transaction.season).avatar}" alt="{getTeamFromTeamManagers(leagueTeamManagers, owner, transaction.season).name} avatar"/>
-    </div>
-    <div class="core">
-        <div class="avatarAndDetails">
-            <div class="details">
-                {#each transaction.moves as move}
-                    <div class="player">
-                        <div class="playerAvatar" style="border-color: var(--{players[move[0].player].pos}); background-color: var(--{move[0].type == "Added" ? "waiverAdd" : "waiverDrop"}); {getAvatar(players[move[0].player].pos, move[0].player)}">
-                            {#if move[0].type == "Added"}
-                                <i class="add indicator material-icons" aria-hidden="true">add_circle</i>
-                            {:else if move[0].type == "Dropped"}
-                                <i class="drop indicator material-icons" aria-hidden="true">do_not_disturb_on</i>
-                            {/if}
-                        </div>
-                        <span class="nameHolder">
-                            <span class="playerName">{`${players[move[0].player].fn} ${players[move[0].player].ln}`}</span>
-                            <span class="playerInfo">
-                                <span>{players[move[0].player].pos}</span>
-                                {#if players[move[0].player].t}
-                                    -
-                                    <span>{players[move[0].player].t}</span> 
-                                {/if}
-                            </span>
-                        </span>
-                    </div>
-                {/each}
+<div
+    class="waiverTransaction"
+    onclick={() =>
+        gotoManager({
+            year: transaction.season,
+            leagueTeamManagers,
+            rosterID: owner
+        })
+    }
+>
+
+    <div class="waiverHeader">
+
+        <img
+            class="avatar"
+            src={historicalTeam.avatar}
+            alt={`${historicalTeam.name} avatar`}
+        />
+
+        <div class="teamInfo">
+
+            <div class="ownerName">
+                {historicalTeam.name}
+
+                {#if historicalTeam.name != currentTeam.name}
+                    <span class="currentOwner">
+                        Current: {currentTeam.name}
+                    </span>
+                {/if}
             </div>
+
+            <div class="waiverType">
+                Waiver / Free Agent Move
+            </div>
+
         </div>
+
+        {#if transaction.moves?.[0]?.[0]?.bid}
+            <div class="bid">
+                💰 ${transaction.moves[0][0].bid}
+            </div>
+        {/if}
+
+    </div>
+
+    <div class="moves">
+
+        {#each transaction.moves as move}
+
+            {@const moveData = move[0]}
+            {@const player = players[moveData.player]}
+
+            <div class="player">
+
+                <div
+                    class="playerAvatar"
+                    style={`border-color: var(--${player.pos}); background-color: var(--${moveData.type == "Added" ? "waiverAdd" : "waiverDrop"}); ${getAvatar(player.pos, moveData.player)}`}
+                >
+
+                    {#if moveData.type == "Added"}
+                        <i
+                            class="add indicator material-icons"
+                            aria-hidden="true"
+                        >
+                            add_circle
+                        </i>
+
+                    {:else if moveData.type == "Dropped"}
+
+                        <i
+                            class="drop indicator material-icons"
+                            aria-hidden="true"
+                        >
+                            do_not_disturb_on
+                        </i>
+
+                    {/if}
+
+                </div>
+
+                <div class="playerText">
+
+                    <div
+                        class:playerActionAdd={moveData.type == "Added"}
+                        class:playerActionDrop={moveData.type == "Dropped"}
+                        class="playerAction"
+                    >
+                        {moveData.type}
+                    </div>
+
+                    <div class="playerName">
+                        {player.fn} {player.ln}
+                    </div>
+
+                    <div class="playerInfo">
+                        {player.pos}
+
+                        {#if player.t}
+                            · {player.t}
+                        {/if}
+                    </div>
+
+                </div>
+
+            </div>
+
+        {/each}
+
+    </div>
+
+    <div class="waiverFooter">
         <span class="date">
-            {transaction.date}
+            ➕ {transaction.date}
         </span>
     </div>
+
 </div>
