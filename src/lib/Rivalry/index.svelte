@@ -545,6 +545,23 @@ const getMatchupTotal = (points) => {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.historyTeamWinner {
+    font-weight: 800;
+}
+
+.historyTeamWinner .historyScore {
+    color: #2e9d50;
+}
+
+.historyTeamLoser {
+    opacity: 0.55;
+}
+
+.historyTeamWinner::before {
+    content: "🏆";
+    margin-right: 6px;
+    font-size: 0.8rem;
+}
 
 .historyScore {
     font-weight: 800;
@@ -778,29 +795,33 @@ const getMatchupTotal = (points) => {
                     Week {game.week}
                 </div>
 
-                <div class="historyTeams">
+                <div
+    class:historyTeamWinner={scoreOne > scoreTwo}
+    class:historyTeamLoser={scoreOne < scoreTwo}
+    class="historyTeam"
+>
+    <span class="historyTeamName">
+        {playerOneData?.name || playerOneManagerName}
+    </span>
 
-                    <div class="historyTeam">
-                        <span class="historyTeamName">
-                            {playerOneData?.name || playerOneManagerName}
-                        </span>
+    <span class="historyScore">
+        {scoreOne}
+    </span>
+</div>
 
-                        <span class="historyScore">
-                            {scoreOne}
-                        </span>
-                    </div>
+<div
+    class:historyTeamWinner={scoreTwo > scoreOne}
+    class:historyTeamLoser={scoreTwo < scoreOne}
+    class="historyTeam"
+>
+    <span class="historyTeamName">
+        {playerTwoData?.name || playerTwoManagerName}
+    </span>
 
-                    <div class="historyTeam">
-                        <span class="historyTeamName">
-                            {playerTwoData?.name || playerTwoManagerName}
-                        </span>
-
-                        <span class="historyScore">
-                            {scoreTwo}
-                        </span>
-                    </div>
-
-                </div>
+    <span class="historyScore">
+        {scoreTwo}
+    </span>
+</div>
 
                 <div class="historyResult">
 
