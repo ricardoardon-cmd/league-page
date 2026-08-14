@@ -588,15 +588,10 @@ a {
     </div>
 
     <div class="statCard">
-        <img
-    class="leagueBadge"
-    src="/managers/GGL.png"
-    alt="GGL League Badge"
-/>
-
-        <div class="statLabel">League</div>
-        <div class="statValue">GGL</div>
-    </div>
+    <div class="statIcon">🏆</div>
+    <div class="statLabel">League</div>
+    <div class="statValue">GGL</div>
+</div>
 
 </section>
 
