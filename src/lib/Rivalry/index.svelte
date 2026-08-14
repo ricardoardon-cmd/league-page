@@ -453,6 +453,126 @@ $: seriesLeader =
         font-size: 1.25rem;
     }
 }
+.matchupHistory {
+    width: 95%;
+    max-width: 1000px;
+    margin: 22px auto;
+    padding: 24px;
+    box-sizing: border-box;
+    border-radius: 18px;
+    background: var(--fff);
+    border: 1px solid var(--ccc);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+}
+
+.matchupHistoryTitle {
+    text-align: center;
+    font-size: 1.9rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.matchupHistoryList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.historyGame {
+    display: grid;
+    grid-template-columns: 110px 1fr 90px;
+    align-items: center;
+    gap: 12px;
+
+    padding: 14px 16px;
+
+    border-radius: 12px;
+    border: 1px solid var(--ccc);
+    background: var(--f3f3f3);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.historyGame:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.08);
+    border-color: var(--blueOne);
+}
+
+.historyGameActive {
+    border: 2px solid var(--blueOne);
+}
+
+.historyWeek {
+    font-size: 0.75rem;
+    font-weight: 800;
+    opacity: 0.6;
+    text-transform: uppercase;
+}
+
+.historyTeams {
+    min-width: 0;
+}
+
+.historyTeam {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 2px 0;
+    font-size: 0.9rem;
+}
+
+.historyTeamName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.historyScore {
+    font-weight: 800;
+    font-family: "Roboto Mono", monospace;
+}
+
+.historyResult {
+    text-align: right;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.historyWinner {
+    color: #2e9d50;
+}
+
+@media (max-width: 600px) {
+    .matchupHistory {
+        padding: 16px 10px;
+    }
+
+    .matchupHistoryTitle {
+        font-size: 1.5rem;
+    }
+
+    .historyGame {
+        grid-template-columns: 75px 1fr;
+    }
+
+    .historyResult {
+        display: none;
+    }
+
+    .historyWeek {
+        font-size: 0.65rem;
+    }
+
+    .historyTeam {
+        font-size: 0.82rem;
+    }
+}
 </style>
 
 <div class="rivalryHeader">
@@ -621,7 +741,94 @@ $: seriesLeader =
                 label="Points"
                 unit="pts"
             />
+<div class="matchupHistory">
 
+    <div class="matchupHistoryTitle">
+        📜 Matchup History
+    </div>
+
+    <div class="matchupHistoryList">
+
+        {#each rivalry.matchups as game, index}
+
+            <div
+                class:historyGameActive={selected === index}
+                class="historyGame"
+                onclick={() => selected = index}
+            >
+
+                <div class="historyWeek">
+                    {game.year}<br />
+                    Week {game.week}
+                </div>
+
+                <div class="historyTeams">
+
+                    {#if game.matchup?.length >= 2}
+
+                        <div class="historyTeam">
+
+                            <span class="historyTeamName">
+                                Team 1
+                            </span>
+
+                            <span class="historyScore">
+                                {game.matchup[0]?.points ?? 0}
+                            </span>
+
+                        </div>
+
+                        <div class="historyTeam">
+
+                            <span class="historyTeamName">
+                                Team 2
+                            </span>
+
+                            <span class="historyScore">
+                                {game.matchup[1]?.points ?? 0}
+                            </span>
+
+                        </div>
+
+                    {:else}
+
+                        <div class="historyTeam">
+                            Matchup data unavailable
+                        </div>
+
+                    {/if}
+
+                </div>
+
+                <div class="historyResult">
+
+                    {#if game.matchup?.length >= 2}
+
+                        {#if game.matchup[0]?.points > game.matchup[1]?.points}
+                            <span class="historyWinner">
+                                Winner: Team 1
+                            </span>
+
+                        {:else if game.matchup[1]?.points > game.matchup[0]?.points}
+                            <span class="historyWinner">
+                                Winner: Team 2
+                            </span>
+
+                        {:else}
+                            Tie
+                        {/if}
+
+                    {/if}
+
+                </div>
+
+            </div>
+
+        {/each}
+
+    </div>
+
+</div>
             <h3>Matchups</h3>
 
             <RivalryControls
