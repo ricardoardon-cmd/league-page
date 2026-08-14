@@ -8,8 +8,10 @@
         loadPlayers,
         round
     } from "$lib/utils/helper";
-    import { getRosterIDFromManagerIDAndYear } from "$lib/utils/helperFunctions/universalFunctions";
-    import LinearProgress from '@smui/linear-progress';
+   import {
+    getRosterIDFromManagerIDAndYear,
+    getTeamData
+} from "$lib/utils/helperFunctions/universalFunctions";    import LinearProgress from '@smui/linear-progress';
     import { onMount } from "svelte";
 
     import ComparissonBar from "./ComparissonBar.svelte";
@@ -168,6 +170,30 @@
         recordsInfo?.regularSeasonData?.leagueManagerRecords
             ? recordsInfo.regularSeasonData.leagueManagerRecords[playerTwo]
             : null;
+$: playerOneData = playerOne
+    ? getTeamData(leagueTeamManagers.users, playerOne)
+    : null;
+
+$: playerTwoData = playerTwo
+    ? getTeamData(leagueTeamManagers.users, playerTwo)
+    : null;
+
+$: playerOneManagerName = playerOne
+    ? leagueTeamManagers.users[playerOne]?.display_name
+    : '';
+
+$: playerTwoManagerName = playerTwo
+    ? leagueTeamManagers.users[playerTwo]?.display_name
+    : '';
+
+$: seriesLeader =
+    rivalry && playerOne && playerTwo
+        ? rivalry.wins.one > rivalry.wins.two
+            ? playerOneData?.name
+            : rivalry.wins.two > rivalry.wins.one
+                ? playerTwoData?.name
+                : 'Series Tied'
+        : '';
 </script>
 
 <style>
@@ -284,6 +310,149 @@
             font-size: 1.3em;
         }
     }
+.vsCard {
+    width: 95%;
+    max-width: 1000px;
+    margin: 22px auto;
+    padding: 28px 24px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    background: var(--fff);
+    border: 1px solid var(--ccc);
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+}
+
+.vsLabel {
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    opacity: 0.55;
+    margin-bottom: 24px;
+}
+
+.vsMatchup {
+    display: grid;
+    grid-template-columns: 1fr 110px 1fr;
+    align-items: center;
+    gap: 20px;
+}
+
+.vsTeam {
+    text-align: center;
+    min-width: 0;
+}
+
+.vsAvatar {
+    width: 105px;
+    height: 105px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid var(--ccc);
+    box-shadow: 0 4px 13px rgba(0, 0, 0, 0.15);
+}
+
+.vsTeamName {
+    margin-top: 12px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.vsManagerName {
+    margin-top: 5px;
+    font-size: 0.82rem;
+    opacity: 0.6;
+}
+
+.vsWins {
+    margin-top: 12px;
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.vsWinsLabel {
+    margin-left: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    opacity: 0.55;
+}
+
+.vsMiddle {
+    text-align: center;
+}
+
+.vsText {
+    font-size: 1.5rem;
+    font-weight: 900;
+    opacity: 0.35;
+    margin-bottom: 9px;
+}
+
+.seriesScore {
+    font-size: 1.8rem;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.seriesLeader {
+    margin-top: 25px;
+    padding-top: 18px;
+    text-align: center;
+    border-top: 1px solid var(--ccc);
+}
+
+.seriesLeaderLabel {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.5;
+}
+
+.seriesLeaderName {
+    margin-top: 5px;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+@media (max-width: 600px) {
+    .vsCard {
+        padding: 22px 12px;
+    }
+
+    .vsMatchup {
+        grid-template-columns: 1fr 60px 1fr;
+        gap: 5px;
+    }
+
+    .vsAvatar {
+        width: 70px;
+        height: 70px;
+    }
+
+    .vsTeamName {
+        font-size: 0.9rem;
+    }
+
+    .vsManagerName {
+        font-size: 0.7rem;
+    }
+
+    .vsWins {
+        font-size: 1.1rem;
+    }
+
+    .vsText {
+        font-size: 1rem;
+    }
+
+    .seriesScore {
+        font-size: 1.25rem;
+    }
+}
 </style>
 
 <div class="rivalryHeader">
@@ -313,7 +482,108 @@
         />
     </div>
 </div>
+{#if !loading && playerOne && playerTwo && rivalry}
 
+    <div class="vsCard">
+
+        <div class="vsLabel">
+            All-Time Head-to-Head
+        </div>
+
+        <div class="vsMatchup">
+
+            <!-- Manager One -->
+            <div class="vsTeam">
+
+                {#if playerOneData?.avatar}
+                    <img
+                        class="vsAvatar"
+                        src={playerOneData.avatar}
+                        alt={playerOneData.name}
+                    />
+                {/if}
+
+                <div class="vsTeamName">
+                    {playerOneData?.name}
+                </div>
+
+                <div class="vsManagerName">
+                    {playerOneManagerName}
+                </div>
+
+                <div class="vsWins">
+                    {rivalry.wins.one}
+                    <span class="vsWinsLabel">
+                        WINS
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- Center Score -->
+            <div class="vsMiddle">
+
+                <div class="vsText">
+                    VS
+                </div>
+
+                <div class="seriesScore">
+                    {rivalry.wins.one} – {rivalry.wins.two}
+                </div>
+
+            </div>
+
+            <!-- Manager Two -->
+            <div class="vsTeam">
+
+                {#if playerTwoData?.avatar}
+                    <img
+                        class="vsAvatar"
+                        src={playerTwoData.avatar}
+                        alt={playerTwoData.name}
+                    />
+                {/if}
+
+                <div class="vsTeamName">
+                    {playerTwoData?.name}
+                </div>
+
+                <div class="vsManagerName">
+                    {playerTwoManagerName}
+                </div>
+
+                <div class="vsWins">
+                    {rivalry.wins.two}
+                    <span class="vsWinsLabel">
+                        WINS
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="seriesLeader">
+
+            <div class="seriesLeaderLabel">
+                All-Time Series
+            </div>
+
+            <div class="seriesLeaderName">
+                {#if rivalry.wins.one === rivalry.wins.two}
+                    🤝 Series Tied
+                {:else}
+                    👑 {seriesLeader} Leads
+                {/if}
+            </div>
+
+        </div>
+
+    </div>
+
+{/if}
+
+{#if loading}
 {#if loading}
     {#if playerOne && playerTwo}
         <div class="loading">
