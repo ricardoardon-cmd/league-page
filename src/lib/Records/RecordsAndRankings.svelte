@@ -469,38 +469,120 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
-    .recordAnchor {
-        scroll-margin-top: 130px;
+
+    @media (max-width: 900px) {
+        .fullFlex {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            width: 96%;
+        }
     }
 
+    @media (max-width: 600px) {
+        :global(.recordTable) {
+            border-radius: 12px;
+        }
+
+        :global(.recordTable thead tr:first-child th) {
+            font-size: 0.82rem;
+            padding-top: 11px;
+            padding-bottom: 11px;
+        }
+
+        :global(.recordTable thead tr:nth-child(2) th) {
+            font-size: 0.62rem;
+            letter-spacing: 0.25px;
+        }
+
+        .fullFlex {
+            width: 98%;
+            margin-top: 22px;
+        }
+    }
     :global(.headerPrimary) {
-        background-color: var(--headerPrimary);
+        background: var(--f3f3f3);
+        color: inherit;
         text-align: center;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        border-bottom: 1px solid var(--ccc);
     }
 
     .italic {
         display: block;
-        font-style: italic;
-        font-size: 0.9em;
-        color: var(--g999);
+        margin-top: 3px;
+        font-style: normal;
+        font-size: 0.72em;
+        font-weight: 500;
+        opacity: 0.55;
     }
 
     :global(.recordTable) {
-        box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);
-        margin: 2em;
+        width: 100%;
+        margin: 0 !important;
+        border-radius: 16px;
+        overflow: hidden;
+        background: var(--fff);
+        border: 1px solid var(--ccc);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    }
+
+    :global(.recordTable table) {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    :global(.recordTable thead tr:first-child th) {
+        padding-top: 14px;
+        padding-bottom: 14px;
+        font-size: 0.95rem;
+    }
+
+    :global(.recordTable thead tr:nth-child(2) th) {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.45px;
+        text-transform: uppercase;
+        opacity: 0.65;
+        background: var(--fff);
+    }
+
+    :global(.recordTable tbody tr) {
+        transition: background-color 0.15s ease;
+    }
+
+    :global(.recordTable tbody tr:hover) {
+        background: var(--f3f3f3);
+    }
+
+    :global(.recordTable td) {
+        vertical-align: middle;
     }
 
     :global(.rankingTable) {
         display: table;
-        box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);
+        border-radius: 16px;
+        overflow: hidden;
+        background: var(--fff);
+        border: 1px solid var(--ccc);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
         margin: 2em auto 0.5em;
     }
 
     .fullFlex {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-around;
-        margin: 3em auto 5em;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        width: 95%;
+        max-width: 1100px;
+        margin: 30px auto 70px;
+        align-items: start;
+    }
+
+    .recordAnchor {
+        width: 100%;
+        min-width: 0;
+        scroll-margin-top: 130px;
     }
 
     .rankingHolder {
