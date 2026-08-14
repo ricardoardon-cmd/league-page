@@ -389,6 +389,90 @@
 <svelte:window bind:innerWidth={innerWidth} />
 
 <style>
+.recordsHeader {
+    width: 95%;
+    max-width: 1000px;
+    margin: 30px auto 20px;
+    text-align: center;
+}
+
+.recordsEyebrow {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+.recordsHeader h2 {
+    margin: 6px 0 0;
+    font-size: 2.6rem;
+    font-weight: 800;
+}
+
+.recordsHeader p {
+    margin: 10px 0 0;
+    opacity: 0.65;
+}
+
+.recordQuickLinks {
+    width: 95%;
+    max-width: 1000px;
+    margin: 0 auto 30px;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.recordQuickCard {
+    display: block;
+    padding: 18px 10px;
+
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+
+    border-radius: 16px;
+    background: var(--fff);
+    border: 1px solid var(--ccc);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.recordQuickCard:hover {
+    transform: translateY(-2px);
+    border-color: var(--blueOne);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.09);
+}
+
+.quickIcon {
+    font-size: 1.4rem;
+}
+
+.quickTitle {
+    margin-top: 7px;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+@media (max-width: 700px) {
+    .recordsHeader h2 {
+        font-size: 2rem;
+    }
+
+    .recordQuickLinks {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+    .recordAnchor {
+        scroll-margin-top: 130px;
+    }
+
     :global(.headerPrimary) {
         background-color: var(--headerPrimary);
         text-align: center;
@@ -708,11 +792,58 @@
 
 </style>
 
-<h4>{prefix} Records</h4>
+<div class="recordsHeader">
+
+    <div class="recordsEyebrow">
+        GGL RECORD BOOK
+    </div>
+
+    <h2>
+        🏅 {prefix} Records
+    </h2>
+
+    <p>
+        Historic league highs, lows and unforgettable performances
+    </p>
+
+</div>
+
+<div class="recordQuickLinks">
+
+    {#if weekRecords?.length}
+        <a class="recordQuickCard" href="#scoring-highs">
+            <div class="quickIcon">🔥</div>
+            <div class="quickTitle">Scoring Highs</div>
+        </a>
+    {/if}
+
+    {#if weekLows?.length}
+        <a class="recordQuickCard" href="#scoring-lows">
+            <div class="quickIcon">🧊</div>
+            <div class="quickTitle">Scoring Lows</div>
+        </a>
+    {/if}
+
+    {#if blowouts?.length}
+        <a class="recordQuickCard" href="#blowouts">
+            <div class="quickIcon">💥</div>
+            <div class="quickTitle">Largest Blowouts</div>
+        </a>
+    {/if}
+
+    {#if closestMatchups?.length}
+        <a class="recordQuickCard" href="#closest-wins">
+            <div class="quickIcon">🤏</div>
+            <div class="quickTitle">Closest Wins</div>
+        </a>
+    {/if}
+
+</div>
 
 <div class="fullFlex">
     {#if weekRecords && weekRecords.length}
-        <DataTable class="recordTable">
+        <div id="scoring-highs" class="recordAnchor">
+            <DataTable class="recordTable">
             <Head>
                 <Row class="rTableHeader">
                     <Cell class="header headerPrimary" colspan=4>{prefix} {key == "playoffData" ? "Playoff " : ""}Single Week Scoring Records</Cell>
@@ -795,11 +926,13 @@
                     {/if}
                 {/each}
             </Body>
-        </DataTable>
+            </DataTable>
+        </div>
     {/if}
 
     {#if weekLows && weekLows.length}
-        <DataTable class="recordTable">
+        <div id="scoring-lows" class="recordAnchor">
+            <DataTable class="recordTable">
             <Head>
                 <Row>
                     <Cell class="header headerPrimary" colspan=4>{prefix} {key == "playoffData" ? "Playoff " : ""}Single Week Scoring Lows</Cell>
@@ -882,7 +1015,8 @@
                     {/if}
                 {/each}
             </Body>
-        </DataTable>
+            </DataTable>
+        </div>
     {/if}
 
     {#if allTime && key == "regularSeasonData"}
@@ -946,7 +1080,8 @@
     {/if}
 
     {#if blowouts && blowouts.length}
-        <DataTable class="recordTable">
+        <div id="blowouts" class="recordAnchor">
+            <DataTable class="recordTable">
             <Head>
                 <Row>
                     <Cell class="header headerPrimary" colspan=4>{prefix} Largest {key == "playoffData" ? "Playoff " : ""}Blowouts</Cell>
@@ -1029,11 +1164,13 @@
                     {/if}
                 {/each}
             </Body>
-        </DataTable>
+            </DataTable>
+        </div>
     {/if}
 
     {#if closestMatchups && closestMatchups.length}
-        <DataTable class="recordTable">
+        <div id="closest-wins" class="recordAnchor">
+            <DataTable class="recordTable">
             <Head>
                 <Row>
                     <Cell class="header headerPrimary" colspan=4>{prefix} Narrowest {key == "playoffData" ? "Playoff " : ""}Wins</Cell>
@@ -1116,7 +1253,8 @@
                     {/if}
                 {/each}
             </Body>
-        </DataTable>
+            </DataTable>
+        </div>
     {/if}
 </div>
 
