@@ -810,21 +810,26 @@
 }
 
 .recordDetail {
-    width: 760px;
-    max-width: calc(100vw - 50px);
+    width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
 
-    padding: 18px;
+    padding: 12px 8px 14px;
     background: var(--fff);
     border-top: 3px solid var(--blueOne);
 
-    overflow-x: auto;
+    overflow-x: hidden;
+    font-size: 0.82em;
 }
+
+.recordDetail :global(.material-icons) {
+    font-size: 0.9em;
+}
+
 @media (max-width: 700px) {
     .recordDetail {
-        width: 100%;
-        max-width: 100%;
-        padding: 10px 4px 14px;
+        padding: 9px 3px 12px;
+        font-size: 0.74em;
     }
 }
     .recordDetailHeader {
