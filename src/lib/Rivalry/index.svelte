@@ -1,19 +1,4 @@
 <script>
-<div class="rivalryHeader">
-
-    <div class="rivalryEyebrow">
-        GGL HEAD-TO-HEAD
-    </div>
-
-    <h2>
-        ⚔️ Rivalry Center
-    </h2>
-
-    <p>
-        Compare two managers across league history
-    </p>
-
-</div>
 
 <div class="rivalrySelectorCard">
 
@@ -240,7 +225,21 @@
 </style>
 
 <h2>Rivalry</h2>
+<div class="rivalryHeader">
 
+    <div class="rivalryEyebrow">
+        GGL HEAD-TO-HEAD
+    </div>
+
+    <h2>
+        ⚔️ Rivalry Center
+    </h2>
+
+    <p>
+        Compare two managers across league history
+    </p>
+
+</div>
 <div class="rivalrySelection">
     <ManagerSelectors bind:playerOne={playerOne} bind:playerTwo={playerTwo} {leagueTeamManagers} />
 </div>
