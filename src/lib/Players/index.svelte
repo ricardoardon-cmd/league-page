@@ -14,6 +14,7 @@
     let rosters = [];
     let leagueTeamManagers;
     let players = {};
+    let previousDrafts = [];
 
     let ownershipMap = {};
     let playerList = [];
@@ -25,32 +26,26 @@
     let selectedPlayer = null;
     let visibleCount = 60;
 
-   const buildOwnershipMap = (leagueRosters) => {
+    const buildOwnershipMap = (leagueRosters) => {
+        const map = {};
 
-    const map = {};
+        const rosterMap =
+            leagueRosters?.rosters || {};
 
-    const rosterMap =
-        leagueRosters?.rosters || {};
+        const rosterList =
+            Object.values(rosterMap);
 
-    const rosterList =
-        Object.values(rosterMap);
+        for (const roster of rosterList) {
+            const rosterPlayers =
+                roster?.players || [];
 
-    for (const roster of rosterList) {
-
-        const rosterPlayers =
-            roster?.players || [];
-
-        for (const playerID of rosterPlayers) {
-
-            map[String(playerID)] =
-                Number(roster.roster_id);
-
+            for (const playerID of rosterPlayers) {
+                map[String(playerID)] =
+                    Number(roster.roster_id);
+            }
         }
 
-    }
-
-    return map;
-
+        return map;
     };
 
     const playerName = (player) => {
@@ -135,6 +130,152 @@
                 playerName(a).localeCompare(playerName(b))
             );
     };
+
+    const getDraftPickLabel = (
+        draftData,
+        draftCol,
+        rowIndex,
+        colIndex
+    ) => {
+        const row = rowIndex + 1;
+        const draftRow =
+            draftData?.draft?.[rowIndex] || [];
+        const draftType =
+            draftData?.draftType;
+        const reversalRound =
+            draftData?.reversalRound;
+
+        if (
+            draftType === 'auction'
+        ) {
+            return `$${draftCol?.amount ?? 0}`;
+        }
+
+        if (
+            draftType === 'snake' &&
+            !reversalRound
+        ) {
+            return `${row}.${
+                row % 2 === 0
+                    ? draftRow.length - colIndex
+                    : colIndex + 1
+            }`;
+        }
+
+        if (
+            draftType === 'snake' &&
+            reversalRound
+        ) {
+            if (
+                (
+                    row < reversalRound &&
+                    row % 2 === 0
+                ) ||
+                (
+                    row >= reversalRound &&
+                    row % 2 === 1
+                )
+            ) {
+                return `${row}.${draftRow.length - colIndex}`;
+            }
+
+            return `${row}.${colIndex + 1}`;
+        }
+
+        if (
+            !reversalRound ||
+            row < reversalRound
+        ) {
+            return `${row}.${colIndex + 1}`;
+        }
+
+        return `${row}.${draftRow.length - colIndex}`;
+    };
+
+
+    const getDraftHistory = (playerID) => {
+        const history = [];
+
+        for (const draftData of previousDrafts || []) {
+            const draftRows =
+                draftData?.draft || [];
+
+            draftRows.forEach(
+                (draftRow, rowIndex) => {
+
+                    (draftRow || []).forEach(
+                        (draftCol, colIndex) => {
+
+                            if (
+                                !draftCol?.player ||
+                                String(draftCol.player) !==
+                                    String(playerID)
+                            ) {
+                                return;
+                            }
+
+                            const originalRosterID =
+                                draftData?.draftOrder?.[
+                                    colIndex
+                                ];
+
+                            const rosterID =
+                                draftCol?.newOwner ||
+                                originalRosterID ||
+                                null;
+
+                            let team = null;
+
+                            if (
+                                rosterID &&
+                                leagueTeamManagers
+                            ) {
+                                try {
+                                    team =
+                                        getTeamFromTeamManagers(
+                                            leagueTeamManagers,
+                                            Number(rosterID),
+                                            draftData.year
+                                        );
+                                } catch (error) {
+                                    team = null;
+                                }
+                            }
+
+                            history.push({
+                                year: draftData.year,
+                                rosterID:
+                                    rosterID
+                                        ? Number(rosterID)
+                                        : null,
+                                team,
+                                pick:
+                                    getDraftPickLabel(
+                                        draftData,
+                                        draftCol,
+                                        rowIndex,
+                                        colIndex
+                                    ),
+                                round:
+                                    rowIndex + 1,
+                                tradedPick:
+                                    Boolean(
+                                        draftCol?.newOwner
+                                    )
+                            });
+                        }
+                    );
+                }
+            );
+        }
+
+        return history.sort(
+            (a, b) =>
+                Number(b.year || 0) -
+                Number(a.year || 0)
+        );
+    };
+
 
     const openPlayer = (player) => {
         selectedPlayer = player;
@@ -221,12 +362,15 @@
             const [
                 leagueRosters,
                 teamManagers,
-                playerData
+                playerData,
+                previousDraftData
             ] = await playersInfo;
 
             rosters = leagueRosters || [];
             leagueTeamManagers = teamManagers;
             players = playerData?.players || {};
+            previousDrafts =
+                previousDraftData || [];
 
             ownershipMap = buildOwnershipMap(rosters);
             buildPlayerList();
@@ -626,8 +770,71 @@
         cursor: pointer;
     }
 
-    .historyNote {
+    .historySection {
         margin-top: 14px;
+    }
+
+    .historyHeading {
+        margin-bottom: 8px;
+        font-size: 0.68rem;
+        font-weight: 850;
+        letter-spacing: 0.65px;
+        text-transform: uppercase;
+        opacity: 0.5;
+    }
+
+    .historyList {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .historyItem {
+        display: grid;
+        grid-template-columns:
+            58px
+            72px
+            minmax(0, 1fr);
+        align-items: center;
+        gap: 9px;
+        padding: 11px 12px;
+        border-radius: 12px;
+        background: var(--f3f3f3);
+        border: 1px solid var(--ccc);
+    }
+
+    .historyYear {
+        font-size: 0.78rem;
+        font-weight: 850;
+    }
+
+    .historyPick {
+        padding: 4px 7px;
+        border-radius: 999px;
+        background: var(--fff);
+        border: 1px solid var(--ccc);
+        text-align: center;
+        font-size: 0.67rem;
+        font-weight: 850;
+    }
+
+    .historyTeam {
+        min-width: 0;
+        font-size: 0.77rem;
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .historyMeta {
+        margin-top: 2px;
+        font-size: 0.62rem;
+        font-weight: 650;
+        opacity: 0.52;
+    }
+
+    .historyEmpty {
         padding: 12px;
         border-radius: 12px;
         border: 1px dashed var(--ccc);
@@ -903,6 +1110,9 @@
     {@const selectedOwner =
         getOwnerInfo(selectedPlayer.id)}
 
+    {@const selectedDraftHistory =
+        getDraftHistory(selectedPlayer.id)}
+
     <div
         class="modalBackdrop"
         role="presentation"
@@ -988,10 +1198,10 @@
 
                     <div class="detailCard">
                         <div class="detailLabel">
-                            Player ID
+                            GGL Drafts
                         </div>
                         <div class="detailValue">
-                            {selectedPlayer.id}
+                            {selectedDraftHistory.length}
                         </div>
                     </div>
 
@@ -1027,10 +1237,58 @@
                 </div>
 
 
-                <div class="historyNote">
-                    Player history can be added next:
-                    GGL draft picks, trades, waiver moves,
-                    and previous league owners.
+                <div class="historySection">
+
+                    <div class="historyHeading">
+                        GGL Draft History
+                    </div>
+
+                    {#if selectedDraftHistory.length}
+
+                        <div class="historyList">
+
+                            {#each selectedDraftHistory as draftEvent}
+
+                                <div class="historyItem">
+
+                                    <div class="historyYear">
+                                        {draftEvent.year}
+                                    </div>
+
+                                    <div class="historyPick">
+                                        {draftEvent.pick}
+                                    </div>
+
+                                    <div>
+
+                                        <div class="historyTeam">
+                                            {draftEvent.team?.name ||
+                                                'Unknown GGL Team'}
+                                        </div>
+
+                                        <div class="historyMeta">
+                                            Round {draftEvent.round}
+                                            {draftEvent.tradedPick
+                                                ? ' · Traded pick'
+                                                : ''}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            {/each}
+
+                        </div>
+
+                    {:else}
+
+                        <div class="historyEmpty">
+                            No GGL draft selection found for this player.
+                        </div>
+
+                    {/if}
+
                 </div>
 
             </div>
