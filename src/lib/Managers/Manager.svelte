@@ -129,15 +129,18 @@
 }
 
 .teamSub {
-    margin-top: 8px;
+    margin-top: 10px;
     font-size: 1.05em;
-    line-height: 1.3em;
+    line-height: 1.4em;
     opacity: 0.65;
 }
 
 .teamSub i {
+    display: block;
+    margin-top: 3px;
+    font-size: 1.35em;
+    font-weight: 800;
     font-style: normal;
-    font-weight: 700;
     opacity: 1;
 }
 
