@@ -76,7 +76,7 @@
 </style>
 
 <nav>
-	<a href="/"><img id="logo" alt="league logo" src="/badge.png" /></a>
+	<a href="/"><img id="logo" alt="GGL league logo" src="/managers/GGL.png" /></a>
 
 	<div class="container">
 		<IconButton
