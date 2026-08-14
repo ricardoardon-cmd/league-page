@@ -11,7 +11,7 @@ export const homepageText = `
   <p>Welcome to the Gentlemen of the Gridiron League (GGL)!</p>
   <p>15+ years. A decade and a half of questionable draft choices, Sunday heartbreak, and pure fantasy glory.</p>
   <p>We’ve come a long way since the dark ages when we were just an 8-team league forced to roster a GhostTeam. Over the years, this league has seen it all: wild waiver claims, legendary rivalries, and yes... the infamous night someone clogged a toilet and resorted to using BBQ tongs as a plunger.</p>
-  <p>And to anyone claiming those early-era titles don't count because we were "infants" at fantasy back then? Nice try. A chip is a chip, baby! The record books don't care if you beat a human, a phantom, or a kitchen utensil—put it on the trophy!</p>
+  <p>And to anyone claiming those early-era titles don't count because we were "infants" at fantasy back then? Nice try. A chip is a chip, Boys!</p>
   <p>Now we’re a rock-solid 10-team league bound by over a decade of real-life friendship, growing older, and refusing to let each other down.</p>
   <p>A Note from Commish Pico:</p>
   <p>"Thanks for everyone's effort in and out every year, this is probably one of the best ways that we all stay connected - it awesome seeing everyone grow together"</p>
