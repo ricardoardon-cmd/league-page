@@ -22,7 +22,7 @@
     } from '$lib/utils/helperFunctions/universalFunctions';
 
     import { dues, dynasty } from '$lib/utils/leagueInfo';
-import gglBadge from '$lib/Managers/GGL.jpg';
+
     const nflState = getNflState();
     const podiumsData = getAwards();
     const leagueTeamManagersData = getLeagueTeamManagers();
