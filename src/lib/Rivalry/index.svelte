@@ -194,6 +194,19 @@ $: seriesLeader =
                 ? playerTwoData?.name
                 : 'Series Tied'
         : '';
+const getMatchupTotal = (points) => {
+    if (!points) return 0;
+
+    if (Array.isArray(points)) {
+        return round(
+            points.reduce((total, score) => {
+                return total + (Number(score) || 0);
+            }, 0)
+        );
+    }
+
+    return round(Number(points) || 0);
+};
 </script>
 
 <style>
@@ -751,6 +764,9 @@ $: seriesLeader =
 
         {#each rivalry.matchups as game, index}
 
+            {@const scoreOne = getMatchupTotal(game.matchup?.[0]?.points)}
+            {@const scoreTwo = getMatchupTotal(game.matchup?.[1]?.points)}
+
             <div
                 class:historyGameActive={selected === index}
                 class="historyGame"
@@ -764,60 +780,42 @@ $: seriesLeader =
 
                 <div class="historyTeams">
 
-                    {#if game.matchup?.length >= 2}
+                    <div class="historyTeam">
+                        <span class="historyTeamName">
+                            {playerOneData?.name || playerOneManagerName}
+                        </span>
 
-                        <div class="historyTeam">
+                        <span class="historyScore">
+                            {scoreOne}
+                        </span>
+                    </div>
 
-                            <span class="historyTeamName">
-                                Team 1
-                            </span>
+                    <div class="historyTeam">
+                        <span class="historyTeamName">
+                            {playerTwoData?.name || playerTwoManagerName}
+                        </span>
 
-                            <span class="historyScore">
-                                {game.matchup[0]?.points ?? 0}
-                            </span>
-
-                        </div>
-
-                        <div class="historyTeam">
-
-                            <span class="historyTeamName">
-                                Team 2
-                            </span>
-
-                            <span class="historyScore">
-                                {game.matchup[1]?.points ?? 0}
-                            </span>
-
-                        </div>
-
-                    {:else}
-
-                        <div class="historyTeam">
-                            Matchup data unavailable
-                        </div>
-
-                    {/if}
+                        <span class="historyScore">
+                            {scoreTwo}
+                        </span>
+                    </div>
 
                 </div>
 
                 <div class="historyResult">
 
-                    {#if game.matchup?.length >= 2}
+                    {#if scoreOne > scoreTwo}
+                        <span class="historyWinner">
+                            🏆 {playerOneData?.name || playerOneManagerName}
+                        </span>
 
-                        {#if game.matchup[0]?.points > game.matchup[1]?.points}
-                            <span class="historyWinner">
-                                Winner: Team 1
-                            </span>
+                    {:else if scoreTwo > scoreOne}
+                        <span class="historyWinner">
+                            🏆 {playerTwoData?.name || playerTwoManagerName}
+                        </span>
 
-                        {:else if game.matchup[1]?.points > game.matchup[0]?.points}
-                            <span class="historyWinner">
-                                Winner: Team 2
-                            </span>
-
-                        {:else}
-                            Tie
-                        {/if}
-
+                    {:else}
+                        🤝 Tie
                     {/if}
 
                 </div>
