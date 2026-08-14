@@ -1,9 +1,34 @@
 <script>
     import { gotoManager } from '$lib/utils/helper';
-    import { getTeamFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
-    import TransactionMove from './TransactionMove.svelte';
+    import {
+    getTeamFromTeamManagers,
+    getManagers
+} from '$lib/utils/helperFunctions/universalFunctions';
+import TransactionMove from './TransactionMove.svelte';
 
     export let transaction, players, leagueTeamManagers;
+
+const openManager = (rosterID) => {
+    const historicalRoster =
+        leagueTeamManagers?.teamManagersMap?.[transaction.season]?.[rosterID];
+
+    const managerID = historicalRoster?.managers?.[0];
+
+    if (managerID) {
+        gotoManager({
+            leagueTeamManagers,
+            managerID,
+            year: transaction.season
+        });
+        return;
+    }
+
+    gotoManager({
+        leagueTeamManagers,
+        rosterID,
+        year: transaction.season
+    });
+};
 </script>
 
 <style>
@@ -171,13 +196,7 @@
 
             <div
                 class="teamHeader"
-                onclick={() =>
-                    gotoManager({
-                        year: transaction.season,
-                        leagueTeamManagers,
-                        rosterID: owner
-                    })
-                }
+               onclick={() => openManager(owner)}
             >
 
                 <img
