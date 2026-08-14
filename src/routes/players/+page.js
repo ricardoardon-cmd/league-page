@@ -1,6 +1,7 @@
 import {
     getLeagueRosters,
     getLeagueTeamManagers,
+    getPreviousDrafts,
     loadPlayers,
     waitForAll
 } from '$lib/utils/helper';
@@ -10,7 +11,8 @@ export async function load({ fetch }) {
     const playersInfo = waitForAll(
         getLeagueRosters(),
         getLeagueTeamManagers(),
-        loadPlayers(fetch)
+        loadPlayers(fetch),
+        getPreviousDrafts()
     );
 
     return {
