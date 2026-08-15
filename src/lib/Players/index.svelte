@@ -15,6 +15,7 @@
     let leagueTeamManagers;
     let players = {};
     let previousDrafts = [];
+    let leagueTransactions = [];
 
     let ownershipMap = {};
     let playerList = [];
@@ -277,6 +278,195 @@
     };
 
 
+
+    const flattenTransactions = (value) => {
+        const transactions = [];
+
+        const visit = (node) => {
+            if (!node) return;
+
+            if (Array.isArray(node)) {
+                for (const item of node) {
+                    visit(item);
+                }
+                return;
+            }
+
+            if (typeof node !== 'object') {
+                return;
+            }
+
+            if (
+                Array.isArray(node.moves) &&
+                Array.isArray(node.rosters)
+            ) {
+                transactions.push(node);
+                return;
+            }
+
+            for (const child of Object.values(node)) {
+                visit(child);
+            }
+        };
+
+        visit(value);
+
+        return transactions;
+    };
+
+
+    const safeTeam = (rosterID, season) => {
+        if (
+            !rosterID ||
+            !leagueTeamManagers
+        ) {
+            return null;
+        }
+
+        try {
+            return getTeamFromTeamManagers(
+                leagueTeamManagers,
+                Number(rosterID),
+                season
+            );
+        } catch (error) {
+            return null;
+        }
+    };
+
+
+    const getPlayerTransactionHistory = (playerID) => {
+        const history = [];
+        const wantedPlayerID =
+            String(playerID);
+
+        for (const transaction of leagueTransactions || []) {
+            const transactionType =
+                String(transaction?.type || '')
+                    .toLowerCase();
+
+            const rosters =
+                transaction?.rosters || [];
+
+            const moves =
+                transaction?.moves || [];
+
+            if (transactionType.includes('trade')) {
+
+                for (const move of moves) {
+                    if (!Array.isArray(move)) {
+                        continue;
+                    }
+
+                    const originIndex =
+                        move.findIndex(
+                            (cell) =>
+                                cell === 'origin'
+                        );
+
+                    const destinationIndex =
+                        move.findIndex(
+                            (cell) =>
+                                cell?.player &&
+                                String(cell.player) ===
+                                    wantedPlayerID
+                        );
+
+                    if (destinationIndex < 0) {
+                        continue;
+                    }
+
+                    const fromRosterID =
+                        originIndex >= 0
+                            ? rosters[originIndex]
+                            : null;
+
+                    const toRosterID =
+                        rosters[destinationIndex] || null;
+
+                    history.push({
+                        kind: 'trade',
+                        action: 'Traded',
+                        season: transaction.season,
+                        date: transaction.date,
+                        fromRosterID:
+                            fromRosterID
+                                ? Number(fromRosterID)
+                                : null,
+                        toRosterID:
+                            toRosterID
+                                ? Number(toRosterID)
+                                : null,
+                        fromTeam:
+                            safeTeam(
+                                fromRosterID,
+                                transaction.season
+                            ),
+                        toTeam:
+                            safeTeam(
+                                toRosterID,
+                                transaction.season
+                            ),
+                        bid: null
+                    });
+                }
+
+                continue;
+            }
+
+
+            for (const move of moves) {
+                const moveData =
+                    Array.isArray(move)
+                        ? move[0]
+                        : move;
+
+                if (
+                    !moveData?.player ||
+                    String(moveData.player) !==
+                        wantedPlayerID
+                ) {
+                    continue;
+                }
+
+                const rosterID =
+                    rosters?.[0] || null;
+
+                const action =
+                    String(moveData.type || '')
+                        .trim() ||
+                    'Transaction';
+
+                history.push({
+                    kind:
+                        action.toLowerCase() ===
+                        'dropped'
+                            ? 'drop'
+                            : 'add',
+                    action,
+                    season:
+                        transaction.season,
+                    date:
+                        transaction.date,
+                    rosterID:
+                        rosterID
+                            ? Number(rosterID)
+                            : null,
+                    team:
+                        safeTeam(
+                            rosterID,
+                            transaction.season
+                        ),
+                    bid:
+                        moveData.bid ?? null
+                });
+            }
+        }
+
+        return history;
+    };
+
+
     const openPlayer = (player) => {
         selectedPlayer = player;
     };
@@ -363,7 +553,8 @@
                 leagueRosters,
                 teamManagers,
                 playerData,
-                previousDraftData
+                previousDraftData,
+                transactionData
             ] = await playersInfo;
 
             rosters = leagueRosters || [];
@@ -371,6 +562,10 @@
             players = playerData?.players || {};
             previousDrafts =
                 previousDraftData || [];
+            leagueTransactions =
+                flattenTransactions(
+                    transactionData
+                );
 
             ownershipMap = buildOwnershipMap(rosters);
             buildPlayerList();
@@ -844,6 +1039,74 @@
         opacity: 0.58;
     }
 
+    .transactionHistory {
+        margin-top: 16px;
+    }
+
+    .transactionItem {
+        display: grid;
+        grid-template-columns:
+            70px
+            minmax(0, 1fr)
+            auto;
+        gap: 10px;
+        align-items: center;
+        padding: 11px 12px;
+        border-radius: 12px;
+        background: var(--f3f3f3);
+        border: 1px solid var(--ccc);
+    }
+
+    .transactionItem + .transactionItem {
+        margin-top: 8px;
+    }
+
+    .transactionAction {
+        font-size: 0.68rem;
+        font-weight: 900;
+        letter-spacing: 0.45px;
+        text-transform: uppercase;
+    }
+
+    .transactionAdd {
+        color: #00a995;
+    }
+
+    .transactionDrop {
+        color: #ff2a6d;
+    }
+
+    .transactionTrade {
+        color: var(--blueOne);
+    }
+
+    .transactionMain {
+        min-width: 0;
+    }
+
+    .transactionTeams {
+        font-size: 0.77rem;
+        font-weight: 800;
+        line-height: 1.25;
+    }
+
+    .transactionMeta {
+        margin-top: 3px;
+        font-size: 0.62rem;
+        font-weight: 650;
+        opacity: 0.52;
+    }
+
+    .transactionBid {
+        padding: 4px 7px;
+        border-radius: 999px;
+        background: var(--fff);
+        border: 1px solid var(--ccc);
+        font-size: 0.64rem;
+        font-weight: 850;
+        white-space: nowrap;
+    }
+
     @media (max-width: 900px) {
         .playerGrid {
             grid-template-columns:
@@ -886,6 +1149,17 @@
 
         .detailGrid {
             grid-template-columns: 1fr;
+        }
+
+        .transactionItem {
+            grid-template-columns:
+                62px
+                minmax(0, 1fr);
+        }
+
+        .transactionBid {
+            grid-column: 2;
+            justify-self: start;
         }
     }
 </style>
@@ -1113,6 +1387,11 @@
     {@const selectedDraftHistory =
         getDraftHistory(selectedPlayer.id)}
 
+    {@const selectedTransactionHistory =
+        getPlayerTransactionHistory(
+            selectedPlayer.id
+        )}
+
     <div
         class="modalBackdrop"
         role="presentation"
@@ -1285,6 +1564,80 @@
 
                         <div class="historyEmpty">
                             No GGL draft selection found for this player.
+                        </div>
+
+                    {/if}
+
+                </div>
+
+
+                <div class="transactionHistory">
+
+                    <div class="historyHeading">
+                        GGL Transaction History
+                    </div>
+
+                    {#if selectedTransactionHistory.length}
+
+                        {#each selectedTransactionHistory as event}
+
+                            <div class="transactionItem">
+
+                                <div
+                                    class:transactionTrade={event.kind === 'trade'}
+                                    class:transactionAdd={event.kind === 'add'}
+                                    class:transactionDrop={event.kind === 'drop'}
+                                    class="transactionAction"
+                                >
+                                    {event.action}
+                                </div>
+
+                                <div class="transactionMain">
+
+                                    <div class="transactionTeams">
+
+                                        {#if event.kind === 'trade'}
+
+                                            {event.fromTeam?.name || 'Unknown Team'}
+                                            →
+                                            {event.toTeam?.name || 'Unknown Team'}
+
+                                        {:else}
+
+                                            {event.team?.name || 'Unknown GGL Team'}
+
+                                        {/if}
+
+                                    </div>
+
+                                    <div class="transactionMeta">
+
+                                        {event.season || ''}
+
+                                        {#if event.date}
+                                            · {event.date}
+                                        {/if}
+
+                                    </div>
+
+                                </div>
+
+                                {#if event.bid != null}
+
+                                    <div class="transactionBid">
+                                        ${event.bid} FAAB
+                                    </div>
+
+                                {/if}
+
+                            </div>
+
+                        {/each}
+
+                    {:else}
+
+                        <div class="historyEmpty">
+                            No GGL trade, waiver, or free-agent history found for this player.
                         </div>
 
                     {/if}
