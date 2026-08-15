@@ -1,14 +1,16 @@
 <script>
     import {round} from '$lib/utils/helper'
   	import RecordsAndRankings from './RecordsAndRankings.svelte';
+    import LeagueScoringHistory from './LeagueScoringHistory.svelte';
 
-    export let key, leagueManagerRecords, leagueTeamManagers, leagueWeekHighs, leagueWeekLows, allTimeBiggestBlowouts, allTimeClosestMatchups, mostSeasonLongPoints, leastSeasonLongPoints, transactionTotals;
+    export let key, leagueManagerRecords, leagueRosterRecords, leagueTeamManagers, leagueWeekHighs, leagueWeekLows, allTimeBiggestBlowouts, allTimeClosestMatchups, mostSeasonLongPoints, leastSeasonLongPoints, transactionTotals;
 
     let winPercentages = [];
     let lineupIQs = [];
     let fptsHistories = [];
     let tradesData = [];
     let waiversData = [];
+    let seasonScoringHistory = [];
 
     let showTies = false;
     
@@ -23,6 +25,40 @@
         })
     }
 
+    const setSeasonScoringHistory = (lRR) => {
+        const seasons = {};
+
+        for (const rosterID in lRR || {}) {
+            const rosterRecord = lRR[rosterID];
+
+            for (const season of rosterRecord?.years || []) {
+                const seasonYear = Number(season.year);
+                const ppg = Number(season.fptsPerGame);
+
+                if (!Number.isFinite(seasonYear) || !Number.isFinite(ppg)) {
+                    continue;
+                }
+
+                if (!seasons[seasonYear]) {
+                    seasons[seasonYear] = {
+                        totalPPG: 0,
+                        teams: 0
+                    };
+                }
+
+                seasons[seasonYear].totalPPG += ppg;
+                seasons[seasonYear].teams++;
+            }
+        }
+
+        seasonScoringHistory = Object.entries(seasons)
+            .map(([year, values]) => ({
+                year: Number(year),
+                averagePPG: round(values.totalPPG / values.teams),
+                teams: values.teams
+            }))
+            .sort((a, b) => a.year - b.year);
+    };
 
     const setRankingsData = (lRR) => {
         winPercentages = [];
@@ -76,7 +112,6 @@
             })
         }
 
-
         winPercentages.sort((a, b) => b.percentage - a.percentage);
         lineupIQs.sort((a, b) => b.iq - a.iq);
         fptsHistories.sort((a, b) => b.fptsFor - a.fptsFor);
@@ -85,7 +120,12 @@
     }
 
     $:setRankingsData(leagueManagerRecords)
+    $:setSeasonScoringHistory(leagueRosterRecords)
 </script>
+
+{#if key == "regularSeasonData" && seasonScoringHistory?.length > 1}
+    <LeagueScoringHistory data={seasonScoringHistory} />
+{/if}
 
 <RecordsAndRankings
     blowouts={allTimeBiggestBlowouts}
