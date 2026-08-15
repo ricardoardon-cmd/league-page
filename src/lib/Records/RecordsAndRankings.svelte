@@ -876,7 +876,162 @@
             padding: 0 6px;
         }
     }
+/* =========================================================
+   MOBILE - SCORING HIGHS
+   First record table mobile cleanup
+   ========================================================= */
 
+@media (max-width: 700px) {
+
+    /*
+     * Force only Scoring Highs to use the entire grid width.
+     * We will update the other record tables separately.
+     */
+    .scoringHighAnchor {
+        grid-column: 1 / -1;
+        width: 100%;
+        min-width: 0;
+    }
+
+    :global(.scoringHighTable) {
+        width: 100%;
+        min-width: 0;
+    }
+
+    :global(.scoringHighTable table) {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
+    }
+
+
+    /*
+     * Column widths:
+     * rank | team | week | points
+     */
+    :global(
+        .scoringHighTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(1)
+    ) {
+        width: 7%;
+    }
+
+    :global(
+        .scoringHighTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(2)
+    ) {
+        width: 49%;
+    }
+
+    :global(
+        .scoringHighTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(3)
+    ) {
+        width: 25%;
+    }
+
+    :global(
+        .scoringHighTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(4)
+    ) {
+        width: 19%;
+    }
+
+
+    /*
+     * Override the older mobile rules that shrink
+     * record tables down to extremely tiny text.
+     */
+    :global(.scoringHighTable th) {
+        font-size: 0.7rem !important;
+        padding: 8px 4px !important;
+    }
+
+    :global(
+        .scoringHighTable
+        tbody
+        tr.recordMatchupRow
+        td
+    ) {
+        font-size: 0.72rem !important;
+        padding: 8px 4px !important;
+    }
+
+
+    /*
+     * Give the team cell most of the usable room.
+     */
+    :global(
+        .scoringHighTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(2)
+    ) {
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+    }
+
+
+    /*
+     * Keep year/week readable instead of squeezing
+     * everything onto an impossibly narrow line.
+     */
+    :global(
+        .scoringHighTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(3)
+    ) {
+        white-space: normal;
+        line-height: 1.25;
+        text-align: center;
+    }
+
+
+    :global(
+        .scoringHighTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(4)
+    ) {
+        white-space: nowrap;
+        text-align: center;
+        font-weight: 800;
+    }
+
+
+    /*
+     * The entire row is clickable already,
+     * so the tiny instruction isn't necessary on phones.
+     */
+    .scoringHighAnchor .recordMatchupHint {
+        display: none;
+    }
+
+
+    /*
+     * Allow the table title to wrap naturally.
+     */
+    :global(
+        .scoringHighTable
+        thead
+        tr:first-child
+        th
+    ) {
+        white-space: normal;
+        line-height: 1.3;
+        font-size: 0.82rem !important;
+        padding: 12px 8px !important;
+    }
+}
 </style>
 
 <div class="recordsHeader">
@@ -929,8 +1084,11 @@
 
 <div class="fullFlex">
     {#if weekRecords && weekRecords.length}
-        <div id="scoring-highs" class="recordAnchor">
-            <DataTable class="recordTable">
+       <div
+    id="scoring-highs"
+    class="recordAnchor scoringHighAnchor"
+>
+    <DataTable class="recordTable scoringHighTable">
             <Head>
                 <Row class="rTableHeader">
                     <Cell class="header headerPrimary" colspan=4>{prefix} {key == "playoffData" ? "Playoff " : ""}Single Week Scoring Records</Cell>
@@ -939,7 +1097,7 @@
                     <Cell class="header rank"></Cell>
                     <Cell class="header">Team</Cell>
                     <Cell class="header">Week</Cell>
-                    <Cell class="header">Total Points</Cell>
+                    <Cell class="header">Points</Cell>
                 </Row>
             </Head>
             <Body>
