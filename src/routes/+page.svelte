@@ -215,7 +215,7 @@
         box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
         border: 1px solid #e5e5e5;
     }
-.    .statIcon {
+    .statIcon {
         font-size: 1.5rem;
     }
 leagueBadge {
