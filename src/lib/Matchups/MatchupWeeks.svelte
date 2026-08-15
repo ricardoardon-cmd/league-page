@@ -13,7 +13,7 @@
         if(!queryWeek || queryWeek < 1) {
             queryWeek = week;
             displayWeek = queryWeek * 1;
-            goto(`/matchups?week=${queryWeek}`, {noscroll: true});
+            goto(`/matchups?year=${year}&week=${queryWeek}`, {noscroll: true});
             if(queryWeek > regularSeasonLength) {
                 selection = 'champions';
                 return;
@@ -36,6 +36,10 @@
 
     const processDisplayMatchup = (newWeek) => {
         const matchup = matchupWeeks[newWeek-1];
+        if(!matchup?.matchups) {
+            matchupArray = [];
+            return;
+        }
         const allMatchups = matchup.matchups;
         matchupArray = [];
         for (const key in allMatchups) {
@@ -50,7 +54,7 @@
         displayWeek = newWeek;
         processDisplayMatchup(displayWeek);
         active = null;
-        goto(`/matchups?week=${displayWeek}`, {noscroll: true});
+        goto(`/matchups?year=${year}&week=${displayWeek}`, {noscroll: true});
     }
 </script>
 
@@ -207,6 +211,6 @@
     {/if}
 
     {#each matchupArray as matchup, ix (rand * (ix + 1))}
-        <Matchup {ix} {matchup} {players} {displayWeek} bind:active={active} {leagueTeamManagers} />
+        <Matchup {ix} {matchup} {players} {displayWeek} {year} bind:active={active} {leagueTeamManagers} />
     {/each}
 </div>
