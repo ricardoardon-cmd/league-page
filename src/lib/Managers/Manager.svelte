@@ -76,15 +76,103 @@
         margin: 0 auto 4em;
     }
 
-    .managerPhoto {
-        display: block;
-        border-radius: 100%;
-        width: 70%;
-        max-width: 200px;
-        height: auto;
-        margin: 5em auto 1em;
-        box-shadow: 0 0 8px 4px #aaa;
-    }
+   .managerPhoto {
+    display: block;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin: 0 auto;
+    border: 5px solid var(--fff);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.profileHero {
+    position: relative;
+    padding: 35px 25px 30px;
+    margin: 20px auto 25px;
+    max-width: 800px;
+    text-align: center;
+    border-radius: 24px;
+    background: var(--fff);
+    border: 1px solid var(--ccc);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.profileStatus {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 18px;
+    padding: 6px 13px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid var(--ccc);
+    background: var(--f3f3f3);
+}
+
+.statusDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2e9d50;
+}
+
+.profileName {
+    margin: 18px 0 0;
+    font-size: 2.5em;
+    font-weight: 800;
+    line-height: 1.05;
+}
+
+.teamSub {
+    margin-top: 10px;
+    font-size: 1.05em;
+    line-height: 1.4em;
+    opacity: 0.65;
+}
+
+.teamSub i {
+    display: block;
+    margin-top: 3px;
+    font-size: 1.35em;
+    font-weight: 800;
+    font-style: normal;
+    opacity: 1;
+}
+
+.profileMeta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.metaItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    background: var(--f3f3f3);
+    border: 1px solid var(--ccc);
+}
+
+.metaTeam {
+    height: 25px;
+    width: 25px;
+}
+
+.profileNav {
+    margin: 20px auto 30px;
+    text-align: center;
+}
 
     h2 {
         text-align: center;
@@ -224,70 +312,159 @@
 
 <div class="managerContainer">
     <div class="managerConstrained">
-        <img class="managerPhoto" src="{viewManager.photo}" alt="manager"/>
-        <h2>
-            {viewManager.name}
-            <div class="teamSub">{coOwners ? 'Co-' : ''}Manager of <i>{getTeamNameFromTeamManagers(leagueTeamManagers, rosterID, year)}</i></div>
-        </h2>
-        
-        <div class="basicInfo">
-            <span class="infoChild">{viewManager.location || 'Undisclosed Location'}</span>
-            {#if viewManager.managerID && datesActive.start}
-                <span class="seperator">|</span>
-                {#if datesActive.end}
-                    <span class="infoChild">In the league from '{datesActive.start.toString().substr(2)} to '{datesActive.end.toString().substr(2)}</span>
-                {:else}
-                    <span class="infoChild">In the league since '{datesActive.start.toString().substr(2)}</span>
-                {/if}
-            {:else if viewManager.fantasyStart}
-                <!-- fantasyStart is an optional field -->
-                <span class="seperator">|</span>
-                <span class="infoChild">Playing ff since '{viewManager.fantasyStart.toString().substr(2)}</span>
-            {/if}
-            {#if viewManager.preferredContact}
-                <!-- preferredContact is an optional field -->
-                <span class="seperator">|</span>
-                <span class="infoChild">{viewManager.preferredContact}<img class="infoChild infoContact" src="/{viewManager.preferredContact}.png" alt="favorite team"/></span>
-            {/if}
-            <!-- <span class="infoChild">{viewManager.preferredContact}</span> -->
-            {#if viewManager.favoriteTeam}
-                <!-- favoriteTeam is an optional field -->
-                <span class="seperator">|</span>
-                <img class="infoChild infoTeam" src="https://sleepercdn.com/images/team_logos/nfl/{viewManager.favoriteTeam}.png" alt="favorite team"/>
-            {/if}
-            {#if commissioner}
-                <span class="seperator">|</span>
-                <div class="infoChild commissionerBadge">
-                    <span>C</span>
-                </div>
-            {/if}
-        </div>
+       <div class="profileHero">
 
-        <div class="managerNav upper">
-            <Group variant="outlined">
-                {#if manager == 0}
-                    <Button disabled class="selectionButtons" onclick={() => changeManager(parseInt(manager) - 1, true)} variant="outlined">
-                        <Label>Previous Manager</Label>
-                    </Button>
-                {:else}
-                    <Button class="selectionButtons" onclick={() => changeManager(parseInt(manager) - 1, true)} variant="outlined">
-                        <Label>Previous Manager</Label>
-                    </Button>
-                {/if}
-                <Button class="selectionButtons" onclick={() => goto('/managers')} variant="outlined">
-                    <Label>All Managers</Label>
-                </Button>
-                {#if manager == managers.length - 1}
-                    <Button disabled class="selectionButtons" onclick={() => changeManager(parseInt(manager) + 1, true)} variant="outlined">
-                        <Label>Next Manager</Label>
-                    </Button>
-                {:else}
-                    <Button class="selectionButtons" onclick={() => changeManager(parseInt(manager) + 1, true)} variant="outlined">
-                        <Label>Next Manager</Label>
-                    </Button>
-                {/if}
-            </Group>
-        </div>
+    <img
+        class="managerPhoto"
+        src="{viewManager.photo}"
+        alt="{viewManager.name}"
+    />
+
+    <div class="profileStatus">
+        <span class="statusDot"></span>
+        2026 · Pre-Draft
+    </div>
+
+    <h2 class="profileName">
+        {viewManager.name}
+
+        {#if commissioner}
+            <span class="commissionerBadge">
+                <span>C</span>
+            </span>
+        {/if}
+    </h2>
+
+    <div class="teamSub">
+        {coOwners ? 'Co-' : ''}Manager of
+        <i>
+            {getTeamNameFromTeamManagers(
+                leagueTeamManagers,
+                rosterID,
+                year
+            )}
+        </i>
+    </div>
+
+    <div class="profileMeta">
+
+        {#if viewManager.location}
+            <div class="metaItem">
+                📍 {viewManager.location}
+            </div>
+        {/if}
+
+        {#if viewManager.managerID && datesActive.start}
+
+            <div class="metaItem">
+                🗓️ Since '{datesActive.start.toString().substr(2)}
+            </div>
+
+        {:else if viewManager.fantasyStart}
+
+            <div class="metaItem">
+                🏈 Fantasy since '{viewManager.fantasyStart.toString().substr(2)}
+            </div>
+
+        {/if}
+
+        {#if viewManager.preferredContact}
+
+            <div class="metaItem">
+
+                <img
+                    class="infoContact"
+                    src="/{viewManager.preferredContact}.png"
+                    alt="{viewManager.preferredContact}"
+                />
+
+                {viewManager.preferredContact}
+
+            </div>
+
+        {/if}
+
+        {#if viewManager.favoriteTeam}
+
+            <div class="metaItem">
+
+                <img
+                    class="metaTeam"
+                    src="https://sleepercdn.com/images/team_logos/nfl/{viewManager.favoriteTeam}.png"
+                    alt="Favorite NFL team"
+                />
+
+                Favorite Team
+
+            </div>
+
+        {/if}
+
+    </div>
+
+</div>
+
+<div class="profileNav">
+
+    <Group variant="outlined">
+
+        {#if manager == 0}
+
+            <Button
+                disabled
+                class="selectionButtons"
+                onclick={() => changeManager(parseInt(manager) - 1, true)}
+                variant="outlined"
+            >
+                <Label>← Previous</Label>
+            </Button>
+
+        {:else}
+
+            <Button
+                class="selectionButtons"
+                onclick={() => changeManager(parseInt(manager) - 1, true)}
+                variant="outlined"
+            >
+                <Label>← Previous</Label>
+            </Button>
+
+        {/if}
+
+        <Button
+            class="selectionButtons"
+            onclick={() => goto('/managers')}
+            variant="outlined"
+        >
+            <Label>All Teams</Label>
+        </Button>
+
+        {#if manager == managers.length - 1}
+
+            <Button
+                disabled
+                class="selectionButtons"
+                onclick={() => changeManager(parseInt(manager) + 1, true)}
+                variant="outlined"
+            >
+                <Label>Next →</Label>
+            </Button>
+
+        {:else}
+
+            <Button
+                class="selectionButtons"
+                onclick={() => changeManager(parseInt(manager) + 1, true)}
+                variant="outlined"
+            >
+                <Label>Next →</Label>
+            </Button>
+
+        {/if}
+
+    </Group>
+
+</div>
 
         <p class="bio">{@html viewManager.bio}</p>
 

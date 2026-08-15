@@ -37,6 +37,11 @@ export const tabs = [
                 dest: '/rosters',
             },
             {
+                icon: 'person_search',
+                label: 'Players',
+                dest: '/players',
+            },
+            {
                 icon: 'groups',
                 label: 'Managers',
                 dest: '/managers',
@@ -58,7 +63,7 @@ export const tabs = [
             },
             {
                 icon: 'emoji_events',
-                label: 'Trophy Room',
+                label: 'History',
                 dest: '/awards',
             },
             {
@@ -77,11 +82,5 @@ export const tabs = [
                 dest: `https://sleeper.app/leagues/${leagueID}`,
             },
         ]
-    },
-    {
-        icon: 'lightbulb',
-        label: 'Resources',
-        dest: '/resources',
-        key: 'resources',
     },
 ];

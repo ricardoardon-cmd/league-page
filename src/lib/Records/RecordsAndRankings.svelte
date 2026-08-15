@@ -1,6 +1,13 @@
 <script>
     import Button, { Group, Label } from '@smui/button';
-    import { generateGraph, gotoManager, round } from '$lib/utils/helper';
+    import {
+        generateGraph,
+        gotoManager,
+        round,
+        getLeagueData,
+        loadPlayers
+    } from '$lib/utils/helper';
+    import { leagueID } from '$lib/utils/leagueInfo';
 
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
 	import RecordTeam from './RecordTeam.svelte';
@@ -223,39 +230,359 @@
     
     let innerWidth;
 
+    let expandedRecordKey = null;
+    let expandedMatchup = null;
+    let expandedYear = null;
+    let expandedWeek = null;
+    let matchupLoading = false;
+    let matchupError = '';
+    let playersInfo = null;
+    let MatchupComponent = null;
+
+    const getLeagueIDForYear = async (targetYear) => {
+        let currentLeagueID = leagueID;
+
+        while (currentLeagueID && currentLeagueID != 0) {
+            const leagueData = await getLeagueData(currentLeagueID);
+
+            if (String(leagueData.season) === String(targetYear)) {
+                return currentLeagueID;
+            }
+
+            currentLeagueID = leagueData.previous_league_id;
+        }
+
+        return null;
+    };
+
+    const buildMatchup = (weekData, homeRosterID, awayRosterID) => {
+        if (!Array.isArray(weekData)) return null;
+
+        const homeRaw = weekData.find(
+            (entry) => Number(entry.roster_id) === Number(homeRosterID)
+        );
+
+        const awayRaw = weekData.find(
+            (entry) => Number(entry.roster_id) === Number(awayRosterID)
+        );
+
+        if (!homeRaw || !awayRaw) return null;
+
+        if (
+            homeRaw.matchup_id == null ||
+            awayRaw.matchup_id == null ||
+            homeRaw.matchup_id !== awayRaw.matchup_id
+        ) {
+            return null;
+        }
+
+        return [homeRaw, awayRaw].map((entry) => ({
+            roster_id: entry.roster_id,
+            starters: entry.starters || [],
+            points: entry.starters_points || []
+        }));
+    };
+
+    const buildSingleTeamMatchup = (weekData, rosterID) => {
+        if (!Array.isArray(weekData)) return null;
+
+        const teamRaw = weekData.find(
+            (entry) => Number(entry.roster_id) === Number(rosterID)
+        );
+
+        if (!teamRaw || teamRaw.matchup_id == null) return null;
+
+        const opponentRaw = weekData.find(
+            (entry) =>
+                Number(entry.roster_id) !== Number(rosterID) &&
+                entry.matchup_id === teamRaw.matchup_id
+        );
+
+        if (!opponentRaw) return null;
+
+        return [teamRaw, opponentRaw].map((entry) => ({
+            roster_id: entry.roster_id,
+            starters: entry.starters || [],
+            points: entry.starters_points || []
+        }));
+    };
+
+    const toggleRecordMatchup = async (record, type, index) => {
+        const targetYear = record.year || prefix;
+        const targetWeek = Number(record.week);
+        const recordKey = `${type}-${targetYear}-${record.week}-${index}`;
+
+        if (expandedRecordKey === recordKey) {
+            expandedRecordKey = null;
+            expandedMatchup = null;
+            matchupError = '';
+            return;
+        }
+
+        expandedRecordKey = recordKey;
+        expandedMatchup = null;
+        matchupError = '';
+
+        if (!Number.isFinite(targetWeek)) {
+            matchupError = 'Full lineup details are not available from this record row.';
+            return;
+        }
+
+        matchupLoading = true;
+
+        try {
+            if (!playersInfo) {
+                playersInfo = await loadPlayers();
+            }
+
+            if (!MatchupComponent) {
+                const matchupModule = await import('$lib/Matchups/Matchup.svelte');
+                MatchupComponent = matchupModule.default;
+            }
+
+            const historicalLeagueID = await getLeagueIDForYear(targetYear);
+
+            if (!historicalLeagueID) {
+                throw new Error(`Could not find the ${targetYear} Sleeper league.`);
+            }
+
+            const response = await fetch(
+                `https://api.sleeper.app/v1/league/${historicalLeagueID}/matchups/${targetWeek}`
+            );
+
+            if (!response.ok) {
+                throw new Error(`Sleeper matchup request failed (${response.status}).`);
+            }
+
+            const weekData = await response.json();
+
+            if (record.home?.rosterID && record.away?.rosterID) {
+                expandedMatchup = buildMatchup(
+                    weekData,
+                    record.home.rosterID,
+                    record.away.rosterID
+                );
+            } else if (record.rosterID) {
+                expandedMatchup = buildSingleTeamMatchup(
+                    weekData,
+                    record.rosterID
+                );
+            }
+
+            if (!expandedMatchup) {
+                throw new Error('Could not find the historical matchup for this record.');
+            }
+
+            expandedYear = targetYear;
+            expandedWeek = targetWeek;
+        } catch (error) {
+            console.error(error);
+            matchupError = error?.message || 'Unable to load this historical matchup.';
+            expandedMatchup = null;
+        } finally {
+            matchupLoading = false;
+        }
+    };
+
 </script>
 
 <svelte:window bind:innerWidth={innerWidth} />
 
 <style>
+.recordsHeader {
+    width: 95%;
+    max-width: 1000px;
+    margin: 30px auto 20px;
+    text-align: center;
+}
+
+.recordsEyebrow {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+.recordsHeader h2 {
+    margin: 6px 0 0;
+    font-size: 2.6rem;
+    font-weight: 800;
+}
+
+.recordsHeader p {
+    margin: 10px 0 0;
+    opacity: 0.65;
+}
+
+.recordQuickLinks {
+    width: 95%;
+    max-width: 1000px;
+    margin: 0 auto 30px;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.recordQuickCard {
+    display: block;
+    padding: 18px 10px;
+
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+
+    border-radius: 16px;
+    background: var(--fff);
+    border: 1px solid var(--ccc);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.recordQuickCard:hover {
+    transform: translateY(-2px);
+    border-color: var(--blueOne);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.09);
+}
+
+.quickIcon {
+    font-size: 1.4rem;
+}
+
+.quickTitle {
+    margin-top: 7px;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+@media (max-width: 700px) {
+    .recordsHeader h2 {
+        font-size: 2rem;
+    }
+
+    .recordQuickLinks {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+    @media (max-width: 900px) {
+        .fullFlex {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            width: 96%;
+        }
+    }
+
+    @media (max-width: 600px) {
+        :global(.recordTable) {
+            border-radius: 12px;
+        }
+
+        :global(.recordTable thead tr:first-child th) {
+            font-size: 0.82rem;
+            padding-top: 11px;
+            padding-bottom: 11px;
+        }
+
+        :global(.recordTable thead tr:nth-child(2) th) {
+            font-size: 0.62rem;
+            letter-spacing: 0.25px;
+        }
+
+        .fullFlex {
+            width: 98%;
+            margin-top: 22px;
+        }
+    }
     :global(.headerPrimary) {
-        background-color: var(--headerPrimary);
+        background: var(--f3f3f3);
+        color: inherit;
         text-align: center;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        border-bottom: 1px solid var(--ccc);
     }
 
     .italic {
         display: block;
-        font-style: italic;
-        font-size: 0.9em;
-        color: var(--g999);
+        margin-top: 3px;
+        font-style: normal;
+        font-size: 0.72em;
+        font-weight: 500;
+        opacity: 0.55;
     }
 
     :global(.recordTable) {
-        box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);
-        margin: 2em;
+        width: 100%;
+        margin: 0 !important;
+        border-radius: 16px;
+        overflow: hidden;
+        background: var(--fff);
+        border: 1px solid var(--ccc);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    }
+
+    :global(.recordTable table) {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    :global(.recordTable thead tr:first-child th) {
+        padding-top: 14px;
+        padding-bottom: 14px;
+        font-size: 0.95rem;
+    }
+
+    :global(.recordTable thead tr:nth-child(2) th) {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.45px;
+        text-transform: uppercase;
+        opacity: 0.65;
+        background: var(--fff);
+    }
+
+    :global(.recordTable tbody tr) {
+        transition: background-color 0.15s ease;
+    }
+
+    :global(.recordTable tbody tr:hover) {
+        background: var(--f3f3f3);
+    }
+
+    :global(.recordTable td) {
+        vertical-align: middle;
     }
 
     :global(.rankingTable) {
         display: table;
-        box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);
+        border-radius: 16px;
+        overflow: hidden;
+        background: var(--fff);
+        border: 1px solid var(--ccc);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
         margin: 2em auto 0.5em;
     }
 
     .fullFlex {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-around;
-        margin: 3em auto 5em;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        width: 95%;
+        max-width: 1100px;
+        margin: 30px auto 70px;
+        align-items: start;
+    }
+
+    .recordAnchor {
+        width: 100%;
+        min-width: 0;
+        scroll-margin-top: 130px;
     }
 
     .rankingHolder {
@@ -459,65 +786,324 @@
     }
 
     /* END ranking table resizing */
+
+    .recordMatchupRow {
+        cursor: pointer;
+    }
+
+    .recordMatchupRow:hover {
+        background: var(--f3f3f3);
+    }
+
+    .recordMatchupHint {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.65em;
+        font-style: italic;
+        opacity: 0.55;
+    }
+
+   :global(.recordDetailCell) {
+    padding: 0 !important;
+    border-bottom: 1px solid var(--borderOverride);
+    overflow: visible !important;
+}
+
+.recordDetail {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+
+    padding: 12px 8px 14px;
+    background: var(--fff);
+    border-top: 3px solid var(--blueOne);
+
+    overflow-x: hidden;
+    font-size: 0.82em;
+}
+
+.recordDetail :global(.material-icons) {
+    font-size: 0.9em;
+}
+
+@media (max-width: 700px) {
+    .recordDetail {
+        padding: 9px 3px 12px;
+        font-size: 0.74em;
+    }
+}
+    .recordDetailHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .recordDetailTitle {
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        opacity: 0.65;
+    }
+
+    .recordClose {
+        border: 1px solid var(--ccc);
+        background: var(--f3f3f3);
+        color: inherit;
+        border-radius: 999px;
+        padding: 6px 11px;
+        font: inherit;
+        font-size: 0.72rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .recordLoading,
+    .recordError {
+        padding: 18px 8px;
+        text-align: center;
+        opacity: 0.7;
+    }
+
+    @media (max-width: 600px) {
+        .recordDetail {
+            padding: 12px 6px 16px;
+        }
+
+        .recordDetailHeader {
+            padding: 0 6px;
+        }
+    }
+
 </style>
 
-<h4>{prefix} Records</h4>
+<div class="recordsHeader">
+
+    <div class="recordsEyebrow">
+        GGL RECORD BOOK
+    </div>
+
+    <h2>
+        🏅 {prefix} Records
+    </h2>
+
+    <p>
+        Historic league highs, lows and unforgettable performances
+    </p>
+
+</div>
+
+<div class="recordQuickLinks">
+
+    {#if weekRecords?.length}
+        <a class="recordQuickCard" href="#scoring-highs">
+            <div class="quickIcon">🔥</div>
+            <div class="quickTitle">Scoring Highs</div>
+        </a>
+    {/if}
+
+    {#if weekLows?.length}
+        <a class="recordQuickCard" href="#scoring-lows">
+            <div class="quickIcon">🧊</div>
+            <div class="quickTitle">Scoring Lows</div>
+        </a>
+    {/if}
+
+    {#if blowouts?.length}
+        <a class="recordQuickCard" href="#blowouts">
+            <div class="quickIcon">💥</div>
+            <div class="quickTitle">Largest Blowouts</div>
+        </a>
+    {/if}
+
+    {#if closestMatchups?.length}
+        <a class="recordQuickCard" href="#closest-wins">
+            <div class="quickIcon">🤏</div>
+            <div class="quickTitle">Closest Wins</div>
+        </a>
+    {/if}
+
+</div>
 
 <div class="fullFlex">
     {#if weekRecords && weekRecords.length}
-        <DataTable class="recordTable">
+        <div id="scoring-highs" class="recordAnchor">
+            <DataTable class="recordTable">
             <Head>
                 <Row class="rTableHeader">
                     <Cell class="header headerPrimary" colspan=4>{prefix} {key == "playoffData" ? "Playoff " : ""}Single Week Scoring Records</Cell>
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
-                    <Cell class="header">Manager</Cell>
+                    <Cell class="header">Team</Cell>
                     <Cell class="header">Week</Cell>
                     <Cell class="header">Total Points</Cell>
                 </Row>
             </Head>
             <Body>
                 {#each weekRecords as leagueWeekRecord, ix}
-                    <Row>
+                    {@const scoringHighKey = `scoring-high-${leagueWeekRecord.year || prefix}-${leagueWeekRecord.week}-${ix}`}
+
+                    <Row
+                        class="recordMatchupRow"
+                        onclick={() => toggleRecordMatchup(leagueWeekRecord, 'scoring-high', ix)}
+                    >
                         <Cell class="rank">{ix + 1}</Cell>
-                        <Cell class="cellName" onclick={() => gotoManager({year: leagueWeekRecord.year || prefix, leagueTeamManagers, rosterID: leagueWeekRecord.rosterID})}>
-                            <RecordTeam {leagueTeamManagers} rosterID={leagueWeekRecord.rosterID} year={allTime ? leagueWeekRecord.year : prefix} />
+                        <Cell class="cellName">
+                            <RecordTeam
+                                {leagueTeamManagers}
+                                rosterID={leagueWeekRecord.rosterID}
+                                year={allTime ? leagueWeekRecord.year : prefix}
+                            />
+                            <span class="recordMatchupHint">Click to view full matchup</span>
                         </Cell>
-                        <Cell>{allTime ? leagueWeekRecord.year + " " : "" }{key == "regularSeasonData" ? "Week " : ""}{leagueWeekRecord.week}</Cell>
+                        <Cell>
+                            {allTime ? leagueWeekRecord.year + " " : ""}
+                            {key == "regularSeasonData" ? "Week " : ""}
+                            {leagueWeekRecord.week}
+                        </Cell>
                         <Cell>{round(leagueWeekRecord.fpts)}</Cell>
                     </Row>
+
+                    {#if expandedRecordKey === scoringHighKey}
+                        <Row>
+                            <Cell class="recordDetailCell" colspan=4>
+                                <div class="recordDetail">
+                                    <div class="recordDetailHeader">
+                                        <div class="recordDetailTitle">
+                                            {leagueWeekRecord.year || prefix} Week {leagueWeekRecord.week} · Full Matchup
+                                        </div>
+                                        <button
+                                            class="recordClose"
+                                            type="button"
+                                            onclick={(event) => {
+                                                event.stopPropagation();
+                                                expandedRecordKey = null;
+                                                expandedMatchup = null;
+                                                matchupError = '';
+                                            }}
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+
+                                    {#if matchupLoading}
+                                        <div class="recordLoading">Loading historical lineup...</div>
+                                    {:else if matchupError}
+                                        <div class="recordError">{matchupError}</div>
+                                    {:else if expandedMatchup && playersInfo?.players && MatchupComponent}
+                                        <svelte:component
+                                            this={MatchupComponent}
+                                            key={`record-scoring-high-${expandedYear}-${expandedWeek}-${ix}`}
+                                            ix={ix}
+                                            active={ix}
+                                            year={expandedYear}
+                                            matchup={expandedMatchup}
+                                            players={playersInfo.players}
+                                            displayWeek={expandedWeek}
+                                            expandOverride={true}
+                                            {leagueTeamManagers}
+                                        />
+                                    {/if}
+                                </div>
+                            </Cell>
+                        </Row>
+                    {/if}
                 {/each}
             </Body>
-        </DataTable>
+            </DataTable>
+        </div>
     {/if}
 
     {#if weekLows && weekLows.length}
-        <DataTable class="recordTable">
+        <div id="scoring-lows" class="recordAnchor">
+            <DataTable class="recordTable">
             <Head>
                 <Row>
                     <Cell class="header headerPrimary" colspan=4>{prefix} {key == "playoffData" ? "Playoff " : ""}Single Week Scoring Lows</Cell>
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
-                    <Cell class="header">Manager</Cell>
+                    <Cell class="header">Team</Cell>
                     <Cell class="header">Week</Cell>
                     <Cell class="header">Total Points</Cell>
                 </Row>
             </Head>
             <Body>
                 {#each weekLows as leagueWeekLow, ix}
-                    <Row>
+                    {@const scoringLowKey = `scoring-low-${leagueWeekLow.year || prefix}-${leagueWeekLow.week}-${ix}`}
+
+                    <Row
+                        class="recordMatchupRow"
+                        onclick={() => toggleRecordMatchup(leagueWeekLow, 'scoring-low', ix)}
+                    >
                         <Cell class="rank">{ix + 1}</Cell>
-                        <Cell class="cellName" onclick={() => gotoManager({year: leagueWeekLow.year || prefix, leagueTeamManagers, rosterID: leagueWeekLow.rosterID})}>
-                            <RecordTeam {leagueTeamManagers} rosterID={leagueWeekLow.rosterID} year={allTime ? leagueWeekLow.year : prefix} />
+                        <Cell class="cellName">
+                            <RecordTeam
+                                {leagueTeamManagers}
+                                rosterID={leagueWeekLow.rosterID}
+                                year={allTime ? leagueWeekLow.year : prefix}
+                            />
+                            <span class="recordMatchupHint">Click to view full matchup</span>
                         </Cell>
-                        <Cell>{allTime ? leagueWeekLow.year + " " : "" }{key == "regularSeasonData" ? "Week " : ""}{leagueWeekLow.week}</Cell>
+                        <Cell>
+                            {allTime ? leagueWeekLow.year + " " : ""}
+                            {key == "regularSeasonData" ? "Week " : ""}
+                            {leagueWeekLow.week}
+                        </Cell>
                         <Cell>{round(leagueWeekLow.fpts)}</Cell>
                     </Row>
+
+                    {#if expandedRecordKey === scoringLowKey}
+                        <Row>
+                            <Cell class="recordDetailCell" colspan=4>
+                                <div class="recordDetail">
+                                    <div class="recordDetailHeader">
+                                        <div class="recordDetailTitle">
+                                            {leagueWeekLow.year || prefix} Week {leagueWeekLow.week} · Full Matchup
+                                        </div>
+                                        <button
+                                            class="recordClose"
+                                            type="button"
+                                            onclick={(event) => {
+                                                event.stopPropagation();
+                                                expandedRecordKey = null;
+                                                expandedMatchup = null;
+                                                matchupError = '';
+                                            }}
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+
+                                    {#if matchupLoading}
+                                        <div class="recordLoading">Loading historical lineup...</div>
+                                    {:else if matchupError}
+                                        <div class="recordError">{matchupError}</div>
+                                    {:else if expandedMatchup && playersInfo?.players && MatchupComponent}
+                                        <svelte:component
+                                            this={MatchupComponent}
+                                            key={`record-scoring-low-${expandedYear}-${expandedWeek}-${ix}`}
+                                            ix={ix}
+                                            active={ix}
+                                            year={expandedYear}
+                                            matchup={expandedMatchup}
+                                            players={playersInfo.players}
+                                            displayWeek={expandedWeek}
+                                            expandOverride={true}
+                                            {leagueTeamManagers}
+                                        />
+                                    {/if}
+                                </div>
+                            </Cell>
+                        </Row>
+                    {/if}
                 {/each}
             </Body>
-        </DataTable>
+            </DataTable>
+        </div>
     {/if}
 
     {#if allTime && key == "regularSeasonData"}
@@ -581,7 +1167,8 @@
     {/if}
 
     {#if blowouts && blowouts.length}
-        <DataTable class="recordTable">
+        <div id="blowouts" class="recordAnchor">
+            <DataTable class="recordTable">
             <Head>
                 <Row>
                     <Cell class="header headerPrimary" colspan=4>{prefix} Largest {key == "playoffData" ? "Playoff " : ""}Blowouts</Cell>
@@ -595,31 +1182,82 @@
             </Head>
             <Body>
                 {#each blowouts as blowout, ix}
-                    <Row>
+                    {@const blowoutKey = `blowout-${blowout.year || prefix}-${blowout.week}-${ix}`}
+
+                    <Row
+                        class="recordMatchupRow"
+                        onclick={() => toggleRecordMatchup(blowout, 'blowout', ix)}
+                    >
                         <Cell class="rank">{ix + 1}</Cell>
                         <Cell class="cellName differentialName">
                             <div class="vsRecord">
-                                <div onclick={() => gotoManager({year: blowout.year || prefix, leagueTeamManagers, rosterID: blowout.home.rosterID})}>
+                                <div>
                                     <RecordTeam {leagueTeamManagers} rosterID={blowout.home.rosterID} year={allTime ? blowout.year : prefix} compressed={true} points={round(blowout.home.fpts)} />
                                 </div>
-                                <p class="vs">
-                                    vs
-                                </p>
-                                <div onclick={() => gotoManager({year: blowout.year || prefix, leagueTeamManagers, rosterID: blowout.away.rosterID})}>
+                                <p class="vs">vs</p>
+                                <div>
                                     <RecordTeam {leagueTeamManagers} rosterID={blowout.away.rosterID} year={allTime ? blowout.year : prefix} compressed={true} points={round(blowout.away.fpts)} />
                                 </div>
                             </div>
+                            <span class="recordMatchupHint">Click to view full matchup</span>
                         </Cell>
                         <Cell>{allTime ? blowout.year + " " : "" }{key == "regularSeasonData" ? "Week " : ""}{blowout.week}</Cell>
                         <Cell>{round(blowout.differential)}</Cell>
                     </Row>
+
+                    {#if expandedRecordKey === blowoutKey}
+                        <Row>
+                            <Cell class="recordDetailCell" colspan=4>
+                                <div class="recordDetail">
+                                    <div class="recordDetailHeader">
+                                        <div class="recordDetailTitle">
+                                            {blowout.year || prefix} Week {blowout.week} · Full Matchup
+                                        </div>
+                                        <button
+                                            class="recordClose"
+                                            type="button"
+                                            onclick={(event) => {
+                                                event.stopPropagation();
+                                                expandedRecordKey = null;
+                                                expandedMatchup = null;
+                                                matchupError = '';
+                                            }}
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+
+                                    {#if matchupLoading}
+                                        <div class="recordLoading">Loading historical lineup...</div>
+                                    {:else if matchupError}
+                                        <div class="recordError">{matchupError}</div>
+                                    {:else if expandedMatchup && playersInfo?.players && MatchupComponent}
+                                        <svelte:component
+                                            this={MatchupComponent}
+                                            key={`record-blowout-${expandedYear}-${expandedWeek}-${ix}`}
+                                            ix={ix}
+                                            active={ix}
+                                            year={expandedYear}
+                                            matchup={expandedMatchup}
+                                            players={playersInfo.players}
+                                            displayWeek={expandedWeek}
+                                            expandOverride={true}
+                                            {leagueTeamManagers}
+                                        />
+                                    {/if}
+                                </div>
+                            </Cell>
+                        </Row>
+                    {/if}
                 {/each}
             </Body>
-        </DataTable>
+            </DataTable>
+        </div>
     {/if}
 
     {#if closestMatchups && closestMatchups.length}
-        <DataTable class="recordTable">
+        <div id="closest-wins" class="recordAnchor">
+            <DataTable class="recordTable">
             <Head>
                 <Row>
                     <Cell class="header headerPrimary" colspan=4>{prefix} Narrowest {key == "playoffData" ? "Playoff " : ""}Wins</Cell>
@@ -633,27 +1271,77 @@
             </Head>
             <Body>
                 {#each closestMatchups as closestMatchup, ix}
-                    <Row>
+                    {@const closestKey = `closest-${closestMatchup.year || prefix}-${closestMatchup.week}-${ix}`}
+
+                    <Row
+                        class="recordMatchupRow"
+                        onclick={() => toggleRecordMatchup(closestMatchup, 'closest', ix)}
+                    >
                         <Cell class="rank">{ix + 1}</Cell>
                         <Cell class="cellName differentialName">
                             <div class="vsRecord">
-                                <div onclick={() => gotoManager({year: closestMatchup.year || prefix, leagueTeamManagers, rosterID: closestMatchup.home.rosterID})}>
+                                <div>
                                     <RecordTeam {leagueTeamManagers} rosterID={closestMatchup.home.rosterID} year={allTime ? closestMatchup.year : prefix} compressed={true} points={round(closestMatchup.home.fpts)} />
                                 </div>
-                                <p class="vs">
-                                    vs
-                                </p>
-                                <div onclick={() => gotoManager({year: closestMatchup.year || prefix, leagueTeamManagers, rosterID: closestMatchup.away.rosterID})}>
+                                <p class="vs">vs</p>
+                                <div>
                                     <RecordTeam {leagueTeamManagers} rosterID={closestMatchup.away.rosterID} year={allTime ? closestMatchup.year : prefix} compressed={true} points={round(closestMatchup.away.fpts)} />
                                 </div>
                             </div>
+                            <span class="recordMatchupHint">Click to view full matchup</span>
                         </Cell>
                         <Cell>{allTime ? closestMatchup.year + " " : "" }{key == "regularSeasonData" ? "Week " : ""}{closestMatchup.week}</Cell>
                         <Cell>{round(closestMatchup.differential)}</Cell>
                     </Row>
+
+                    {#if expandedRecordKey === closestKey}
+                        <Row>
+                            <Cell class="recordDetailCell" colspan=4>
+                                <div class="recordDetail">
+                                    <div class="recordDetailHeader">
+                                        <div class="recordDetailTitle">
+                                            {closestMatchup.year || prefix} Week {closestMatchup.week} · Full Matchup
+                                        </div>
+                                        <button
+                                            class="recordClose"
+                                            type="button"
+                                            onclick={(event) => {
+                                                event.stopPropagation();
+                                                expandedRecordKey = null;
+                                                expandedMatchup = null;
+                                                matchupError = '';
+                                            }}
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+
+                                    {#if matchupLoading}
+                                        <div class="recordLoading">Loading historical lineup...</div>
+                                    {:else if matchupError}
+                                        <div class="recordError">{matchupError}</div>
+                                    {:else if expandedMatchup && playersInfo?.players && MatchupComponent}
+                                        <svelte:component
+                                            this={MatchupComponent}
+                                            key={`record-closest-${expandedYear}-${expandedWeek}-${ix}`}
+                                            ix={ix}
+                                            active={ix}
+                                            year={expandedYear}
+                                            matchup={expandedMatchup}
+                                            players={playersInfo.players}
+                                            displayWeek={expandedWeek}
+                                            expandOverride={true}
+                                            {leagueTeamManagers}
+                                        />
+                                    {/if}
+                                </div>
+                            </Cell>
+                        </Row>
+                    {/if}
                 {/each}
             </Body>
-        </DataTable>
+            </DataTable>
+        </div>
     {/if}
 </div>
 

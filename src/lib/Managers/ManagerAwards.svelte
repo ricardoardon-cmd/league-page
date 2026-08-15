@@ -5,7 +5,14 @@
     export let awards, records, rosterID, tookOver, leagueTeamManagers, managerID;
 
     let displayAwards = [];
-
+let careerStats = {
+    championships: 0,
+    awards: 0,
+    wins: 0,
+    losses: 0,
+    ties: 0,
+    playoffAppearances: 0
+};
     const capitalizeFirstLetter = (string) => {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
@@ -180,6 +187,64 @@
                 }
             }
         }
+let championships = 0;
+    let totalAwards = 0;
+
+    for (const podium of awards) {
+        if (checkIfDeserves(podium.champion, cRosterID, podium.year)) {
+            championships++;
+            totalAwards++;
+        }
+
+        if (checkIfDeserves(podium.second, cRosterID, podium.year)) {
+            totalAwards++;
+        }
+
+        if (checkIfDeserves(podium.third, cRosterID, podium.year)) {
+            totalAwards++;
+        }
+
+        if (podium.divisions) {
+            for (const division of podium.divisions) {
+                if (checkIfDeserves(division.rosterID, cRosterID, podium.year)) {
+                    totalAwards++;
+                }
+            }
+        }
+
+        if (checkIfDeserves(podium.toilet, cRosterID, podium.year)) {
+            totalAwards++;
+        }
+    }
+
+    const findManagerRecord = (recordSet) => {
+    if (!recordSet?.leagueManagerRecords) return null;
+
+    for (const key in recordSet.leagueManagerRecords) {
+        if (checkIfDeservesWithManagerID(key, cRosterID)) {
+            return recordSet.leagueManagerRecords[key];
+        }
+    }
+
+    return null;
+};
+
+const managerRecord = findManagerRecord(
+    records?.regularSeasonData
+);
+
+const playoffRecord = findManagerRecord(
+    records?.playoffData
+);
+
+    careerStats = {
+        championships,
+        awards: totalAwards,
+        wins: managerRecord?.wins || 0,
+        losses: managerRecord?.losses || 0,
+        ties: managerRecord?.ties || 0,
+        playoffAppearances: playoffRecord?.playoffAppearances || 0
+    };
     }
 
     $: computePodiums(rosterID);
@@ -214,6 +279,66 @@
 </script>
 
 <style>
+.careerStats {
+    width: 97%;
+    max-width: 800px;
+    margin: 25px auto 35px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.careerStat {
+    background: var(--fff);
+    border: 1px solid var(--ccc);
+    border-radius: 18px;
+    padding: 18px 10px;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.careerIcon {
+    font-size: 1.5rem;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.careerValue {
+    font-size: 1.7rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.careerLabel {
+    margin-top: 7px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+.careerSub {
+    margin-top: 4px;
+    font-size: 0.7rem;
+    opacity: 0.55;
+}
+
+@media (max-width: 600px) {
+    .careerStats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin: 20px auto 28px;
+    }
+
+    .careerStat {
+        padding: 15px 8px;
+    }
+
+    .careerValue {
+        font-size: 1.45rem;
+    }
+}
     .awardsCase {
         background-color: var(--fff);
         padding: 0 0 2em;
@@ -339,7 +464,57 @@
 
 
 </style>
+<div class="careerStats">
 
+    <div class="careerStat">
+        <div class="careerIcon">🏆</div>
+
+        <div class="careerValue">
+            {careerStats.championships}
+        </div>
+
+        <div class="careerLabel">
+            Championships
+        </div>
+    </div>
+
+    <div class="careerStat">
+        <div class="careerIcon">🥇</div>
+
+        <div class="careerValue">
+            {careerStats.awards}
+        </div>
+
+        <div class="careerLabel">
+            Awards
+        </div>
+    </div>
+
+    <div class="careerStat">
+        <div class="careerIcon">📊</div>
+
+        <div class="careerValue">
+            {careerStats.wins}-{careerStats.losses}{careerStats.ties ? `-${careerStats.ties}` : ''}
+        </div>
+
+        <div class="careerLabel">
+            All-Time Record
+        </div>
+    </div>
+
+    <div class="careerStat">
+        <div class="careerIcon">🎯</div>
+
+        <div class="careerValue">
+            {careerStats.playoffAppearances}
+        </div>
+
+        <div class="careerLabel">
+            Playoff Appearances
+        </div>
+    </div>
+
+</div>
 <div class="awardsCase">
     <h3>Team Awards & Records</h3>
     <div class="awardsCaseInner">
