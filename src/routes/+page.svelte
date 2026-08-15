@@ -96,24 +96,47 @@
     /* HERO */
 
     .hero {
-        background: linear-gradient(
-            135deg,
-            var(--blueOne),
-            #182b49
-        );
-        color: white;
-        border-radius: 18px;
-        padding: 35px;
-        margin-bottom: 25px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
+    position: relative;
+
+    min-height: 310px;
+
+    background:
+        linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.72) 0%,
+            rgba(0, 0, 0, 0.20) 55%,
+            rgba(0, 0, 0, 0.10) 100%
+        ),
+        url('/league-photo.jpg');
+
+    background-size: cover;
+    background-position: center;
+
+    color: white;
+
+    border-radius: 18px;
+
+    padding: 35px;
+
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 8px 25px
+        rgba(0, 0, 0, 0.18);
+
+    overflow: hidden;
+}
 
     .heroTop {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-    }
+    min-height: 240px;
+
+    display: flex;
+
+    justify-content: flex-start;
+    align-items: flex-end;
+
+    position: relative;
+}
 
     .hero h1 {
         margin: 0;
@@ -128,14 +151,38 @@
         font-size: 1.05rem;
     }
 
-    .status {
-        background: rgba(255, 255, 255, 0.14);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 12px 18px;
-        border-radius: 12px;
-        text-align: center;
-        min-width: 130px;
+    .hero h1,
+    .hero p {
+        text-shadow:
+            0 2px 10px
+            rgba(0, 0, 0, 0.75);
     }
+
+    .status {
+    position: absolute;
+
+    top: 0;
+    right: 0;
+
+    background:
+        rgba(0, 0, 0, 0.42);
+
+    backdrop-filter: blur(8px);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.28);
+
+    padding: 12px 18px;
+
+    border-radius: 12px;
+
+    text-align: center;
+
+    min-width: 130px;
+
+    color: white;
+}
 
     .statusLabel {
         display: block;
@@ -168,15 +215,7 @@
         box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
         border: 1px solid #e5e5e5;
     }
-.leagueBadge {
-    width: 48px;
-    height: 48px;
-    object-fit: cover;
-    border-radius: 50%;
-    display: block;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-}
-    .statIcon {
+.    .statIcon {
         font-size: 1.5rem;
     }
 leagueBadge {
@@ -390,13 +429,18 @@ leagueBadge {
         }
 
         .hero {
-            padding: 25px 20px;
+            min-height: 230px;
+            padding: 20px;
             border-radius: 14px;
+            background-position: center;
         }
 
         .heroTop {
-            flex-direction: column;
+            min-height: 190px;
+            display: flex;
+            justify-content: flex-end;
             align-items: flex-start;
+            flex-direction: column;
         }
 
         .hero h1 {
@@ -404,8 +448,20 @@ leagueBadge {
         }
 
         .status {
-            width: 100%;
+            top: 0;
+            right: 0;
+            width: auto;
+            min-width: 105px;
+            padding: 8px 11px;
             box-sizing: border-box;
+        }
+
+        .statusLabel {
+            font-size: 0.62rem;
+        }
+
+        .statusValue {
+            font-size: 0.9rem;
         }
 
         .stats {
