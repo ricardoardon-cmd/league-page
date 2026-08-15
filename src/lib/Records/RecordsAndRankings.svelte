@@ -1051,6 +1051,519 @@
         padding: 12px 8px !important;
     }
 }
+
+/* =========================================================
+   MOBILE - REMAINING RECORD TABLES
+   Matches the Scoring Highs mobile layout
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    /*
+     * Force every record table in the top record section
+     * onto its own full-width row on mobile.
+     */
+    .fullFlex {
+        grid-template-columns: 1fr !important;
+        gap: 16px;
+        width: 98%;
+    }
+
+    .recordAnchor,
+    .scoringLowAnchor,
+    .blowoutAnchor,
+    .closestAnchor {
+        grid-column: 1 / -1;
+        width: 100%;
+        min-width: 0;
+    }
+
+    :global(.scoringLowTable),
+    :global(.seasonHighTable),
+    :global(.seasonLowTable),
+    :global(.blowoutTable),
+    :global(.closestTable) {
+        width: 100%;
+        min-width: 0;
+    }
+
+    :global(.scoringLowTable table),
+    :global(.seasonHighTable table),
+    :global(.seasonLowTable table),
+    :global(.blowoutTable table),
+    :global(.closestTable table) {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
+    }
+
+
+    /* -----------------------------------------------------
+       SCORING LOWS
+       rank | team | week | points
+       ----------------------------------------------------- */
+
+    :global(
+        .scoringLowTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(1)
+    ) {
+        width: 5%;
+    }
+
+    :global(
+        .scoringLowTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(2)
+    ) {
+        width: 51%;
+        text-align: left;
+        transform: translateX(-10px);
+    }
+
+    :global(
+        .scoringLowTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(3)
+    ) {
+        width: 25%;
+    }
+
+    :global(
+        .scoringLowTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(4)
+    ) {
+        width: 19%;
+    }
+
+    :global(.scoringLowTable th) {
+        font-size: 0.7rem !important;
+        padding: 8px 4px !important;
+    }
+
+    :global(
+        .scoringLowTable
+        tbody
+        tr.recordMatchupRow
+        td
+    ) {
+        font-size: 0.72rem !important;
+        padding: 8px 4px !important;
+    }
+
+    :global(
+        .scoringLowTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(1)
+    ) {
+        padding-right: 0 !important;
+    }
+
+    :global(
+        .scoringLowTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(2)
+    ) {
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+        transform: translateX(-10px);
+    }
+
+    :global(
+        .scoringLowTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(3)
+    ) {
+        white-space: normal;
+        line-height: 1.25;
+        text-align: center;
+    }
+
+    :global(
+        .scoringLowTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(4)
+    ) {
+        white-space: nowrap;
+        text-align: center;
+        font-weight: 800;
+    }
+
+    .scoringLowAnchor .recordMatchupHint {
+        display: none;
+    }
+
+    :global(
+        .scoringLowTable
+        thead
+        tr:first-child
+        th
+    ) {
+        white-space: normal;
+        line-height: 1.3;
+        font-size: 0.82rem !important;
+        padding: 12px 8px !important;
+    }
+
+
+    /* -----------------------------------------------------
+       SEASON HIGH / LOW
+       rank | manager | year | points | ppg
+       ----------------------------------------------------- */
+
+    :global(.seasonHighTable th),
+    :global(.seasonLowTable th) {
+        font-size: 0.66rem !important;
+        padding: 7px 3px !important;
+    }
+
+    :global(.seasonHighTable td),
+    :global(.seasonLowTable td) {
+        font-size: 0.7rem !important;
+        padding: 7px 3px !important;
+    }
+
+    :global(
+        .seasonHighTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(1)
+    ),
+    :global(
+        .seasonLowTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(1)
+    ) {
+        width: 5%;
+    }
+
+    :global(
+        .seasonHighTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(2)
+    ),
+    :global(
+        .seasonLowTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(2)
+    ) {
+        width: 42%;
+        text-align: left;
+        transform: translateX(-8px);
+    }
+
+    :global(
+        .seasonHighTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(3)
+    ),
+    :global(
+        .seasonLowTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(3)
+    ) {
+        width: 16%;
+    }
+
+    :global(
+        .seasonHighTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(4)
+    ),
+    :global(
+        .seasonLowTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(4)
+    ) {
+        width: 22%;
+    }
+
+    :global(
+        .seasonHighTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(5)
+    ),
+    :global(
+        .seasonLowTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(5)
+    ) {
+        width: 15%;
+    }
+
+    :global(
+        .seasonHighTable
+        tbody
+        td:nth-child(2)
+    ),
+    :global(
+        .seasonLowTable
+        tbody
+        td:nth-child(2)
+    ) {
+        transform: translateX(-8px);
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+
+    :global(
+        .seasonHighTable
+        tbody
+        td:nth-child(3)
+    ),
+    :global(
+        .seasonLowTable
+        tbody
+        td:nth-child(3)
+    ),
+    :global(
+        .seasonHighTable
+        tbody
+        td:nth-child(4)
+    ),
+    :global(
+        .seasonLowTable
+        tbody
+        td:nth-child(4)
+    ),
+    :global(
+        .seasonHighTable
+        tbody
+        td:nth-child(5)
+    ),
+    :global(
+        .seasonLowTable
+        tbody
+        td:nth-child(5)
+    ) {
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    :global(
+        .seasonHighTable
+        thead
+        tr:first-child
+        th
+    ),
+    :global(
+        .seasonLowTable
+        thead
+        tr:first-child
+        th
+    ) {
+        white-space: normal;
+        line-height: 1.3;
+        font-size: 0.82rem !important;
+        padding: 12px 8px !important;
+    }
+
+
+    /* -----------------------------------------------------
+       BLOWOUTS / NARROWEST WINS
+       rank | matchup | week | differential
+       ----------------------------------------------------- */
+
+    :global(.blowoutTable th),
+    :global(.closestTable th) {
+        font-size: 0.66rem !important;
+        padding: 7px 3px !important;
+    }
+
+    :global(
+        .blowoutTable
+        tbody
+        tr.recordMatchupRow
+        td
+    ),
+    :global(
+        .closestTable
+        tbody
+        tr.recordMatchupRow
+        td
+    ) {
+        font-size: 0.69rem !important;
+        padding: 7px 3px !important;
+    }
+
+    :global(
+        .blowoutTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(1)
+    ),
+    :global(
+        .closestTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(1)
+    ) {
+        width: 5%;
+    }
+
+    :global(
+        .blowoutTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(2)
+    ),
+    :global(
+        .closestTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(2)
+    ) {
+        width: 48%;
+        text-align: left;
+        transform: translateX(-8px);
+    }
+
+    :global(
+        .blowoutTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(3)
+    ),
+    :global(
+        .closestTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(3)
+    ) {
+        width: 27%;
+    }
+
+    :global(
+        .blowoutTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(4)
+    ),
+    :global(
+        .closestTable
+        thead
+        tr:nth-child(2)
+        th:nth-child(4)
+    ) {
+        width: 20%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    :global(
+        .blowoutTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(1)
+    ),
+    :global(
+        .closestTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(1)
+    ) {
+        padding-right: 0 !important;
+    }
+
+    :global(
+        .blowoutTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(2)
+    ),
+    :global(
+        .closestTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(2)
+    ) {
+        transform: translateX(-8px);
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+    }
+
+    :global(
+        .blowoutTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(3)
+    ),
+    :global(
+        .closestTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(3)
+    ) {
+        text-align: center;
+        white-space: normal;
+        line-height: 1.25;
+    }
+
+    :global(
+        .blowoutTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(4)
+    ),
+    :global(
+        .closestTable
+        tbody
+        tr.recordMatchupRow
+        td:nth-child(4)
+    ) {
+        text-align: center;
+        white-space: nowrap;
+        font-weight: 800;
+    }
+
+    .blowoutAnchor .recordMatchupHint,
+    .closestAnchor .recordMatchupHint {
+        display: none;
+    }
+
+    :global(
+        .blowoutTable
+        thead
+        tr:first-child
+        th
+    ),
+    :global(
+        .closestTable
+        thead
+        tr:first-child
+        th
+    ) {
+        white-space: normal;
+        line-height: 1.3;
+        font-size: 0.82rem !important;
+        padding: 12px 8px !important;
+    }
+
+    .blowoutAnchor .vs,
+    .closestAnchor .vs {
+        margin: 0.25em 0;
+        padding-left: 0;
+    }
+}
+
 </style>
 
 <div class="recordsHeader">
@@ -1195,8 +1708,8 @@
     {/if}
 
     {#if weekLows && weekLows.length}
-        <div id="scoring-lows" class="recordAnchor">
-            <DataTable class="recordTable">
+        <div id="scoring-lows" class="recordAnchor scoringLowAnchor">
+            <DataTable class="recordTable scoringLowTable">
             <Head>
                 <Row>
                     <Cell class="header headerPrimary" colspan=4>{prefix} {key == "playoffData" ? "Playoff " : ""}Single Week Scoring Lows</Cell>
@@ -1205,7 +1718,7 @@
                     <Cell class="header rank"></Cell>
                     <Cell class="header">Team</Cell>
                     <Cell class="header">Week</Cell>
-                    <Cell class="header">Total Points</Cell>
+                    <Cell class="header">Points</Cell>
                 </Row>
             </Head>
             <Body>
@@ -1284,7 +1797,7 @@
     {/if}
 
     {#if allTime && key == "regularSeasonData"}
-        <DataTable class="recordTable">
+        <DataTable class="recordTable seasonHighTable">
             <Head>
                 <Row>
                     <Cell class="header headerPrimary" colspan=5>All-Time Highest Season Points<span class="italic">Ranked by PPG</span></Cell>
@@ -1293,7 +1806,7 @@
                     <Cell class="header rank"></Cell>
                     <Cell class="header">Manager</Cell>
                     <Cell class="header">Year</Cell>
-                    <Cell class="header">Total Points</Cell>
+                    <Cell class="header">Points</Cell>
                     <Cell class="header">PPG</Cell>
                 </Row>
             </Head>
@@ -1314,7 +1827,7 @@
     {/if}
     
     {#if allTime && key == "regularSeasonData"}
-        <DataTable class="recordTable">
+        <DataTable class="recordTable seasonLowTable">
             <Head>
                 <Row>
                     <Cell class="header headerPrimary" colspan=5>All-Time Lowest Season Points<span class="italic">Ranked by PPG</span></Cell>
@@ -1323,7 +1836,7 @@
                     <Cell class="header rank"></Cell>
                     <Cell class="header">Manager</Cell>
                     <Cell class="header">Year</Cell>
-                    <Cell class="header">Total Points</Cell>
+                    <Cell class="header">Points</Cell>
                     <Cell class="header">PPG</Cell>
                 </Row>
             </Head>
@@ -1344,8 +1857,8 @@
     {/if}
 
     {#if blowouts && blowouts.length}
-        <div id="blowouts" class="recordAnchor">
-            <DataTable class="recordTable">
+        <div id="blowouts" class="recordAnchor blowoutAnchor">
+            <DataTable class="recordTable blowoutTable">
             <Head>
                 <Row>
                     <Cell class="header headerPrimary" colspan=4>{prefix} Largest {key == "playoffData" ? "Playoff " : ""}Blowouts</Cell>
@@ -1433,8 +1946,8 @@
     {/if}
 
     {#if closestMatchups && closestMatchups.length}
-        <div id="closest-wins" class="recordAnchor">
-            <DataTable class="recordTable">
+        <div id="closest-wins" class="recordAnchor closestAnchor">
+            <DataTable class="recordTable closestTable">
             <Head>
                 <Row>
                     <Cell class="header headerPrimary" colspan=4>{prefix} Narrowest {key == "playoffData" ? "Playoff " : ""}Wins</Cell>
