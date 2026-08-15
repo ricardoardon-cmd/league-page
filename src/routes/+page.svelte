@@ -110,7 +110,7 @@
         url('/league-photo.jpg');
 
     background-size: cover;
-    background-position: center;
+    background-position: center 68%;
 
     color: white;
 
@@ -432,7 +432,7 @@ leagueBadge {
             min-height: 230px;
             padding: 20px;
             border-radius: 14px;
-            background-position: center;
+            background-position: center 72%;
         }
 
         .heroTop {
