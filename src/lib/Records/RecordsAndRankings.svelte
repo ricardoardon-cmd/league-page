@@ -941,6 +941,8 @@
         th:nth-child(2)
     ) {
         width: 51%;
+        text-align: left;
+        transform: translateX(-10px);
     }
 
     :global(
@@ -993,6 +995,7 @@
     ) {
         padding-left: 6px !important;
         padding-right: 6px !important;
+        transform: translateX(-10px);
     }
 
 
