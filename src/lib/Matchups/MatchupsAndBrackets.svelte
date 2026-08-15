@@ -15,11 +15,14 @@
     export let bracketsData;
     export let playersData;
 
+    const MAX_MATCHUP_WEEK = 18;
+
     let players;
     let matchupWeeks = [];
     let year;
     let week;
     let regularSeasonLength;
+    let playoffTeams = 0;
     let brackets;
     let leagueTeamManagers;
 
@@ -60,7 +63,8 @@
             options.push({
                 year: Number(data.season),
                 leagueID: currentLeagueID,
-                regularSeasonLength: Number(data.settings?.playoff_week_start || 1) - 1
+                regularSeasonLength: Number(data.settings?.playoff_week_start || 1) - 1,
+                playoffTeams: Number(data.settings?.playoff_teams || 0)
             });
 
             currentLeagueID = data.previous_league_id;
@@ -69,17 +73,19 @@
         return options.sort((a, b) => b.year - a.year);
     };
 
-    const loadHistoricalMatchups = async (season) => {
+    const loadSeasonMatchups = async (season) => {
         const requests = [];
 
-        for (let matchupWeek = 1; matchupWeek <= season.regularSeasonLength; matchupWeek++) {
+        // Sleeper's matchup endpoint contains every head-to-head game for a week,
+        // including championship bracket and consolation / toilet-bowl games.
+        for (let matchupWeek = 1; matchupWeek <= MAX_MATCHUP_WEEK; matchupWeek++) {
             requests.push(
                 fetch(
                     `https://api.sleeper.app/v1/league/${season.leagueID}/matchups/${matchupWeek}`
                 ).then(async (response) => {
                     if (!response.ok) return [];
                     return response.json();
-                })
+                }).catch(() => [])
             );
         }
 
@@ -91,6 +97,40 @@
                 week: index + 1
             }))
             .filter((item) => Object.keys(item.matchups).length);
+    };
+
+    const getAvailableWeeks = () =>
+        matchupWeeks
+            .map((item) => Number(item.week))
+            .filter(Number.isFinite)
+            .sort((a, b) => a - b);
+
+    const getBestWeek = (requestedWeek, isCurrentSeason) => {
+        const availableWeeks = getAvailableWeeks();
+        if (!availableWeeks.length) return 1;
+
+        const requested = Number(requestedWeek);
+        if (availableWeeks.includes(requested)) {
+            return requested;
+        }
+
+        if (isCurrentSeason) {
+            const current = Number(currentMatchupsInfo?.week || 1);
+
+            if (availableWeeks.includes(current)) {
+                return current;
+            }
+
+            const completedOrCurrent = availableWeeks.filter(
+                (availableWeek) => availableWeek <= current
+            );
+
+            if (completedOrCurrent.length) {
+                return completedOrCurrent[completedOrCurrent.length - 1];
+            }
+        }
+
+        return availableWeeks[0];
     };
 
     const applySeason = async (targetYear, requestedWeek = null, updateUrl = true) => {
@@ -105,32 +145,22 @@
         selectedYear = season.year;
         year = season.year;
         regularSeasonLength = season.regularSeasonLength;
+        playoffTeams = season.playoffTeams;
 
-        if (Number(season.year) === Number(currentSeason)) {
-            matchupWeeks = currentMatchupsInfo?.matchupWeeks || [];
-            week = currentMatchupsInfo?.week || 1;
+        matchupWeeks = await loadSeasonMatchups(season);
+
+        const isCurrentSeason = Number(season.year) === Number(currentSeason);
+
+        if (isCurrentSeason) {
+            week = Number(currentMatchupsInfo?.week || 1);
         } else {
-            matchupWeeks = await loadHistoricalMatchups(season);
-            // Every historical regular-season week is complete.
-            week = regularSeasonLength + 1;
+            const availableWeeks = getAvailableWeeks();
+            // Historical seasons are fully complete, so every available week
+            // should render as a recap rather than a preview.
+            week = (availableWeeks[availableWeeks.length - 1] || regularSeasonLength) + 1;
         }
 
-        const numericRequestedWeek = Number(requestedWeek);
-        const validRequestedWeek =
-            Number.isFinite(numericRequestedWeek) &&
-            numericRequestedWeek >= 1 &&
-            numericRequestedWeek <= Math.max(1, regularSeasonLength);
-
-        if (validRequestedWeek) {
-            queryWeek = numericRequestedWeek;
-        } else if (Number(season.year) === Number(currentSeason)) {
-            queryWeek = Math.min(
-                Math.max(Number(currentMatchupsInfo?.week || 1), 1),
-                Math.max(regularSeasonLength, 1)
-            );
-        } else {
-            queryWeek = 1;
-        }
+        queryWeek = getBestWeek(requestedWeek, isCurrentSeason);
 
         if (updateUrl) {
             goto(`/matchups?year=${selectedYear}&week=${queryWeek}`, {
@@ -174,9 +204,15 @@
 
     const changeSelection = (s) => {
         if (s == 'regular') {
-            queryWeek = 1;
+            const availableWeeks = getAvailableWeeks();
+            const current = Number(currentMatchupsInfo?.week || 1);
+            const bestCurrentWeek = availableWeeks.includes(current)
+                ? current
+                : availableWeeks[0] || 1;
 
-            goto(`/matchups?year=${selectedYear}&week=1`, {
+            queryWeek = bestCurrentWeek;
+
+            goto(`/matchups?year=${selectedYear}&week=${queryWeek}`, {
                 noscroll: true
             });
         } else if (s == 'champions') {
@@ -376,7 +412,7 @@
         {#if seasonLoading}
             <div class="message">
                 <div class="emptyTitle">Loading {selectedYear}</div>
-                <p class="emptyText">Retrieving historical matchups...</p>
+                <p class="emptyText">Retrieving all matchup weeks...</p>
                 <LinearProgress indeterminate />
             </div>
 
@@ -393,7 +429,7 @@
                                     : 'outlined'}
                             >
                                 <Label>
-                                    Regular Season
+                                    Weekly Matchups
                                 </Label>
                             </Button>
 
@@ -406,7 +442,7 @@
                                     : 'outlined'}
                             >
                                 <Label>
-                                    Playoffs
+                                    Playoff Brackets
                                 </Label>
                             </Button>
                         </Group>
@@ -454,6 +490,7 @@
                         {queryWeek}
                         {matchupWeeks}
                         {regularSeasonLength}
+                        {playoffTeams}
                         {year}
                         {week}
                         bind:selection
@@ -469,7 +506,7 @@
                 </div>
 
                 <p class="emptyText">
-                    No regular-season matchup data is available for {year}.
+                    No matchup data is available for {year}.
                 </p>
             </div>
         {/if}
