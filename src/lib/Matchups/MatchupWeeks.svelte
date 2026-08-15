@@ -1,6 +1,7 @@
 <script>
 	import { Icon } from '@smui/tab';
     import Matchup from './Matchup.svelte'
+    import WeeklyMatchupAnalysis from './WeeklyMatchupAnalysis.svelte';
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
 
@@ -192,6 +193,19 @@
             <span class="spacer" />
         {/if}
     </div>
+
+    {#if matchupArray.length}
+        <WeeklyMatchupAnalysis
+            {matchupArray}
+            {matchupWeeks}
+            {displayWeek}
+            currentWeek={week}
+            {players}
+            {year}
+            {leagueTeamManagers}
+        />
+    {/if}
+
     {#each matchupArray as matchup, ix (rand * (ix + 1))}
         <Matchup {ix} {matchup} {players} {displayWeek} bind:active={active} {leagueTeamManagers} />
     {/each}
