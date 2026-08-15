@@ -110,7 +110,7 @@
         url('/league-photo.jpg');
 
     background-size: cover;
-    background-position: center 35%;
+    background-position: center 22%;
 
     color: white;
 
