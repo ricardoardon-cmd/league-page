@@ -1,7 +1,7 @@
 <script>
     import LinearProgress from '@smui/linear-progress';
     import { onMount } from 'svelte';
-    import { gotoManager } from '$lib/utils/helper';
+    import { gotoManager, getLeagueTransactions } from '$lib/utils/helper';
     import { getTeamFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
 
     export let playersInfo;
@@ -15,7 +15,11 @@
     let leagueTeamManagers;
     let players = {};
     let previousDrafts = [];
+
     let leagueTransactions = [];
+    let transactionsLoaded = false;
+    let transactionsLoading = false;
+    let transactionsError = '';
 
     let ownershipMap = {};
     let playerList = [];
@@ -278,46 +282,9 @@
     };
 
 
-
-    const flattenTransactions = (value) => {
-        const transactions = [];
-
-        const visit = (node) => {
-            if (!node) return;
-
-            if (Array.isArray(node)) {
-                for (const item of node) {
-                    visit(item);
-                }
-                return;
-            }
-
-            if (typeof node !== 'object') {
-                return;
-            }
-
-            if (
-                Array.isArray(node.moves) &&
-                Array.isArray(node.rosters)
-            ) {
-                transactions.push(node);
-                return;
-            }
-
-            for (const child of Object.values(node)) {
-                visit(child);
-            }
-        };
-
-        visit(value);
-
-        return transactions;
-    };
-
-
     const safeTeam = (rosterID, season) => {
         if (
-            !rosterID ||
+            rosterID == null ||
             !leagueTeamManagers
         ) {
             return null;
@@ -335,15 +302,51 @@
     };
 
 
+    const ensureTransactionsLoaded = async () => {
+        if (
+            transactionsLoaded ||
+            transactionsLoading
+        ) {
+            return;
+        }
+
+        transactionsLoading = true;
+        transactionsError = '';
+
+        try {
+            const transactionPackage =
+                await getLeagueTransactions(false);
+
+            leagueTransactions =
+                Array.isArray(
+                    transactionPackage?.transactions
+                )
+                    ? transactionPackage.transactions
+                    : [];
+
+            transactionsLoaded = true;
+        } catch (error) {
+            console.error(error);
+
+            transactionsError =
+                'Transaction history could not be loaded right now.';
+        } finally {
+            transactionsLoading = false;
+        }
+    };
+
+
     const getPlayerTransactionHistory = (playerID) => {
         const history = [];
-        const wantedPlayerID =
+        const targetPlayerID =
             String(playerID);
 
         for (const transaction of leagueTransactions || []) {
+
             const transactionType =
-                String(transaction?.type || '')
-                    .toLowerCase();
+                String(
+                    transaction?.type || ''
+                ).toLowerCase();
 
             const rosters =
                 transaction?.rosters || [];
@@ -351,10 +354,24 @@
             const moves =
                 transaction?.moves || [];
 
-            if (transactionType.includes('trade')) {
+
+            if (transactionType === 'trade') {
 
                 for (const move of moves) {
+
                     if (!Array.isArray(move)) {
+                        continue;
+                    }
+
+                    const destinationIndex =
+                        move.findIndex(
+                            (cell) =>
+                                cell?.player &&
+                                String(cell.player) ===
+                                    targetPlayerID
+                        );
+
+                    if (destinationIndex < 0) {
                         continue;
                     }
 
@@ -364,39 +381,19 @@
                                 cell === 'origin'
                         );
 
-                    const destinationIndex =
-                        move.findIndex(
-                            (cell) =>
-                                cell?.player &&
-                                String(cell.player) ===
-                                    wantedPlayerID
-                        );
-
-                    if (destinationIndex < 0) {
-                        continue;
-                    }
-
                     const fromRosterID =
                         originIndex >= 0
                             ? rosters[originIndex]
                             : null;
 
                     const toRosterID =
-                        rosters[destinationIndex] || null;
+                        rosters[destinationIndex] ?? null;
 
                     history.push({
                         kind: 'trade',
                         action: 'Traded',
                         season: transaction.season,
                         date: transaction.date,
-                        fromRosterID:
-                            fromRosterID
-                                ? Number(fromRosterID)
-                                : null,
-                        toRosterID:
-                            toRosterID
-                                ? Number(toRosterID)
-                                : null,
                         fromTeam:
                             safeTeam(
                                 fromRosterID,
@@ -406,8 +403,7 @@
                             safeTeam(
                                 toRosterID,
                                 transaction.season
-                            ),
-                        bid: null
+                            )
                     });
                 }
 
@@ -416,50 +412,49 @@
 
 
             for (const move of moves) {
-                const moveData =
-                    Array.isArray(move)
-                        ? move[0]
-                        : move;
 
-                if (
-                    !moveData?.player ||
-                    String(moveData.player) !==
-                        wantedPlayerID
-                ) {
+                if (!Array.isArray(move)) {
                     continue;
                 }
 
-                const rosterID =
-                    rosters?.[0] || null;
+                for (let ix = 0; ix < move.length; ix++) {
 
-                const action =
-                    String(moveData.type || '')
-                        .trim() ||
-                    'Transaction';
+                    const cell = move[ix];
 
-                history.push({
-                    kind:
-                        action.toLowerCase() ===
-                        'dropped'
-                            ? 'drop'
-                            : 'add',
-                    action,
-                    season:
-                        transaction.season,
-                    date:
-                        transaction.date,
-                    rosterID:
-                        rosterID
-                            ? Number(rosterID)
-                            : null,
-                    team:
-                        safeTeam(
-                            rosterID,
-                            transaction.season
-                        ),
-                    bid:
-                        moveData.bid ?? null
-                });
+                    if (
+                        !cell?.player ||
+                        String(cell.player) !==
+                            targetPlayerID
+                    ) {
+                        continue;
+                    }
+
+                    const rosterID =
+                        rosters[ix] ?? rosters[0] ?? null;
+
+                    const action =
+                        String(
+                            cell.type || 'Transaction'
+                        );
+
+                    history.push({
+                        kind:
+                            action.toLowerCase() ===
+                            'dropped'
+                                ? 'drop'
+                                : 'add',
+                        action,
+                        season: transaction.season,
+                        date: transaction.date,
+                        team:
+                            safeTeam(
+                                rosterID,
+                                transaction.season
+                            ),
+                        bid:
+                            cell.bid ?? null
+                    });
+                }
             }
         }
 
@@ -469,6 +464,7 @@
 
     const openPlayer = (player) => {
         selectedPlayer = player;
+        ensureTransactionsLoaded();
     };
 
     const closePlayer = () => {
@@ -553,8 +549,7 @@
                 leagueRosters,
                 teamManagers,
                 playerData,
-                previousDraftData,
-                transactionData
+                previousDraftData
             ] = await playersInfo;
 
             rosters = leagueRosters || [];
@@ -562,10 +557,6 @@
             players = playerData?.players || {};
             previousDrafts =
                 previousDraftData || [];
-            leagueTransactions =
-                flattenTransactions(
-                    transactionData
-                );
 
             ownershipMap = buildOwnershipMap(rosters);
             buildPlayerList();
@@ -1039,18 +1030,18 @@
         opacity: 0.58;
     }
 
-    .transactionHistory {
+    .transactionSection {
         margin-top: 16px;
     }
 
     .transactionItem {
         display: grid;
         grid-template-columns:
-            70px
+            72px
             minmax(0, 1fr)
             auto;
-        gap: 10px;
         align-items: center;
+        gap: 10px;
         padding: 11px 12px;
         border-radius: 12px;
         background: var(--f3f3f3);
@@ -1062,10 +1053,14 @@
     }
 
     .transactionAction {
-        font-size: 0.68rem;
+        font-size: 0.67rem;
         font-weight: 900;
         letter-spacing: 0.45px;
         text-transform: uppercase;
+    }
+
+    .transactionTrade {
+        color: var(--blueOne);
     }
 
     .transactionAdd {
@@ -1074,10 +1069,6 @@
 
     .transactionDrop {
         color: #ff2a6d;
-    }
-
-    .transactionTrade {
-        color: var(--blueOne);
     }
 
     .transactionMain {
@@ -1105,6 +1096,16 @@
         font-size: 0.64rem;
         font-weight: 850;
         white-space: nowrap;
+    }
+
+    .transactionStatus {
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px dashed var(--ccc);
+        text-align: center;
+        font-size: 0.72rem;
+        line-height: 1.45;
+        opacity: 0.62;
     }
 
     @media (max-width: 900px) {
@@ -1571,22 +1572,40 @@
                 </div>
 
 
-                <div class="transactionHistory">
+                <div class="transactionSection">
 
                     <div class="historyHeading">
                         GGL Transaction History
                     </div>
 
-                    {#if selectedTransactionHistory.length}
+                    {#if transactionsLoading}
+
+                        <div class="transactionStatus">
+                            Loading trades, waivers and free-agent moves...
+                        </div>
+
+                    {:else if transactionsError}
+
+                        <div class="transactionStatus">
+                            {transactionsError}
+                        </div>
+
+                    {:else if selectedTransactionHistory.length}
 
                         {#each selectedTransactionHistory as event}
 
                             <div class="transactionItem">
 
                                 <div
-                                    class:transactionTrade={event.kind === 'trade'}
-                                    class:transactionAdd={event.kind === 'add'}
-                                    class:transactionDrop={event.kind === 'drop'}
+                                    class:transactionTrade={
+                                        event.kind === 'trade'
+                                    }
+                                    class:transactionAdd={
+                                        event.kind === 'add'
+                                    }
+                                    class:transactionDrop={
+                                        event.kind === 'drop'
+                                    }
                                     class="transactionAction"
                                 >
                                     {event.action}
@@ -1598,13 +1617,16 @@
 
                                         {#if event.kind === 'trade'}
 
-                                            {event.fromTeam?.name || 'Unknown Team'}
+                                            {event.fromTeam?.name ||
+                                                'Unknown Team'}
                                             →
-                                            {event.toTeam?.name || 'Unknown Team'}
+                                            {event.toTeam?.name ||
+                                                'Unknown Team'}
 
                                         {:else}
 
-                                            {event.team?.name || 'Unknown GGL Team'}
+                                            {event.team?.name ||
+                                                'Unknown GGL Team'}
 
                                         {/if}
 
@@ -1634,9 +1656,9 @@
 
                         {/each}
 
-                    {:else}
+                    {:else if transactionsLoaded}
 
-                        <div class="historyEmpty">
+                        <div class="transactionStatus">
                             No GGL trade, waiver, or free-agent history found for this player.
                         </div>
 
