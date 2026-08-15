@@ -2,6 +2,7 @@ import {
     getLeagueRosters,
     getLeagueTeamManagers,
     getPreviousDrafts,
+    getLeagueTransactions,
     loadPlayers,
     waitForAll
 } from '$lib/utils/helper';
@@ -12,7 +13,8 @@ export async function load({ fetch }) {
         getLeagueRosters(),
         getLeagueTeamManagers(),
         loadPlayers(fetch),
-        getPreviousDrafts()
+        getPreviousDrafts(),
+        getLeagueTransactions(false)
     );
 
     return {
