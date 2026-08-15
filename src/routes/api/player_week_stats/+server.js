@@ -1,10 +1,5 @@
 import { json } from '@sveltejs/kit';
 
-const STATS_BASES = [
-    'https://api.sleeper.com',
-    'https://api.sleeper.app'
-];
-
 const getCandidateWeek = (candidate) =>
     Number(
         candidate?.week ??
@@ -17,4 +12,8 @@ const getCandidatePlayerID = (candidate) =>
     String(
         candidate?.player_id ??
         candidate?.player?.player_id ??
-        candidate?.stats
+        candidate?.stats?.player_id ??
+        ''
+    );
+
+const
