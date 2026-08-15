@@ -915,16 +915,32 @@
         tr:nth-child(2)
         th:nth-child(1)
     ) {
-        width: 7%;
+        width: 5%;
     }
+:global(
+    .scoringHighTable
+    tbody
+    tr.recordMatchupRow
+    td:nth-child(1)
+) {
+    padding-right: 0 !important;
+}
 
+:global(
+    .scoringHighTable
+    tbody
+    tr.recordMatchupRow
+    td:nth-child(2)
+) {
+    padding-left: 2px !important;
+}
     :global(
         .scoringHighTable
         thead
         tr:nth-child(2)
         th:nth-child(2)
     ) {
-        width: 49%;
+        width: 51%;
     }
 
     :global(
