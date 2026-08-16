@@ -2,7 +2,7 @@
     import { getTeamNameFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
     import { Awards } from '$lib/components';
     import LegacyAwards from '$lib/Awards/LegacyAwards.svelte';
-    import { LEGACY_SEASONS } from '$lib/utils/legacyHistory';
+    import { legacyHistory } from '$lib/utils/legacyHistory';
     import { waitForAll, leagueName } from '$lib/utils/helper';
     import LinearProgress from '@smui/linear-progress';
 
@@ -37,7 +37,7 @@
             }
         };
 
-        for (const season of LEGACY_SEASONS) {
+        for (const season of legacyHistory) {
             const championTeam = season.podium?.champion;
             const champion = season.teams.find((team) => team.name === championTeam);
             addTitle(champion?.manager, championTeam, season.year, 'Legacy');
@@ -53,7 +53,6 @@
                 podium.year
             );
 
-            // Sleeper manager IDs are the stable identity when available.
             const managers = leagueTeamManagers?.teamManagersMap?.[podium.year]?.[rosterID]?.managers || [];
             const managerName = managers
                 .map((id) => leagueTeamManagers?.users?.[id]?.display_name || leagueTeamManagers?.users?.[id]?.name || id)
@@ -69,7 +68,7 @@
 
     const getCombinedSeasons = (podiums) => [
         ...(podiums || []).map((podium) => ({ year: Number(podium.year), era: 'sleeper', podium })),
-        ...LEGACY_SEASONS.map((season) => ({ year: Number(season.year), era: 'legacy', season }))
+        ...legacyHistory.map((season) => ({ year: Number(season.year), era: 'legacy', season }))
     ].sort((a, b) => b.year - a.year);
 </script>
 
