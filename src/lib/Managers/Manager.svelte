@@ -71,6 +71,25 @@
     const selectManager = (event) => {
         changeManager(parseInt(event.currentTarget.value), true);
     };
+
+    const goToRival = () => {
+        if(!viewManager.rival) return;
+
+        const rivalName = String(viewManager.rival.name || '').trim().toLowerCase();
+        const rivalIndex = managers.findIndex((managerOption) =>
+            String(managerOption.name || '').trim().toLowerCase() === rivalName
+        );
+
+        if(rivalIndex >= 0) {
+            changeManager(rivalIndex, true);
+            return;
+        }
+
+        const rivalLink = Number(viewManager.rival.link);
+        if(Number.isInteger(rivalLink) && rivalLink >= 0 && rivalLink < managers.length) {
+            changeManager(rivalLink, true);
+        }
+    };
 </script>
 
 <style>
@@ -198,6 +217,16 @@
         font-weight: 800;
     }
 
+    .profileTagline {
+        margin: 24px auto 0;
+        padding-top: 18px;
+        max-width: 620px;
+        border-top: 1px solid var(--ccc);
+        font-size: 1rem;
+        line-height: 1.5;
+        text-align: center;
+    }
+
     .managerControls {
         width: 100%;
         max-width: 800px;
@@ -268,11 +297,6 @@
         vertical-align: middle;
     }
 
-    .bio {
-        margin: 2em 1.5em;
-        text-indent: 4em;
-    }
-
     .philosophy {
         margin: 2em 1.5em;
         text-indent: 4em;
@@ -319,6 +343,10 @@
 
         .managerSelectWrap {
             max-width: 330px;
+        }
+
+        .profileTagline {
+            font-size: 0.92rem;
         }
     }
 
@@ -444,7 +472,7 @@
                     <button
                         type="button"
                         class="metaItem metaRival"
-                        onclick={() => changeManager(viewManager.rival.link, true)}
+                        onclick={goToRival}
                     >
                         <img
                             class="metaRivalImage"
@@ -455,9 +483,11 @@
                     </button>
                 {/if}
             </div>
-        </div>
 
-        <p class="bio">{@html viewManager.bio}</p>
+            {#if viewManager.bio}
+                <div class="profileTagline">{@html viewManager.bio}</div>
+            {/if}
+        </div>
 
         {#if viewManager.philosophy}
             <h3>Team Philosophy</h3>
