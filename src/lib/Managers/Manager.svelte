@@ -203,6 +203,7 @@
         {rosterID}
         {managers}
         {leagueTeamManagers}
+        {transactions}
     />
 
     <ManagerAwards {leagueTeamManagers} tookOver={viewManager.tookOver} {awards} {records} {rosterID} managerID={viewManager.managerID} managerName={viewManager.name} hideCareerStats={true} />
