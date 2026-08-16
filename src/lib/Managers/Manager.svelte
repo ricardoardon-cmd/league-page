@@ -7,6 +7,7 @@
     import { goto } from '$app/navigation';
     import ManagerFantasyInfo from './ManagerFantasyInfo.svelte';
     import ManagerAwards from './ManagerAwards.svelte';
+    import ManagerCareerStats from './ManagerCareerStats.svelte';
     import { onMount } from 'svelte';
 	import { getDatesActive, getRosterIDFromManagerID, getTeamNameFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
 
@@ -18,7 +19,7 @@
 
     $: datesActive = getDatesActive(leagueTeamManagers, viewManager.managerID);
 
-    const  startersAndReserve = rostersData.startersAndReserve;
+    const startersAndReserve = rostersData.startersAndReserve;
     let rosters = rostersData.rosters;
 
     $: ({rosterID, year} = viewManager.managerID ? getRosterIDFromManagerID(leagueTeamManagers, viewManager.managerID) : {rosterID: viewManager.roster, year: null});
@@ -264,8 +265,6 @@
         color: #fff;
     }
 
-    /* media queries */
-
     @media (max-width: 505px) {
         :global(.selectionButtons span) {
             font-size: 0.8em;
@@ -280,7 +279,6 @@
     }
 
 	@media (max-width: 450px) {
-
         .basicInfo {
             height: 20px;
         }
@@ -295,7 +293,6 @@
 	}
 
     @media (max-width: 370px) {
-
         .basicInfo {
             height: 18px;
         }
@@ -347,7 +344,6 @@
     </div>
 
     <div class="profileMeta">
-
         {#if viewManager.location}
             <div class="metaItem">
                 📍 {viewManager.location}
@@ -355,135 +351,100 @@
         {/if}
 
         {#if viewManager.managerID && datesActive.start}
-
             <div class="metaItem">
                 🗓️ Since '{datesActive.start.toString().substr(2)}
             </div>
-
         {:else if viewManager.fantasyStart}
-
             <div class="metaItem">
                 🏈 Fantasy since '{viewManager.fantasyStart.toString().substr(2)}
             </div>
-
         {/if}
 
         {#if viewManager.preferredContact}
-
             <div class="metaItem">
-
                 <img
                     class="infoContact"
                     src="/{viewManager.preferredContact}.png"
                     alt="{viewManager.preferredContact}"
                 />
-
                 {viewManager.preferredContact}
-
             </div>
-
         {/if}
 
         {#if viewManager.favoriteTeam}
-
             <div class="metaItem">
-
                 <img
                     class="metaTeam"
                     src="https://sleepercdn.com/images/team_logos/nfl/{viewManager.favoriteTeam}.png"
                     alt="Favorite NFL team"
                 />
-
                 Favorite Team
-
             </div>
-
         {/if}
-
     </div>
 
 </div>
 
 <div class="profileNav">
-
     <Group variant="outlined">
-
         {#if manager == 0}
-
-            <Button
-                disabled
-                class="selectionButtons"
-                onclick={() => changeManager(parseInt(manager) - 1, true)}
-                variant="outlined"
-            >
+            <Button disabled class="selectionButtons" onclick={() => changeManager(parseInt(manager) - 1, true)} variant="outlined">
                 <Label>← Previous</Label>
             </Button>
-
         {:else}
-
-            <Button
-                class="selectionButtons"
-                onclick={() => changeManager(parseInt(manager) - 1, true)}
-                variant="outlined"
-            >
+            <Button class="selectionButtons" onclick={() => changeManager(parseInt(manager) - 1, true)} variant="outlined">
                 <Label>← Previous</Label>
             </Button>
-
         {/if}
 
-        <Button
-            class="selectionButtons"
-            onclick={() => goto('/managers')}
-            variant="outlined"
-        >
+        <Button class="selectionButtons" onclick={() => goto('/managers')} variant="outlined">
             <Label>All Teams</Label>
         </Button>
 
         {#if manager == managers.length - 1}
-
-            <Button
-                disabled
-                class="selectionButtons"
-                onclick={() => changeManager(parseInt(manager) + 1, true)}
-                variant="outlined"
-            >
+            <Button disabled class="selectionButtons" onclick={() => changeManager(parseInt(manager) + 1, true)} variant="outlined">
                 <Label>Next →</Label>
             </Button>
-
         {:else}
-
-            <Button
-                class="selectionButtons"
-                onclick={() => changeManager(parseInt(manager) + 1, true)}
-                variant="outlined"
-            >
+            <Button class="selectionButtons" onclick={() => changeManager(parseInt(manager) + 1, true)} variant="outlined">
                 <Label>Next →</Label>
             </Button>
-
         {/if}
-
     </Group>
-
 </div>
 
         <p class="bio">{@html viewManager.bio}</p>
 
         {#if viewManager.philosophy}
-            <!-- philosophy is an optional field -->
             <h3>Team Philosophy</h3>
             <p class="philosophy">{@html viewManager.philosophy}</p>
         {/if}
     </div>
 
     {#if !loading}
-        <!-- Favorite player -->
         <ManagerFantasyInfo {viewManager} {players} {changeManager} />
     {/if}
 
-    <ManagerAwards {leagueTeamManagers} tookOver={viewManager.tookOver} {awards} {records} {rosterID} managerID={viewManager.managerID} />
+    <ManagerCareerStats
+        {leagueTeamManagers}
+        {awards}
+        {records}
+        {rosterID}
+        managerID={viewManager.managerID}
+        managerName={viewManager.name}
+    />
+
+    <ManagerAwards
+        {leagueTeamManagers}
+        tookOver={viewManager.tookOver}
+        {awards}
+        {records}
+        {rosterID}
+        managerID={viewManager.managerID}
+        hideCareerStats={true}
+    />
 
     {#if loading}
-        <!-- promise is pending -->
         <div class="loading">
             <p>Retrieving players...</p>
             <LinearProgress indeterminate />
@@ -495,7 +456,6 @@
     <h3>Team Transactions</h3>
     <div class="managerConstrained">
         {#if loading}
-            <!-- promise is pending -->
             <div class="loading">
                 <p>Retrieving players...</p>
                 <LinearProgress indeterminate />
