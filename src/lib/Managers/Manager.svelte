@@ -67,6 +67,10 @@
         manager = newManager;
         goto(`/manager?manager=${newManager}`, {noscroll});
     };
+
+    const selectManager = (event) => {
+        changeManager(parseInt(event.currentTarget.value), true);
+    };
 </script>
 
 <style>
@@ -95,7 +99,7 @@
     .profileHero {
         position: relative;
         padding: 35px 25px 30px;
-        margin: 20px auto 25px;
+        margin: 0 auto 25px;
         max-width: 800px;
         text-align: center;
         border-radius: 24px;
@@ -194,9 +198,55 @@
         font-weight: 800;
     }
 
+    .managerControls {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
     .profileNav {
-        margin: 20px auto 30px;
+        margin: 0;
         text-align: center;
+    }
+
+    .managerSelectWrap {
+        width: 100%;
+        max-width: 390px;
+        position: relative;
+    }
+
+    .managerSelectLabel {
+        display: block;
+        margin: 0 0 6px 4px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--g999);
+    }
+
+    .managerSelect {
+        width: 100%;
+        min-height: 44px;
+        padding: 0 42px 0 14px;
+        border-radius: 12px;
+        border: 1px solid var(--ccc);
+        background: var(--fff);
+        color: inherit;
+        font: inherit;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        appearance: auto;
+    }
+
+    .managerSelect:focus {
+        outline: 2px solid var(--blueOne);
+        outline-offset: 2px;
     }
 
     h2 {
@@ -262,6 +312,14 @@
         :global(.selectionButtons span) {
             font-size: 0.8em;
         }
+
+        .managerControls {
+            width: 97%;
+        }
+
+        .managerSelectWrap {
+            max-width: 330px;
+        }
     }
 
     @media (max-width: 435px) {
@@ -274,6 +332,50 @@
 
 <div class="managerContainer">
     <div class="managerConstrained">
+        <div class="managerControls">
+            <div class="profileNav">
+                <Group variant="outlined">
+                    {#if manager == 0}
+                        <Button disabled class="selectionButtons" variant="outlined">
+                            <Label>← Previous</Label>
+                        </Button>
+                    {:else}
+                        <Button class="selectionButtons" onclick={() => changeManager(parseInt(manager) - 1, true)} variant="outlined">
+                            <Label>← Previous</Label>
+                        </Button>
+                    {/if}
+
+                    <Button class="selectionButtons" onclick={() => goto('/managers')} variant="outlined">
+                        <Label>All Teams</Label>
+                    </Button>
+
+                    {#if manager == managers.length - 1}
+                        <Button disabled class="selectionButtons" variant="outlined">
+                            <Label>Next →</Label>
+                        </Button>
+                    {:else}
+                        <Button class="selectionButtons" onclick={() => changeManager(parseInt(manager) + 1, true)} variant="outlined">
+                            <Label>Next →</Label>
+                        </Button>
+                    {/if}
+                </Group>
+            </div>
+
+            <div class="managerSelectWrap">
+                <label class="managerSelectLabel" for="manager-select">Jump to manager</label>
+                <select
+                    id="manager-select"
+                    class="managerSelect"
+                    value={manager}
+                    onchange={selectManager}
+                >
+                    {#each managers as managerOption, index}
+                        <option value={index}>{managerOption.name}</option>
+                    {/each}
+                </select>
+            </div>
+        </div>
+
         <div class="profileHero">
             <img
                 class="managerPhoto"
@@ -353,34 +455,6 @@
                     </button>
                 {/if}
             </div>
-        </div>
-
-        <div class="profileNav">
-            <Group variant="outlined">
-                {#if manager == 0}
-                    <Button disabled class="selectionButtons" variant="outlined">
-                        <Label>← Previous</Label>
-                    </Button>
-                {:else}
-                    <Button class="selectionButtons" onclick={() => changeManager(parseInt(manager) - 1, true)} variant="outlined">
-                        <Label>← Previous</Label>
-                    </Button>
-                {/if}
-
-                <Button class="selectionButtons" onclick={() => goto('/managers')} variant="outlined">
-                    <Label>All Teams</Label>
-                </Button>
-
-                {#if manager == managers.length - 1}
-                    <Button disabled class="selectionButtons" variant="outlined">
-                        <Label>Next →</Label>
-                    </Button>
-                {:else}
-                    <Button class="selectionButtons" onclick={() => changeManager(parseInt(manager) + 1, true)} variant="outlined">
-                        <Label>Next →</Label>
-                    </Button>
-                {/if}
-            </Group>
         </div>
 
         <p class="bio">{@html viewManager.bio}</p>
