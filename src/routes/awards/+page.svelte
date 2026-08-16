@@ -10,18 +10,28 @@
 
     const { awardsData, teamManagersData } = data;
 
+    const canonicalManagerName = (manager) => {
+        const normalized = String(manager || '').trim().toLowerCase();
+
+        // Legacy name -> current Sleeper identity.
+        if (normalized === 'pico' || normalized === 'picorico') return 'PicoRico';
+
+        return manager;
+    };
+
     const getChampionshipCounts = (podiums, leagueTeamManagers) => {
         const counts = {};
 
         const addTitle = (manager, team, year, era) => {
-            const key = manager || team;
+            const canonicalManager = canonicalManagerName(manager || team);
+            const key = String(canonicalManager || '').trim().toLowerCase();
             if (!key) return;
 
             if (!counts[key]) {
                 counts[key] = {
                     key,
-                    manager: manager || team,
-                    latestTeam: team || manager,
+                    manager: canonicalManager,
+                    latestTeam: team || canonicalManager,
                     championships: 0,
                     latestYear: year,
                     eras: new Set()
@@ -33,7 +43,7 @@
 
             if (!counts[key].latestYear || Number(year) > Number(counts[key].latestYear)) {
                 counts[key].latestYear = year;
-                counts[key].latestTeam = team || manager;
+                counts[key].latestTeam = team || canonicalManager;
             }
         };
 
