@@ -1,5 +1,5 @@
 <script>
-    import { getLegacyManagerCareer } from '$lib/utils/legacyHistory';
+    import { getLegacyManagerCareer, getLegacySeason } from '$lib/utils/legacyHistory';
     import { checkIfManagerReceivedAward } from '$lib/utils/helperFunctions/universalFunctions';
 
     export let awards, records, rosterID, leagueTeamManagers, managerID, managerName;
@@ -65,7 +65,8 @@
 
     const getLegacyPlayoffAppearances = (legacyCareer) => {
         return (legacyCareer?.seasonHistory || []).reduce((total, season) => {
-            const cutoff = legacyPlayoffCutoff(season.teamCount);
+            const seasonData = getLegacySeason(season.year);
+            const cutoff = legacyPlayoffCutoff(seasonData?.teamCount || 0);
             return total + (cutoff && season.finish <= cutoff ? 1 : 0);
         }, 0);
     };
