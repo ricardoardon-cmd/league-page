@@ -119,7 +119,6 @@
     h2 { text-align: center; font-size: 2.8em; margin: 1em 0 0; line-height: 1em; }
     h3 { text-align: center; font-size: 1.5em; margin: 1.5em 0 .5em; font-weight: 200; }
     .infoContact { height: 20px; vertical-align: middle; }
-    .philosophy { margin: 2em 1.5em; text-indent: 4em; }
     .loading { display: block; width: 85%; max-width: 500px; margin: 80px auto; }
     .managerNav { margin: 4em 0 2em; text-align: center; }
     .commissionerBadge { display: inline-flex; justify-content: center; align-items: center; height: 25px; width: 25px; margin-left: 6px; font-weight: 600; border-radius: 15px; background-color: var(--blueTwo); border: 1px solid var(--blueOne); vertical-align: middle; }
@@ -189,11 +188,6 @@
             </div>
             {#if viewManager.bio}<div class="profileTagline">{@html viewManager.bio}</div>{/if}
         </div>
-
-        {#if viewManager.philosophy}
-            <h3>Team Philosophy</h3>
-            <p class="philosophy">{@html viewManager.philosophy}</p>
-        {/if}
     </div>
 
     <ManagerCareerStats {leagueTeamManagers} {awards} {records} {rosterID} managerID={viewManager.managerID} managerName={viewManager.name} />
