@@ -1,64 +1,133 @@
 <script>
-    import { round } from "$lib/utils/helper";
-	import { checkIfManagerReceivedAward, getTeamNameFromTeamManagers } from "$lib/utils/helperFunctions/universalFunctions";
+    import { round } from '$lib/utils/helper';
+    import { checkIfManagerReceivedAward, getTeamNameFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
+    import { getLegacyManagerSeasons, getLegacySeason } from '$lib/utils/legacyHistory';
 
-    export let awards, records, rosterID, tookOver, leagueTeamManagers, managerID;
+    export let awards, records, rosterID, tookOver, leagueTeamManagers, managerID, managerName = '';
 
     let displayAwards = [];
-let careerStats = {
-    championships: 0,
-    awards: 0,
-    wins: 0,
-    losses: 0,
-    ties: 0,
-    playoffAppearances: 0
-};
+    let formerGlobal = false;
+
     const capitalizeFirstLetter = (string) => {
         return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-    
-    let formerGlobal = false;
+    };
 
     const checkIfDeserves = (awardRosterID, userRosterID, year) => {
         if(!managerID || !year || !awardRosterID) {
             return awardRosterID == userRosterID;
         }
         return checkIfManagerReceivedAward(leagueTeamManagers, awardRosterID, year, managerID);
-    }
+    };
 
     const checkIfDeservesWithManagerID = (recordManagerID, userRosterID) => {
         if(managerID) {
             return recordManagerID == managerID;
         }
+
         for(const year in leagueTeamManagers.teamManagersMap) {
-            for(const rosterID in  leagueTeamManagers.teamManagersMap[year]) {
-                if(leagueTeamManagers.teamManagersMap[year][rosterID].managers.indexOf(recordManagerID) > -1) {
-                    return rosterID == userRosterID;
+            for(const historicalRosterID in leagueTeamManagers.teamManagersMap[year]) {
+                if(leagueTeamManagers.teamManagersMap[year][historicalRosterID].managers.indexOf(recordManagerID) > -1) {
+                    return historicalRosterID == userRosterID;
                 }
             }
         }
         return false;
-    }
+    };
 
-    const computePodiums = (cRosterID) => {
+    const addLegacyAwards = () => {
+        const legacySeasons = getLegacyManagerSeasons(managerName);
+
+        for(const legacy of legacySeasons) {
+            const seasonData = getLegacySeason(legacy.year);
+
+            // Regular-season first place is a real legacy accolade too.
+            if(legacy.finish === 1) {
+                displayAwards.push({
+                    award: 'Regular Season Champion',
+                    icon: '/awards/division.png',
+                    type: 'award',
+                    originalName: legacy.team,
+                    year: legacy.year,
+                    legacy: true
+                });
+            }
+
+            if(legacy.champion) {
+                displayAwards.push({
+                    award: 'Champion',
+                    icon: '/awards/champion.png',
+                    type: 'award',
+                    originalName: legacy.team,
+                    year: legacy.year,
+                    legacy: true
+                });
+            }
+
+            if(legacy.runnerUp) {
+                displayAwards.push({
+                    award: 'Second',
+                    icon: '/awards/second.png',
+                    type: 'award',
+                    originalName: legacy.team,
+                    year: legacy.year,
+                    legacy: true
+                });
+            }
+
+            if(legacy.thirdPlace) {
+                displayAwards.push({
+                    award: 'Third',
+                    icon: '/awards/third.png',
+                    type: 'award',
+                    originalName: legacy.team,
+                    year: legacy.year,
+                    legacy: true
+                });
+            }
+
+            if(legacy.mostPoints && seasonData?.mostPoints?.points != null) {
+                displayAwards.push({
+                    award: 'Points Leader',
+                    icon: '/awards/record-1.png',
+                    type: 'Legacy Season Points Leader',
+                    originalName: legacy.team,
+                    year: legacy.year,
+                    extraInfo: seasonData.mostPoints.points,
+                    legacy: true
+                });
+            }
+
+            if(legacy.toiletBowlLoser) {
+                displayAwards.push({
+                    award: 'Toilet',
+                    icon: '/awards/toilet.png',
+                    type: 'award',
+                    originalName: legacy.team,
+                    year: legacy.year,
+                    legacy: true
+                });
+            }
+        }
+    };
+
+    const computePodiums = (cRosterID, name) => {
         formerGlobal = false;
         displayAwards = [];
 
-        // first look through annual awards (champion, second, etc)
-        for(const podium of awards) {
+        // Sleeper-era annual awards.
+        for(const podium of awards || []) {
             for(const award in podium) {
                 if(award == 'year') continue;
+
                 if(award == 'divisions') {
                     for(const division of podium[award]) {
                         if(checkIfDeserves(division.rosterID, cRosterID, podium.year)) {
                             const former = tookOver && tookOver > podium.year;
-                            if(former) {
-                                formerGlobal = true;
-                            }
+                            if(former) formerGlobal = true;
+
                             let awardTitle = 'Regular Season Champion';
-                            if(division.name) {
-                                awardTitle = `${division.name} Division Champion`;
-                            }
+                            if(division.name) awardTitle = `${division.name} Division Champion`;
+
                             displayAwards.push({
                                 award: awardTitle,
                                 icon: '/awards/division.png',
@@ -66,14 +135,13 @@ let careerStats = {
                                 originalName: getTeamNameFromTeamManagers(leagueTeamManagers, cRosterID, podium.year),
                                 year: podium.year,
                                 former
-                            })
+                            });
                         }
                     }
                 } else if(checkIfDeserves(podium[award], cRosterID, podium.year)) {
                     const former = tookOver && tookOver > podium.year;
-                    if(former) {
-                        formerGlobal = true;
-                    }
+                    if(former) formerGlobal = true;
+
                     displayAwards.push({
                         award: capitalizeFirstLetter(award),
                         icon: '/awards/' + award + '.png',
@@ -81,25 +149,28 @@ let careerStats = {
                         originalName: getTeamNameFromTeamManagers(leagueTeamManagers, cRosterID, podium.year),
                         year: podium.year,
                         former
-                    })
+                    });
                 }
             }
         }
 
-        // Next look through record books
+        // Sleeper-era record book entries.
         const leagueManagerRecords = [];
-        for(const key in records.regularSeasonData.leagueManagerRecords) {
+        for(const key in records?.regularSeasonData?.leagueManagerRecords || {}) {
             const record = records.regularSeasonData.leagueManagerRecords[key];
-            record.rosterID = key;
-            leagueManagerRecords.push(record);
+            leagueManagerRecords.push({ ...record, rosterID: key });
         }
+
         const winRecords = [...leagueManagerRecords].sort((a, b) => b.wins - a.wins);
         const pointsRecords = [...leagueManagerRecords].sort((a, b) => b.fptsFor - a.fptsFor);
-        const iqRecords = [...leagueManagerRecords].sort((a, b) => (b.fptsFor/b.potentialPoints) - (a.fptsFor/a.potentialPoints));
+        const iqRecords = [...leagueManagerRecords].sort((a, b) => (b.fptsFor / b.potentialPoints) - (a.fptsFor / a.potentialPoints));
 
-        for(let i = 0; i < records.regularSeasonData.leagueWeekHighs.length; i++) {
-            const leagueWeekRecord = records.regularSeasonData.leagueWeekHighs[i];
-            const seasonLongRecord = records.regularSeasonData.mostSeasonLongPoints[i];
+        const leagueWeekHighs = records?.regularSeasonData?.leagueWeekHighs || [];
+        const seasonLongPoints = records?.regularSeasonData?.mostSeasonLongPoints || [];
+
+        for(let i = 0; i < leagueWeekHighs.length; i++) {
+            const leagueWeekRecord = leagueWeekHighs[i];
+            const seasonLongRecord = seasonLongPoints[i];
             const winRecord = winRecords[i];
             const pointsRecord = pointsRecords[i];
             const iqRecord = iqRecords[i];
@@ -107,156 +178,102 @@ let careerStats = {
             if(checkIfDeservesWithManagerID(winRecord?.rosterID, cRosterID) && i < 3) {
                 displayAwards.push({
                     award: i + 1,
-                    icon: '/awards/record-' + (i+1) + '.png',
+                    icon: '/awards/record-' + (i + 1) + '.png',
                     type: 'All-Time Wins Record',
                     extraInfo: winRecord.wins,
                     wins: true
-                })
+                });
             }
 
             if(checkIfDeservesWithManagerID(pointsRecord?.rosterID, cRosterID) && i < 3) {
                 displayAwards.push({
                     award: i + 1,
-                    icon: '/awards/record-' + (i+1) + '.png',
+                    icon: '/awards/record-' + (i + 1) + '.png',
                     type: 'All-Time Fantasy Points Record',
                     extraInfo: round(pointsRecord.fptsFor)
-                })
+                });
             }
 
             if(checkIfDeservesWithManagerID(iqRecord?.rosterID, cRosterID) && i < 3) {
                 displayAwards.push({
                     award: i + 1,
-                    icon: '/awards/record-' + (i+1) + '.png',
+                    icon: '/awards/record-' + (i + 1) + '.png',
                     type: 'All-Time Lineup IQ Record',
                     extraInfo: round(iqRecord.fptsFor * 100 / iqRecord.potentialPoints),
                     iq: true
-                })
+                });
             }
 
-            if(checkIfDeserves(leagueWeekRecord.rosterID, cRosterID, leagueWeekRecord.year)) {
+            if(leagueWeekRecord && checkIfDeserves(leagueWeekRecord.rosterID, cRosterID, leagueWeekRecord.year)) {
                 const former = tookOver && tookOver > leagueWeekRecord.year;
-                if(former) {
-                    formerGlobal = true;
-                }
+                if(former) formerGlobal = true;
+
                 displayAwards.push({
                     award: i + 1,
-                    icon: '/awards/' + (i < 3 ? `record-${i+1}` : 'generic') + '.png',
+                    icon: '/awards/' + (i < 3 ? `record-${i + 1}` : 'generic') + '.png',
                     type: 'All-Time Single Week Record',
                     originalName: getTeamNameFromTeamManagers(leagueTeamManagers, cRosterID, leagueWeekRecord.year),
                     year: leagueWeekRecord.year,
                     week: leagueWeekRecord.week,
                     extraInfo: leagueWeekRecord.fpts,
                     former
-                })
+                });
             }
 
-            if(checkIfDeserves(seasonLongRecord.rosterID, cRosterID, seasonLongRecord.year)) {
+            if(seasonLongRecord && checkIfDeserves(seasonLongRecord.rosterID, cRosterID, seasonLongRecord.year)) {
                 const former = tookOver && tookOver > seasonLongRecord.year;
-                if(former) {
-                    formerGlobal = true;
-                }
+                if(former) formerGlobal = true;
+
                 displayAwards.push({
                     award: i + 1,
-                    icon: '/awards/' + (i < 3 ? `record-${i+1}` : 'generic') + '.png',
+                    icon: '/awards/' + (i < 3 ? `record-${i + 1}` : 'generic') + '.png',
                     type: 'All-Time Season Long Points',
                     originalName: getTeamNameFromTeamManagers(leagueTeamManagers, cRosterID, seasonLongRecord.year),
                     year: seasonLongRecord.year,
                     extraInfo: seasonLongRecord.fpts,
                     former
-                })
+                });
             }
         }
-        for(const yearRecords of records.regularSeasonData.seasonWeekRecords) {
-            for(let i = 0; i < 3; i++) {
+
+        for(const yearRecords of records?.regularSeasonData?.seasonWeekRecords || []) {
+            for(let i = 0; i < Math.min(3, yearRecords.seasonPointsHighs?.length || 0); i++) {
                 const seasonPointsRecord = yearRecords.seasonPointsHighs[i];
                 if(checkIfDeserves(seasonPointsRecord.rosterID, cRosterID, yearRecords.year)) {
                     const former = tookOver && tookOver > yearRecords.year;
-                    if(former) {
-                        formerGlobal = true;
-                    }
+                    if(former) formerGlobal = true;
+
                     displayAwards.push({
                         award: i + 1,
-                        icon: '/awards/' + (i < 3 ? `record-${i+1}` : 'generic') + '.png',
+                        icon: '/awards/' + (i < 3 ? `record-${i + 1}` : 'generic') + '.png',
                         type: `${yearRecords.year} Single Week Record`,
                         originalName: getTeamNameFromTeamManagers(leagueTeamManagers, cRosterID, seasonPointsRecord.year),
                         year: null,
                         week: seasonPointsRecord.week,
                         extraInfo: seasonPointsRecord.fpts,
                         former
-                    })
-                }
-            }
-        }
-let championships = 0;
-    let totalAwards = 0;
-
-    for (const podium of awards) {
-        if (checkIfDeserves(podium.champion, cRosterID, podium.year)) {
-            championships++;
-            totalAwards++;
-        }
-
-        if (checkIfDeserves(podium.second, cRosterID, podium.year)) {
-            totalAwards++;
-        }
-
-        if (checkIfDeserves(podium.third, cRosterID, podium.year)) {
-            totalAwards++;
-        }
-
-        if (podium.divisions) {
-            for (const division of podium.divisions) {
-                if (checkIfDeserves(division.rosterID, cRosterID, podium.year)) {
-                    totalAwards++;
+                    });
                 }
             }
         }
 
-        if (checkIfDeserves(podium.toilet, cRosterID, podium.year)) {
-            totalAwards++;
-        }
-    }
+        // Add the reconstructed 2012-2022 NFL Fantasy accolades to the same case.
+        if(name) addLegacyAwards();
 
-    const findManagerRecord = (recordSet) => {
-    if (!recordSet?.leagueManagerRecords) return null;
-
-    for (const key in recordSet.leagueManagerRecords) {
-        if (checkIfDeservesWithManagerID(key, cRosterID)) {
-            return recordSet.leagueManagerRecords[key];
-        }
-    }
-
-    return null;
-};
-
-const managerRecord = findManagerRecord(
-    records?.regularSeasonData
-);
-
-const playoffRecord = findManagerRecord(
-    records?.playoffData
-);
-
-    careerStats = {
-        championships,
-        awards: totalAwards,
-        wins: managerRecord?.wins || 0,
-        losses: managerRecord?.losses || 0,
-        ties: managerRecord?.ties || 0,
-        playoffAppearances: playoffRecord?.playoffAppearances || 0
+        displayAwards.sort((a, b) => {
+            if(a.year && b.year && a.year !== b.year) return b.year - a.year;
+            if(a.legacy !== b.legacy) return a.legacy ? 1 : -1;
+            return 0;
+        });
     };
-    }
 
-    $: computePodiums(rosterID);
+    $: computePodiums(rosterID, managerName);
 
     const computeAward = (award) => {
         switch (award) {
-            case 1:
-                return '1st Place'
-            case 2:
-                return '2nd Place'
-            case 3:
-                return '3rd Place'
+            case 1: return '1st Place';
+            case 2: return '2nd Place';
+            case 3: return '3rd Place';
             case 4:
             case 5:
             case 6:
@@ -265,80 +282,16 @@ const playoffRecord = findManagerRecord(
             case 9:
             case 10:
                 return award + 'th Place';
-            case 'Champion':
-                return award
+            case 'Champion': return award;
             case 'Second':
-            case 'Third':
-                return award + ' Place'
-            case 'Toilet':
-                return award + ' Bowl'
-            default:
-                return award;
+            case 'Third': return award + ' Place';
+            case 'Toilet': return award + ' Bowl';
+            default: return award;
         }
-    }
+    };
 </script>
 
 <style>
-.careerStats {
-    width: 97%;
-    max-width: 800px;
-    margin: 25px auto 35px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-}
-
-.careerStat {
-    background: var(--fff);
-    border: 1px solid var(--ccc);
-    border-radius: 18px;
-    padding: 18px 10px;
-    text-align: center;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-}
-
-.careerIcon {
-    font-size: 1.5rem;
-    line-height: 1;
-    margin-bottom: 8px;
-}
-
-.careerValue {
-    font-size: 1.7rem;
-    font-weight: 800;
-    line-height: 1.1;
-}
-
-.careerLabel {
-    margin-top: 7px;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.7px;
-    text-transform: uppercase;
-    opacity: 0.6;
-}
-
-.careerSub {
-    margin-top: 4px;
-    font-size: 0.7rem;
-    opacity: 0.55;
-}
-
-@media (max-width: 600px) {
-    .careerStats {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        margin: 20px auto 28px;
-    }
-
-    .careerStat {
-        padding: 15px 8px;
-    }
-
-    .careerValue {
-        font-size: 1.45rem;
-    }
-}
     .awardsCase {
         background-color: var(--fff);
         padding: 0 0 2em;
@@ -369,7 +322,7 @@ const playoffRecord = findManagerRecord(
         margin: 1em 0.5em 2em;
     }
 
-    .awardHeader, .awardLabel, .subText {
+    .awardHeader, .awardLabel, .subText, .legacyTeam {
         text-align: center;
         line-height: 1.2em;
     }
@@ -388,12 +341,25 @@ const playoffRecord = findManagerRecord(
         width: 130px;
     }
 
-    .subText {
+    .subText, .legacyTeam {
         font-size: 0.8em;
         width: 130px;
         color: var(--g555);
         margin-top: 0.3em;
         font-style: italic;
+    }
+
+    .legacyBadge {
+        display: inline-block;
+        margin-top: 0.35em;
+        padding: 2px 7px;
+        border: 1px solid var(--ccc);
+        border-radius: 999px;
+        font-size: 0.58em;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        opacity: 0.7;
     }
 
     .sad {
@@ -410,10 +376,10 @@ const playoffRecord = findManagerRecord(
         overflow: hidden;
     }
 
-    .awardImage{
+    .awardImage {
         height: 100%;
     }
-    
+
     .disclaimer {
         font-size: 0.8em;
         color: var(--g999);
@@ -430,11 +396,7 @@ const playoffRecord = findManagerRecord(
             width: 90px;
         }
 
-        .awardLabel {
-            width: 90px;
-        }
-
-        .subText {
+        .awardLabel, .subText, .legacyTeam {
             width: 90px;
         }
     }
@@ -456,65 +418,13 @@ const playoffRecord = findManagerRecord(
             width: 65px;
         }
 
-        .subText {
+        .subText, .legacyTeam {
             font-size: 0.6em;
             width: 65px;
         }
     }
-
-
 </style>
-<div class="careerStats">
 
-    <div class="careerStat">
-        <div class="careerIcon">🏆</div>
-
-        <div class="careerValue">
-            {careerStats.championships}
-        </div>
-
-        <div class="careerLabel">
-            Championships
-        </div>
-    </div>
-
-    <div class="careerStat">
-        <div class="careerIcon">🥇</div>
-
-        <div class="careerValue">
-            {careerStats.awards}
-        </div>
-
-        <div class="careerLabel">
-            Awards
-        </div>
-    </div>
-
-    <div class="careerStat">
-        <div class="careerIcon">📊</div>
-
-        <div class="careerValue">
-            {careerStats.wins}-{careerStats.losses}{careerStats.ties ? `-${careerStats.ties}` : ''}
-        </div>
-
-        <div class="careerLabel">
-            All-Time Record
-        </div>
-    </div>
-
-    <div class="careerStat">
-        <div class="careerIcon">🎯</div>
-
-        <div class="careerValue">
-            {careerStats.playoffAppearances}
-        </div>
-
-        <div class="careerLabel">
-            Playoff Appearances
-        </div>
-    </div>
-
-</div>
 <div class="awardsCase">
     <h3>Team Awards & Records</h3>
     <div class="awardsCaseInner">
@@ -524,9 +434,17 @@ const playoffRecord = findManagerRecord(
                 <div class="awardIcon">
                     <img class="awardImage" src="{award.icon}" alt="trophy" />
                 </div>
-                <div class="awardLabel">{award.type == 'award' ? `${award.year} ` : ''}{computeAward(award.award)}{award.former ? '*' : ''}</div>
+                <div class="awardLabel">
+                    {award.type == 'award' ? `${award.year} ` : ''}{computeAward(award.award)}{award.former ? '*' : ''}
+                </div>
                 {#if award.extraInfo}
-                    <div class="subText">{award.year ? `${award.year} ` : ''}{award.week ? `Week ${award.week} ` : ''}{award.year || award.week ? ' - ' : ''}{award.extraInfo}{award.wins ? ' Wins' : ''}{award.iq ? '%' : ''}{!award.wins && !award.iq ? 'pts' : ''}</div>
+                    <div class="subText">
+                        {award.year ? `${award.year} ` : ''}{award.week ? `Week ${award.week} ` : ''}{award.year || award.week ? ' - ' : ''}{award.extraInfo}{award.wins ? ' Wins' : ''}{award.iq ? '%' : ''}{!award.wins && !award.iq ? 'pts' : ''}
+                    </div>
+                {/if}
+                {#if award.legacy && award.originalName}
+                    <div class="legacyTeam">{award.originalName}</div>
+                    <div class="legacyBadge">Legacy Era</div>
                 {/if}
             </div>
         {:else}
