@@ -3,11 +3,13 @@
 
     export let data;
 
-    const {
+    $: ({
         standingsData,
         leagueTeamManagersData,
-        playoffBracketData
-    } = data;
+        playoffBracketData,
+        availableSeasons,
+        selectedSeason
+    } = data);
 </script>
 
 <style>
@@ -19,9 +21,13 @@
 </style>
 
 <div class="holder">
-    <Standings
-        {standingsData}
-        {leagueTeamManagersData}
-        {playoffBracketData}
-    />
+    {#key selectedSeason}
+        <Standings
+            {standingsData}
+            {leagueTeamManagersData}
+            {playoffBracketData}
+            {availableSeasons}
+            {selectedSeason}
+        />
+    {/key}
 </div>
