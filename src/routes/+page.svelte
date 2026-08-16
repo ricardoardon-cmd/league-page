@@ -1,7 +1,5 @@
 <script>
-
     import LinearProgress from '@smui/linear-progress';
-
     import {
         getNflState,
         leagueName,
@@ -10,17 +8,13 @@
         homepageText,
         managers,
         gotoManager,
-        enableBlog,
         waitForAll
     } from '$lib/utils/helper';
-
-    import { Transactions, PowerRankings, HomePost } from '$lib/components';
-
+    import { Transactions, PowerRankings } from '$lib/components';
     import {
         getAvatarFromTeamManagers,
         getTeamFromTeamManagers
     } from '$lib/utils/helperFunctions/universalFunctions';
-
     import { dues, dynasty } from '$lib/utils/leagueInfo';
 
     const nflState = getNflState();
@@ -28,54 +22,14 @@
     const leagueTeamManagersData = getLeagueTeamManagers();
 
     const navigation = [
-        {
-            title: 'Standings',
-            description: 'League rankings, records and playoff position.',
-            icon: '🏆',
-            href: '/standings'
-        },
-        {
-            title: 'Matchups',
-            description: 'Weekly matchups, scores and results.',
-            icon: '🏈',
-            href: '/matchups'
-        },
-        {
-            title: 'Teams',
-            description: 'Managers, rosters and team information.',
-            icon: '👥',
-            href: '/managers'
-        },
-        {
-            title: 'Rosters',
-            description: 'Browse every roster in the league.',
-            icon: '📋',
-            href: '/rosters'
-        },
-        {
-            title: 'Transactions',
-            description: 'Trades, waivers, adds and drops.',
-            icon: '🔄',
-            href: '/transactions'
-        },
-        {
-            title: 'Drafts',
-            description: 'Draft history and selections.',
-            icon: '🎯',
-            href: '/drafts'
-        },
-        {
-            title: 'Records',
-            description: 'League records and historical achievements.',
-            icon: '📊',
-            href: '/records'
-        },
-        {
-            title: 'Rivalries',
-            description: 'Head-to-head history and rivalries.',
-            icon: '⚔️',
-            href: '/rivalry'
-        }
+        { title: 'Standings', description: 'League rankings, records and playoff position.', icon: '🏆', href: '/standings' },
+        { title: 'Matchups', description: 'Weekly matchups, scores and results.', icon: '🏈', href: '/matchups' },
+        { title: 'Teams', description: 'Managers, rosters and team information.', icon: '👥', href: '/managers' },
+        { title: 'Rosters', description: 'Browse every roster in the league.', icon: '📋', href: '/rosters' },
+        { title: 'Transactions', description: 'Trades, waivers, adds and drops.', icon: '🔄', href: '/transactions' },
+        { title: 'Drafts', description: 'Draft history and selections.', icon: '🎯', href: '/drafts' },
+        { title: 'Records', description: 'League records and historical achievements.', icon: '📊', href: '/records' },
+        { title: 'Rivalries', description: 'Head-to-head history and rivalries.', icon: '⚔️', href: '/rivalry' }
     ];
 </script>
 
@@ -83,6 +37,7 @@
     #home {
         min-height: 100vh;
         background: var(--f3f3f3);
+        color: inherit;
     }
 
     .dashboard {
@@ -93,113 +48,73 @@
         box-sizing: border-box;
     }
 
-    /* HERO */
-
     .hero {
-    position: relative;
-
-    min-height: 310px;
-
-    background:
-        linear-gradient(
-            to top,
-            rgba(0, 0, 0, 0.72) 0%,
-            rgba(0, 0, 0, 0.20) 55%,
-            rgba(0, 0, 0, 0.10) 100%
-        ),
-        url('/league-photo.jpg');
-
-    background-size: cover;
-    background-position: center 22%;
-
-    color: white;
-
-    border-radius: 18px;
-
-    padding: 35px;
-
-    margin-bottom: 25px;
-
-    box-shadow:
-        0 8px 25px
-        rgba(0, 0, 0, 0.18);
-
-    overflow: hidden;
-}
+        position: relative;
+        min-height: 310px;
+        padding: 35px;
+        margin-bottom: 25px;
+        border-radius: 18px;
+        overflow: hidden;
+        color: #fff;
+        background:
+            linear-gradient(to top, rgba(0,0,0,.72) 0%, rgba(0,0,0,.20) 55%, rgba(0,0,0,.10) 100%),
+            url('/league-photo.jpg');
+        background-size: cover;
+        background-position: center 22%;
+        box-shadow: 0 8px 25px rgba(0,0,0,.18);
+    }
 
     .heroTop {
-    min-height: 240px;
-
-    display: flex;
-
-    justify-content: flex-start;
-    align-items: flex-end;
-
-    position: relative;
-}
+        min-height: 240px;
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-end;
+        position: relative;
+    }
 
     .hero h1 {
         margin: 0;
         font-size: 2.7rem;
         font-weight: 800;
         letter-spacing: -1px;
+        text-shadow: 0 2px 10px rgba(0,0,0,.75);
     }
 
     .hero p {
         margin: 8px 0 0;
-        opacity: 0.85;
+        opacity: .85;
         font-size: 1.05rem;
-    }
-
-    .hero h1,
-    .hero p {
-        text-shadow:
-            0 2px 10px
-            rgba(0, 0, 0, 0.75);
+        text-shadow: 0 2px 10px rgba(0,0,0,.75);
     }
 
     .status {
-    position: absolute;
-
-    top: 0;
-    right: 0;
-
-    background:
-        rgba(0, 0, 0, 0.42);
-
-    backdrop-filter: blur(8px);
-
-    border:
-        1px solid
-        rgba(255, 255, 255, 0.28);
-
-    padding: 12px 18px;
-
-    border-radius: 12px;
-
-    text-align: center;
-
-    min-width: 130px;
-
-    color: white;
-}
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 130px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        text-align: center;
+        color: #fff;
+        background: rgba(0,0,0,.42);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,.28);
+    }
 
     .statusLabel {
         display: block;
-        font-size: 0.75rem;
+        font-size: .75rem;
         text-transform: uppercase;
-        opacity: 0.7;
+        opacity: .7;
         letter-spacing: 1px;
     }
 
     .statusValue {
         display: block;
+        margin-top: 3px;
         font-size: 1.1rem;
         font-weight: 700;
-        margin-top: 3px;
     }
-
-    /* STAT CARDS */
 
     .stats {
         display: grid;
@@ -208,46 +123,44 @@
         margin-bottom: 30px;
     }
 
+    .statCard,
+    .intro,
+    .navCard,
+    .panel,
+    #currentChamp {
+        background: var(--f3f3f3);
+        color: inherit;
+    }
+
     .statCard {
-        background:  var(--f3f3f3);
         border-radius: 14px;
         padding: 20px;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e5e5e5;
+        box-shadow: 0 3px 12px rgba(0,0,0,.08);
+        border: 1px solid var(--ccc);
     }
-    .statIcon {
-        font-size: 1.5rem;
-    }
-leagueBadge {
-    width: 48px;
-    height: 48px;
-    object-fit: cover;
-    border-radius: 50%;
-    display: block;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-}
+
+    .statIcon { font-size: 1.5rem; }
+
     .statLabel {
-        color: #777;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
         margin-top: 10px;
+        font-size: .8rem;
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        opacity: .7;
     }
 
     .statValue {
+        margin-top: 4px;
         font-size: 1.4rem;
         font-weight: 750;
-        margin-top: 4px;
     }
 
-    /* INTRO */
-
     .intro {
-        background:  var(--f3f3f3);
         border-radius: 14px;
         padding: 25px;
         margin-bottom: 30px;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+        box-shadow: 0 3px 12px rgba(0,0,0,.06);
+        border: 1px solid var(--ccc);
     }
 
     .introTitle {
@@ -256,12 +169,52 @@ leagueBadge {
         margin-bottom: 12px;
     }
 
-    /* NAVIGATION */
+    .welcomeText {
+        color: inherit;
+        line-height: 1.6;
+    }
+
+    .welcomeText :global(p),
+    .welcomeText :global(div),
+    .welcomeText :global(span),
+    .welcomeText :global(li),
+    .welcomeText :global(strong),
+    .welcomeText :global(b) { color: inherit; }
+
+    .welcomeText :global(a) { color: var(--blueOne); }
+
+    .nflBanner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-height: 62px;
+        box-sizing: border-box;
+        padding: 12px 18px;
+        margin-bottom: 25px;
+        border-radius: 12px;
+        background: var(--blueOne);
+        color: #fff;
+        text-align: center;
+    }
+
+    .nflLabel {
+        font-size: .72rem;
+        text-transform: uppercase;
+        opacity: .75;
+        letter-spacing: 1px;
+    }
+
+    .nflWeek {
+        font-size: 1.15rem;
+        font-weight: 750;
+    }
 
     .sectionTitle {
+        margin: 35px 0 15px;
         font-size: 1.6rem;
         font-weight: 750;
-        margin: 35px 0 15px;
+        color: inherit;
     }
 
     .navigation {
@@ -272,18 +225,17 @@ leagueBadge {
 
     .navCard {
         display: block;
-        text-decoration: none;
-        color: inherit;
-        background:  var(--f3f3f3);
-        border-radius: 14px;
+        min-width: 0;
         padding: 22px;
-        border: 1px solid #e5e5e5;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        border-radius: 14px;
+        border: 1px solid var(--ccc);
+        text-decoration: none;
+        transition: transform .15s ease, box-shadow .15s ease;
     }
 
     .navCard:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 20px rgba(0,0,0,.1);
     }
 
     .navIcon {
@@ -297,13 +249,11 @@ leagueBadge {
     }
 
     .navDescription {
-        color: #777;
-        font-size: 0.85rem;
-        line-height: 1.4;
         margin-top: 5px;
+        font-size: .85rem;
+        line-height: 1.4;
+        opacity: .75;
     }
-
-    /* MAIN CONTENT */
 
     .contentGrid {
         display: grid;
@@ -313,51 +263,25 @@ leagueBadge {
     }
 
     .panel {
-        background:  var(--f3f3f3);
-        border-radius: 14px;
         padding: 20px;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
         margin-bottom: 25px;
+        border-radius: 14px;
+        border: 1px solid var(--ccc);
+        box-shadow: 0 3px 12px rgba(0,0,0,.06);
     }
 
     .panelTitle {
+        margin-bottom: 15px;
         font-size: 1.3rem;
         font-weight: 700;
-        margin-bottom: 15px;
     }
-
-    /* NFL */
-
-    .nflBanner {
-        background: var(--blueOne);
-        color: white;
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        margin-bottom: 25px;
-    }
-
-    .nflLabel {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        opacity: 0.75;
-        letter-spacing: 1px;
-    }
-
-    .nflWeek {
-        font-size: 1.7rem;
-        font-weight: 750;
-        margin-top: 4px;
-    }
-
-    /* CHAMPION */
 
     #currentChamp {
         padding: 25px;
-        background:  var(--f3f3f3);
-        border-radius: 14px;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
         margin-bottom: 25px;
+        border-radius: 14px;
+        border: 1px solid var(--ccc);
+        box-shadow: 0 3px 12px rgba(0,0,0,.06);
         text-align: center;
     }
 
@@ -371,28 +295,29 @@ leagueBadge {
 
     .first {
         position: absolute;
-        transform: translate(-50%, -50%);
-        width: 80px;
-        height: 80px;
-        border-radius: 100%;
-        border: 1px solid #ccc;
         left: 50%;
         top: 43%;
+        width: 80px;
+        height: 80px;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        border: 1px solid #ccc;
+        object-fit: cover;
     }
 
     .laurel {
         position: absolute;
-        transform: translate(-50%, -50%);
-        width: 135px;
-        height: auto;
         left: 50%;
         top: 50%;
+        width: 135px;
+        height: auto;
+        transform: translate(-50%, -50%);
     }
 
     .champTitle {
+        margin-bottom: 5px;
         font-size: 1.4rem;
         font-weight: 700;
-        margin-bottom: 5px;
     }
 
     .champTeam {
@@ -403,383 +328,282 @@ leagueBadge {
     }
 
     .champYear {
-        color: #777;
-        font-size: 0.9rem;
+        font-size: .9rem;
+        opacity: .68;
     }
 
-    /* MOBILE */
+    a { color: inherit; }
 
     @media (max-width: 1000px) {
-        .stats {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .navigation {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .contentGrid {
-            grid-template-columns: 1fr;
-        }
+        .stats { grid-template-columns: repeat(2, 1fr); }
+        .navigation { grid-template-columns: repeat(2, 1fr); }
+        .contentGrid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 650px) {
-        .dashboard {
-            padding: 20px 12px 40px;
-        }
+        .dashboard { padding: 14px 10px 34px; }
 
         .hero {
-            min-height: 230px;
-            padding: 20px;
+            min-height: 185px;
+            padding: 16px;
+            margin-bottom: 12px;
             border-radius: 14px;
             background-position: center 35%;
         }
 
         .heroTop {
-            min-height: 190px;
-            display: flex;
+            min-height: 155px;
             justify-content: flex-end;
             align-items: flex-start;
             flex-direction: column;
         }
 
-        .hero h1 {
-            font-size: 2rem;
-        }
+        .hero h1 { font-size: 1.8rem; }
+        .hero p { margin-top: 4px; font-size: .88rem; }
 
         .status {
-            top: 0;
-            right: 0;
-            width: auto;
-            min-width: 105px;
-            padding: 8px 11px;
-            box-sizing: border-box;
+            min-width: 92px;
+            padding: 6px 9px;
+            border-radius: 10px;
         }
 
-        .statusLabel {
-            font-size: 0.62rem;
-        }
-
-        .statusValue {
-            font-size: 0.9rem;
-        }
+        .statusLabel { font-size: .54rem; }
+        .statusValue { font-size: .82rem; }
 
         .stats {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(4, minmax(0,1fr));
+            gap: 6px;
+            margin-bottom: 12px;
         }
 
         .statCard {
-            padding: 15px;
+            min-width: 0;
+            padding: 10px 5px;
+            border-radius: 11px;
+            text-align: center;
         }
 
+        .statIcon { font-size: 1.1rem; }
+        .statLabel {
+            margin-top: 5px;
+            font-size: .48rem;
+            letter-spacing: .25px;
+            white-space: nowrap;
+        }
+        .statValue {
+            margin-top: 2px;
+            font-size: .82rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .intro {
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+        }
+
+        .introTitle { font-size: 1.05rem; margin-bottom: 8px; }
+        .welcomeText { font-size: .84rem; line-height: 1.45; }
+        .welcomeText :global(p) { margin: .55em 0; }
+
+        .nflBanner {
+            min-height: 48px;
+            gap: 7px;
+            padding: 8px 12px;
+            margin-bottom: 14px;
+            border-radius: 10px;
+        }
+        .nflLabel { font-size: .58rem; }
+        .nflWeek { font-size: .88rem; }
+
+        .sectionTitle {
+            margin: 18px 2px 9px;
+            font-size: 1.2rem;
+        }
+
+        /* Compact mobile League Center: 8 links become four short rows. */
         .navigation {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap: 7px;
         }
 
         .navCard {
-            padding: 18px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-height: 54px;
+            box-sizing: border-box;
+            padding: 9px 10px;
+            border-radius: 11px;
         }
+
+        .navIcon {
+            width: 29px;
+            margin: 0;
+            flex-shrink: 0;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+
+        .navTitle {
+            min-width: 0;
+            font-size: .82rem;
+            font-weight: 800;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .navDescription { display: none; }
+
+        .contentGrid { gap: 10px; }
+        .contentGrid > aside { order: -1; }
+
+        .panel {
+            padding: 13px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+        }
+        .panelTitle { margin-bottom: 10px; font-size: 1.05rem; }
+
+        #currentChamp {
+            display: grid;
+            grid-template-columns: 72px minmax(0,1fr);
+            grid-template-rows: auto auto auto;
+            align-items: center;
+            column-gap: 10px;
+            padding: 12px;
+            margin-bottom: 2px;
+            text-align: left;
+        }
+
+        #currentChamp .champTitle { grid-column: 2; grid-row: 1; margin: 0; font-size: .98rem; }
+        #currentChamp .champYear { grid-column: 2; grid-row: 2; font-size: .72rem; }
+        #currentChamp .champTeam { grid-column: 2; grid-row: 3; font-size: 1rem; }
+        #champ {
+            grid-column: 1;
+            grid-row: 1 / 4;
+            width: 70px;
+            height: 70px;
+            margin: 0;
+        }
+        .first { width: 42px; height: 42px; }
+        .laurel { width: 68px; }
     }
-.welcomeText {
-    color: inherit;
-    line-height: 1.6;
-}
 
-.welcomeText :global(p),
-.welcomeText :global(div),
-.welcomeText :global(span),
-.welcomeText :global(li),
-.welcomeText :global(strong),
-.welcomeText :global(b) {
-    color: inherit;
-}
-
-.welcomeText :global(a) {
-    color: var(--blueOne);
-}
-/* =========================================================
-   GGL DASHBOARD - LIGHT / DARK MODE SUPPORT
-   Uses the existing League Page theme
-   ========================================================= */
-
-/* Cards and dashboard sections */
-.statCard,
-.intro,
-.navCard,
-.panel,
-#currentChamp {
-    background-color: var(--f3f3f3);
-    color: inherit;
-}
-
-/* Dashboard text */
-.statCard,
-.intro,
-.navCard,
-.panel,
-#currentChamp,
-.sectionTitle {
-    color: inherit;
-}
-
-/* Welcome section */
-.welcomeText {
-    color: inherit;
-    line-height: 1.6;
-}
-
-.welcomeText p,
-.welcomeText div,
-.welcomeText span,
-.welcomeText li,
-.welcomeText strong,
-.welcomeText b {
-    color: inherit;
-}
-
-/* Links */
-.welcomeText a,
-.navCard {
-    color: inherit;
-}
-
-/* Card descriptions */
-.navDescription {
-    color: inherit;
-    opacity: 0.75;
-}
-
-/* Stat labels */
-.statLabel {
-    color: inherit;
-    opacity: 0.7;
-}
-
-/* Main dashboard background */
-#home {
-    background-color: var(--f3f3f3);
-    color: inherit;
-}
-
-/* Make headings follow the current theme */
-.sectionTitle,
-.panelTitle,
-.introTitle,
-.statValue,
-.navTitle,
-.champTitle,
-.champTeam,
-.champYear {
-    color: inherit;
-}
-
-/* Keep the league banner readable */
-.nflBanner {
-    background-color: var(--blueOne);
-    color: #fff;
-}
-
-/* Make links visible in both themes */
-a {
-    color: inherit;
-}
-
+    @media (max-width: 370px) {
+        .dashboard { padding-left: 7px; padding-right: 7px; }
+        .navCard { gap: 6px; padding-left: 7px; padding-right: 7px; }
+        .navIcon { width: 25px; font-size: 1.15rem; }
+        .navTitle { font-size: .74rem; }
+        .statLabel { font-size: .43rem; }
+    }
 </style>
 
 <div id="home">
     <main class="dashboard">
-
-        <!-- HERO -->
         <section class="hero">
             <div class="heroTop">
-
                 <div>
                     <h1>{leagueName}</h1>
                     <p>Fantasy Football League Hub</p>
                 </div>
-
                 <div class="status">
                     <span class="statusLabel">League Format</span>
-                    <span class="statusValue">
-                        {dynasty ? 'Dynasty' : 'Redraft'}
-                    </span>
+                    <span class="statusValue">{dynasty ? 'Dynasty' : 'Redraft'}</span>
                 </div>
-
             </div>
         </section>
 
-        <!-- QUICK STATS -->
-<section class="stats">
-
-    <div class="statCard">
-        <div class="statIcon">👥</div>
-        <div class="statLabel">Teams</div>
-        <div class="statValue">{managers.length || '—'}</div>
-    </div>
-
-    <div class="statCard">
-        <div class="statIcon">💰</div>
-        <div class="statLabel">League Dues</div>
-        <div class="statValue">${dues}</div>
-    </div>
-
-    <div class="statCard">
-        <div class="statIcon">🏈</div>
-        <div class="statLabel">NFL Status</div>
-
-        <div class="statValue">
-            {#await nflState}
-                ...
-            {:then state}
-                {state.season_type === 'regular'
-                    ? `Week ${state.week}`
-                    : state.season_type === 'pre'
-                        ? 'Preseason'
-                        : 'Postseason'}
-            {:catch}
-                —
-            {/await}
-        </div>
-    </div>
-
-    <div class="statCard">
-    <div class="statIcon">🏆</div>
-    <div class="statLabel">League</div>
-    <div class="statValue">GGL</div>
-</div>
-
-</section>
-
-        <!-- INTRODUCTION -->
-        <section class="intro">
-            <div class="introTitle">Welcome to {leagueName}</div>
-
-            <div class="welcomeText">
-    {@html homepageText}
-</div>
+        <section class="stats">
+            <div class="statCard">
+                <div class="statIcon">👥</div>
+                <div class="statLabel">Teams</div>
+                <div class="statValue">{managers.length || '—'}</div>
+            </div>
+            <div class="statCard">
+                <div class="statIcon">💰</div>
+                <div class="statLabel">Dues</div>
+                <div class="statValue">${dues}</div>
+            </div>
+            <div class="statCard">
+                <div class="statIcon">🏈</div>
+                <div class="statLabel">NFL</div>
+                <div class="statValue">
+                    {#await nflState}
+                        ...
+                    {:then state}
+                        {state.season_type === 'regular' ? `Wk ${state.week}` : state.season_type === 'pre' ? 'Pre' : 'Post'}
+                    {:catch}
+                        —
+                    {/await}
+                </div>
+            </div>
+            <div class="statCard">
+                <div class="statIcon">🏆</div>
+                <div class="statLabel">League</div>
+                <div class="statValue">GGL</div>
+            </div>
         </section>
 
-        <!-- NFL STATUS -->
+        <section class="intro">
+            <div class="introTitle">Welcome to {leagueName}</div>
+            <div class="welcomeText">{@html homepageText}</div>
+        </section>
+
         <section class="nflBanner">
-
             <div class="nflLabel">NFL Status</div>
-
             {#await nflState}
                 <div class="nflWeek">Retrieving NFL state...</div>
                 <LinearProgress indeterminate />
-
             {:then nflStateData}
-
                 <div class="nflWeek">
-
                     NFL {nflStateData.season}
-
-                    {#if nflStateData.season_type == 'pre'}
-                        — Preseason
-
-                    {:else if nflStateData.season_type == 'post'}
-                        — Postseason
-
-                    {:else}
-                        — Week {nflStateData.week}
-                    {/if}
-
+                    {#if nflStateData.season_type == 'pre'}— Preseason{:else if nflStateData.season_type == 'post'}— Postseason{:else}— Week {nflStateData.week}{/if}
                 </div>
-
-            {:catch error}
-
-                <div class="nflWeek">
-                    Unable to retrieve NFL status
-                </div>
-
+            {:catch}
+                <div class="nflWeek">Unable to retrieve NFL status</div>
             {/await}
-
         </section>
 
-        <!-- NAVIGATION -->
         <h2 class="sectionTitle">League Center</h2>
-
         <section class="navigation">
-
             {#each navigation as item}
-
                 <a class="navCard" href={item.href}>
-
                     <div class="navIcon">{item.icon}</div>
-
-                    <div class="navTitle">
-                        {item.title}
+                    <div>
+                        <div class="navTitle">{item.title}</div>
+                        <div class="navDescription">{item.description}</div>
                     </div>
-
-                    <div class="navDescription">
-                        {item.description}
-                    </div>
-
                 </a>
-
             {/each}
-
         </section>
 
-        <!-- MAIN CONTENT -->
         <h2 class="sectionTitle">League Highlights</h2>
-
         <section class="contentGrid">
-
             <div>
-
-                <!-- POWER RANKINGS -->
                 <div class="panel">
-
-                    <div class="panelTitle">
-                        🔥 Power Rankings
-                    </div>
-
+                    <div class="panelTitle">🔥 Power Rankings</div>
                     <PowerRankings />
-
                 </div>
 
-                <!-- TRANSACTIONS -->
                 <div class="panel">
-
-                    <div class="panelTitle">
-                        🔄 Recent Transactions
-                    </div>
-
+                    <div class="panelTitle">🔄 Recent Transactions</div>
                     <Transactions />
-
                 </div>
-
             </div>
 
-            <!-- SIDEBAR -->
             <aside>
-
-                <!-- CURRENT CHAMPION -->
                 <div id="currentChamp">
-
-                    {#await waitForAll(
-                        podiumsData,
-                        leagueTeamManagersData
-                    )}
-
+                    {#await waitForAll(podiumsData, leagueTeamManagersData)}
                         <p>Retrieving league history...</p>
-
                         <LinearProgress indeterminate />
-
                     {:then [podiums, leagueTeamManagers]}
-
                         {#if podiums[0]}
-
-                            <div class="champTitle">
-                                🏆 Defending Champion
-                            </div>
-
-                            <div class="champYear">
-                                {podiums[0].year} Champion
-                            </div>
-
+                            <div class="champTitle">🏆 Defending Champion</div>
+                            <div class="champYear">{podiums[0].year} Champion</div>
                             <div
                                 id="champ"
                                 onclick={() => {
@@ -792,63 +616,31 @@ a {
                                     }
                                 }}
                             >
-
                                 <img
-                                    src={getAvatarFromTeamManagers(
-                                        leagueTeamManagers,
-                                        podiums[0].champion,
-                                        podiums[0].year
-                                    )}
+                                    src={getAvatarFromTeamManagers(leagueTeamManagers, podiums[0].champion, podiums[0].year)}
                                     class="first"
                                     alt="champion"
                                 />
-
-                                <img
-                                    src="/laurel.png"
-                                    class="laurel"
-                                    alt="champion laurel"
-                                />
-
+                                <img src="/laurel.png" class="laurel" alt="champion laurel" />
                             </div>
-
                             <div
                                 class="champTeam"
-                                onclick={() =>
-                                    gotoManager({
-                                        year: podiums[0].year,
-                                        leagueTeamManagers,
-                                        rosterID: parseInt(podiums[0].champion)
-                                    })
-                                }
-                            >
-
-                                {getTeamFromTeamManagers(
+                                onclick={() => gotoManager({
+                                    year: podiums[0].year,
                                     leagueTeamManagers,
-                                    podiums[0].champion,
-                                    podiums[0].year
-                                ).name}
-
+                                    rosterID: parseInt(podiums[0].champion)
+                                })}
+                            >
+                                {getTeamFromTeamManagers(leagueTeamManagers, podiums[0].champion, podiums[0].year).name}
                             </div>
-
                         {:else}
-
                             <p>No former champions.</p>
-
                         {/if}
-
-                    {:catch error}
-
-                        <p>
-                            Unable to retrieve championship history.
-                        </p>
-
+                    {:catch}
+                        <p>Unable to retrieve championship history.</p>
                     {/await}
-
                 </div>
-
             </aside>
-
         </section>
-
     </main>
 </div>
