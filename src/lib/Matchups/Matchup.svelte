@@ -49,6 +49,7 @@
     const getStarterPoints = (entry, starterIDs) => {
         if(matchupWeek) return entry?.points?.[matchupWeek] || [];
         if(Array.isArray(entry?.starters_points)) return entry.starters_points;
+        if(Array.isArray(entry?.points)) return entry.points;
         const scores = pointMap(entry);
         return (starterIDs || []).map((id) => Number(scores?.[id]) || 0);
     };
