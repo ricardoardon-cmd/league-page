@@ -631,6 +631,13 @@ const processRivalryMatchups = (
             }
 
 
+            const starterPoints = Array.isArray(match.starters_points)
+                ? match.starters_points
+                : (match.starters || []).map((playerID) =>
+                    Number(match.players_points?.[playerID]) || 0
+                );
+
+
             matchups[
                 match.matchup_id
             ].push({
@@ -641,8 +648,14 @@ const processRivalryMatchups = (
                 starters:
                     match.starters,
 
+                // Keep the original rivalry shape for totals/history cards.
                 points:
-                    match.starters_points
+                    starterPoints,
+
+                // Also keep the standard Sleeper field so Matchup.svelte can
+                // render the actual per-player scores instead of projections only.
+                starters_points:
+                    starterPoints
 
             });
 
