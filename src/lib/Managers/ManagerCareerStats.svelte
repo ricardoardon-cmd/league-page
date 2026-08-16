@@ -9,6 +9,8 @@
         championships: 0,
         awards: 0,
         playoffAppearances: 0,
+        sleeperPlayoffAppearances: 0,
+        legacyPlayoffAppearances: 0,
         sleeper: { wins: 0, losses: 0, ties: 0 },
         legacy: { wins: 0, losses: 0, ties: 0 },
         all: { wins: 0, losses: 0, ties: 0 }
@@ -49,6 +51,25 @@
         return null;
     };
 
+    const getLegacyLookupName = (name) => {
+        const normalized = String(name || '').trim().toLowerCase();
+        if(normalized === 'picorico') return 'Pico';
+        return name;
+    };
+
+    const legacyPlayoffCutoff = (teamCount) => {
+        if(teamCount === 10) return 6;
+        if(teamCount === 8 || teamCount === 6) return 4;
+        return 0;
+    };
+
+    const getLegacyPlayoffAppearances = (legacyCareer) => {
+        return (legacyCareer?.seasonHistory || []).reduce((total, season) => {
+            const cutoff = legacyPlayoffCutoff(season.teamCount);
+            return total + (cutoff && season.finish <= cutoff ? 1 : 0);
+        }, 0);
+    };
+
     const buildStats = (userRosterID, name) => {
         let sleeperChampionships = 0;
         let totalAwards = 0;
@@ -75,7 +96,7 @@
 
         const sleeperRecord = findManagerRecord(records?.regularSeasonData, userRosterID);
         const playoffRecord = findManagerRecord(records?.playoffData, userRosterID);
-        const legacyCareer = getLegacyManagerCareer(name);
+        const legacyCareer = getLegacyManagerCareer(getLegacyLookupName(name));
 
         const sleeper = {
             wins: sleeperRecord?.wins || 0,
@@ -89,10 +110,15 @@
             ties: legacyCareer?.ties || 0
         };
 
+        const sleeperPlayoffAppearances = playoffRecord?.playoffAppearances || 0;
+        const legacyPlayoffAppearances = getLegacyPlayoffAppearances(legacyCareer);
+
         stats = {
             championships: sleeperChampionships + (legacyCareer?.championships || 0),
             awards: totalAwards,
-            playoffAppearances: playoffRecord?.playoffAppearances || 0,
+            playoffAppearances: sleeperPlayoffAppearances + legacyPlayoffAppearances,
+            sleeperPlayoffAppearances,
+            legacyPlayoffAppearances,
             sleeper,
             legacy,
             all: {
@@ -232,6 +258,6 @@
         <div class="careerIcon">🎯</div>
         <div class="careerValue">{stats.playoffAppearances}</div>
         <div class="careerLabel">Playoff Appearances</div>
-        <div class="careerSub">Sleeper era</div>
+        <div class="careerSub">Legacy {stats.legacyPlayoffAppearances} · Sleeper {stats.sleeperPlayoffAppearances}</div>
     </div>
 </div>
