@@ -6,187 +6,285 @@
 
 export const LEGACY_SOURCE = 'legacy';
 
-const season = (year, teams, podium = {}, notes = []) => ({
+const team = (finish, name, manager, wins, losses, ties = 0) => ({
+    finish,
+    name,
+    manager,
+    wins,
+    losses,
+    ties,
+});
+
+const season = ({
+    year,
+    teams,
+    podium,
+    mostPoints = null,
+    leastPoints = null,
+    toiletBowlLoser = null,
+    notes = [],
+}) => ({
     year,
     source: LEGACY_SOURCE,
     platform: 'NFL Fantasy',
+    teamCount: teams.length,
     teams,
     podium,
+    mostPoints,
+    leastPoints,
+    toiletBowlLoser,
     notes,
 });
 
-const team = (name, manager) => ({ name, manager });
-
 export const legacyHistory = [
-    season(2012, [
-        team('Victorious Secret', 'Pico'),
-        team('Sofa King Beast', 'Brandon'),
-        team('Rated M for Gore', 'Henry'),
-        team('Casper on Deez Niggaz', 'Ghost Team'),
-        team('The MacDaddys', 'Dustin'),
-        team('Swag Nasty', 'Myron'),
-    ], {
-        champion: 'The MacDaddys',
-        runnerUp: 'Swag Nasty',
-        thirdPlace: 'Sofa King Beast',
+    season({
+        year: 2012,
+        teams: [
+            team(1, 'Victorious Secret', 'Pico', 9, 5),
+            team(2, 'Sofa King Beast', 'Brandon', 8, 6),
+            team(3, 'Rated M for Gore', 'Henry', 8, 6),
+            team(4, 'Casper on Deez Niggaz', 'Ghost Team', 7, 7),
+            team(5, 'The MacDaddys', 'Dustin', 6, 8),
+            team(6, 'Swag Nasty', 'Myron', 4, 10),
+        ],
+        podium: {
+            champion: 'The MacDaddys',
+            runnerUp: 'Swag Nasty',
+            thirdPlace: 'Sofa King Beast',
+        },
+        mostPoints: { team: 'Casper on Deez Niggaz', manager: 'Ghost Team', points: 1543.44 },
+        leastPoints: { team: 'Swag Nasty', manager: 'Myron', points: null },
+        toiletBowlLoser: { team: 'Rated M for Gore', manager: 'Henry' },
     }),
 
-    season(2013, [
-        team('Div Gobblers', 'Luis'),
-        team('Kaeptain Luck My Harbaughs', 'Henry'),
-        team('Megatron is the Ansah', 'Brandon'),
-        team('The Brotherhood', 'Pico'),
-        team('MacDaddy the Pimp', 'Dustin'),
-        team('Ghost Team', 'Ghost Team'),
-    ], {
-        champion: 'The Brotherhood',
-        runnerUp: 'Kaeptain Luck My Harbaughs',
-        thirdPlace: 'Div Gobblers',
+    season({
+        year: 2013,
+        teams: [
+            team(1, 'Div Gobblers', 'Luis', 11, 4),
+            team(2, 'Kaeptain Luck My Harbaughs', 'Henry', 11, 4),
+            team(3, 'Megatron is the Ansah', 'Brandon', 8, 7),
+            team(4, 'The Brotherhood', 'Pico', 7, 8),
+            team(5, 'MacDaddy the Pimp', 'Dustin', 5, 10),
+            team(6, 'Ghost Team', 'Ghost Team', 3, 12),
+        ],
+        podium: {
+            champion: 'The Brotherhood',
+            runnerUp: 'Kaeptain Luck My Harbaughs',
+            thirdPlace: 'Div Gobblers',
+        },
+        mostPoints: { team: 'Kaeptain Luck My Harbaughs', manager: 'Henry', points: 2121.04 },
+        leastPoints: { team: 'Ghost Team', manager: 'Ghost Team', points: 1608.82 },
+        toiletBowlLoser: { team: 'Ghost Team', manager: 'Ghost Team' },
     }),
 
-    season(2014, [
-        team('Megatron is the Ansah', 'Brandon'),
-        team('SuckMyDitka', 'Andreas'),
-        team('Majari-Bimbo', 'Ariel'),
-        team('Karptain Lick My Harbaughs', 'Henry'),
-        team('Purple Swag', 'Andy'),
-        team('The Brotherhood', 'Pico'),
-        team('Man Gobblers', 'Luis'),
-        team('Orange and Blue Balls', 'Jared'),
-        team('MacDaddy the Pimp', 'Dustin'),
-        team('Team Austin', 'Austin'),
-    ], {
-        champion: 'Purple Swag',
-        runnerUp: 'The Brotherhood',
-        thirdPlace: 'Megatron is the Ansah',
-    }, ['Last 1-QB season']),
-
-    season(2015, [
-        team('Jones and Murrays', 'Andy'),
-        team('Man Gobblers', 'Luis'),
-        team('SuckMyDitka', 'Andreas'),
-        team('MacDaddy the Pimp', 'Dustin'),
-        team('Majari-Bimbo', 'Ariel'),
-        team('Megatron is the Ansah', 'Brandon'),
-        team('The Injury Bugs', 'Pico'),
-        team('Orange and Blue Balls', 'Jared'),
-    ], {
-        champion: 'Jones and Murrays',
-        runnerUp: 'SuckMyDitka',
-        thirdPlace: 'Man Gobblers',
-    }, ['First 2-QB season']),
-
-    season(2016, [
-        team('Player 1', 'Brandon'),
-        team('Purple Swag', 'Andy'),
-        team('SuckMyDitka', 'Andreas'),
-        team('Man Gobblers', 'Luis'),
-        team('Majari-Bimbo', 'Ariel'),
-        team('Macdaddy the Pimp', 'Dustin'),
-        team('Wentz Upon a Time', 'Pico'),
-        team('Orange and Blue Balls', 'Jared'),
-    ], {
-        champion: 'Player 1',
-        runnerUp: 'Purple Swag',
-        thirdPlace: 'Man Gobblers',
+    season({
+        year: 2014,
+        teams: [
+            team(1, 'Megatron is the Ansah', 'Brandon', 9, 5),
+            team(2, 'SuckMyDitka', 'Andreas', 8, 6),
+            team(3, 'Majari-Bimbo', 'Ariel', 8, 6),
+            team(4, 'Karptain Lick My Harbaughs', 'Henry', 8, 6),
+            team(5, 'Purple Swag', 'Andy', 7, 7),
+            team(6, 'The Brotherhood', 'Pico', 7, 7),
+            team(7, 'Man Gobblers', 'Luis', 7, 7),
+            team(8, 'Orange and Blue Balls', 'Jared', 7, 7),
+            team(9, 'MacDaddy the Pimp', 'Dustin', 5, 9),
+            team(10, 'Team Austin', 'Austin', 4, 10),
+        ],
+        podium: {
+            champion: 'Purple Swag',
+            runnerUp: 'The Brotherhood',
+            thirdPlace: 'Megatron is the Ansah',
+        },
+        mostPoints: { team: 'The Brotherhood', manager: 'Pico', points: 1619.12 },
+        leastPoints: { team: 'Orange and Blue Balls', manager: 'Jared', points: 1228.78 },
+        toiletBowlLoser: { team: 'Man Gobblers', manager: 'Luis' },
+        notes: ['Last year with 1 QB'],
     }),
 
-    season(2017, [
-        team('Team 6', 'Igoe'),
-        team('Casper the Fantasy Ghost', 'Ghost Team'),
-        team('Player 1', 'Brandon'),
-        team('Purple Swag', 'Andy'),
-        team('MacDaddy the Pimp', 'Dustin'),
-        team('Orange and Blue Balls', 'Jared'),
-        team('Your Butt Ertz from my Johnson', 'Pico'),
-        team('I Forte my Revis n Bowles in U', 'Luis'),
-    ], {
-        champion: 'Team 6',
-        runnerUp: 'Player 1',
-        thirdPlace: 'Casper the Fantasy Ghost',
+    season({
+        year: 2015,
+        teams: [
+            team(1, 'Jones and Murrays', 'Andy', 10, 4),
+            team(2, 'Man Gobblers', 'Luis', 9, 5),
+            team(3, 'SuckMyDitka', 'Andreas', 9, 5),
+            team(4, 'MacDaddy the Pimp', 'Dustin', 7, 7),
+            team(5, 'Majari-Bimbo', 'Ariel', 7, 7),
+            team(6, 'Megatron is the Ansah', 'Brandon', 6, 8),
+            team(7, 'The Injury Bugs', 'Pico', 5, 9),
+            team(8, 'Orange and Blue Balls', 'Jared', 3, 11),
+        ],
+        podium: {
+            champion: 'Jones and Murrays',
+            runnerUp: 'SuckMyDitka',
+            thirdPlace: 'Man Gobblers',
+        },
+        mostPoints: { team: 'MacDaddy the Pimp', manager: 'Dustin', points: 1934.80 },
+        leastPoints: { team: 'Orange and Blue Balls', manager: 'Jared', points: 1523.10 },
+        toiletBowlLoser: { team: 'Orange and Blue Balls', manager: 'Jared' },
+        notes: ['First year with 2 QBs'],
     }),
 
-    season(2018, [
-        team('Player 1', 'Brandon'),
-        team('MacDaddy the Pimp', 'Dustin'),
-        team('Eddie', 'Eddie'),
-        team('Purple Swag', 'Andy'),
-        team('Orange and Blue Balls', 'Jared'),
-        team('Struggle Bus', 'Pico'),
-        team('The Champ', 'Igoe'),
-        team('Barry McCokinner', 'Luis'),
-    ], {
-        champion: 'Purple Swag',
-        runnerUp: 'MacDaddy the Pimp',
-        thirdPlace: 'Player 1',
+    season({
+        year: 2016,
+        teams: [
+            team(1, 'Player 1', 'Brandon', 11, 3),
+            team(2, 'Purple Swag', 'Andy', 9, 5),
+            team(3, 'SuckMyDitka', 'Andreas', 9, 5),
+            team(4, 'Man Gobblers', 'Luis', 8, 6),
+            team(5, 'Majari-Bimbo', 'Ariel', 7, 7),
+            team(6, 'Macdaddy the Pimp', 'Dustin', 5, 9),
+            team(7, 'Wentz Upon a Time', 'Pico', 4, 9, 1),
+            team(8, 'Orange and Blue Balls', 'Jared', 2, 11, 1),
+        ],
+        podium: {
+            champion: 'Player 1',
+            runnerUp: 'Purple Swag',
+            thirdPlace: 'Man Gobblers',
+        },
+        mostPoints: { team: 'Purple Swag', manager: 'Andy', points: 1962.94 },
+        leastPoints: { team: 'Man Gobblers', manager: 'Luis', points: 1544.26 },
+        toiletBowlLoser: { team: 'Orange and Blue Balls', manager: 'Jared' },
     }),
 
-    season(2019, [
-        team('Chilling with Mahomes', 'Isai'),
-        team('I Wentz to Hyde my Chubb in...', 'Pico'),
-        team('Purple Swag', 'Andy'),
-        team('Kylermurraysbleachedassho...', 'Ariel'),
-        team('Player 1', 'Brandon'),
-        team('MacDaddy the Pimp', 'Dustin'),
-        team('Barry McCokinner', 'Luis'),
-        team('Mack N Cheese', 'Igoe'),
-        team('Eddie', 'Eddie'),
-        team('Orange and Blue Balls', 'Jared'),
-    ], {
-        champion: 'Chilling with Mahomes',
-        runnerUp: 'I Wentz to Hyde my Chubb in...',
-        thirdPlace: 'Kylermurraysbleachedassho...',
+    season({
+        year: 2017,
+        teams: [
+            team(1, 'Team 6', 'Igoe', 10, 3),
+            team(2, 'Casper the Fantasy Ghost', 'Ghost Team', 8, 5),
+            team(3, 'Player 1', 'Brandon', 7, 6),
+            team(4, 'Purple Swag', 'Andy', 7, 6),
+            team(5, 'MacDaddy the Pimp', 'Dustin', 7, 6),
+            team(6, 'Orange and Blue Balls', 'Jared', 5, 8),
+            team(7, 'Your Butt Ertz from my Johnson', 'Pico', 4, 9),
+            team(8, 'I Forte my Revis n Bowles in U', 'Luis', 4, 9),
+        ],
+        podium: {
+            champion: 'Team 6',
+            runnerUp: 'Player 1',
+            thirdPlace: 'Casper the Fantasy Ghost',
+        },
+        mostPoints: { team: 'Team 6', manager: 'Igoe', points: 1792.88 },
+        leastPoints: { team: 'I Forte my Revis n Bowles in U', manager: 'Luis', points: null },
+        toiletBowlLoser: { team: 'Your Butt Ertz from my Johnson', manager: 'Pico' },
     }),
 
-    season(2020, [
-        team('Ham05', 'Tony'),
-        team('MacDaddy the Pimp', 'Dustin'),
-        team('Kylermurraybleachedasshole', 'Ariel'),
-        team('I wentz to clyde my jones in U', 'Pico'),
-        team('Eddie', 'Eddie'),
-        team('Big Truss', 'Gabe'),
-        team('Purple Swag', 'Andy'),
-        team('Taco for the win', 'Jared'),
-        team('Team IR', 'Igoe'),
-        team('The ACL Sprainers', 'Isai'),
-    ], {
-        champion: 'Ham05',
-        runnerUp: 'Big Truss',
-        thirdPlace: 'Eddie',
+    season({
+        year: 2018,
+        teams: [
+            team(1, 'Player 1', 'Brandon', 8, 5),
+            team(2, 'MacDaddy the Pimp', 'Dustin', 8, 5),
+            team(3, 'Eddie', 'Eddie', 8, 5),
+            team(4, 'Purple Swag', 'Andy', 6, 7),
+            team(5, 'Orange and Blue Balls', 'Jared', 6, 7),
+            team(6, 'Struggle Bus', 'Pico', 6, 7),
+            team(7, 'The Champ', 'Igoe', 5, 8),
+            team(8, 'Barry McCokinner', 'Luis', 5, 8),
+        ],
+        podium: {
+            champion: 'Purple Swag',
+            runnerUp: 'MacDaddy the Pimp',
+            thirdPlace: 'Player 1',
+        },
+        mostPoints: { team: 'Player 1', manager: 'Brandon', points: 1883.48 },
+        leastPoints: { team: 'Barry McCokinner', manager: 'Luis', points: 1543.84 },
+        toiletBowlLoser: { team: 'The Champ', manager: 'Igoe' },
     }),
 
-    season(2021, [
-        team("Rollin' with Mahomies", 'Pico'),
-        team('MacDaddy the Pimp', 'Dustin'),
-        team('Bad Juju', 'Igoe'),
-        team('Taco for the Win', 'Jared'),
-        team('Lights Rodgers Action', 'Eddie'),
-        team('DhoponKyler', 'Ariel'),
-        team('Sunday Scaries', 'Andy'),
-        team('Champ Ham', 'Tony'),
-        team('MegaWatt', 'Gabe'),
-        team('The Hurts Locker', 'Isai'),
-    ], {
-        champion: 'MacDaddy the Pimp',
-        runnerUp: "Rollin' with Mahomies",
-        thirdPlace: 'Taco for the Win',
+    season({
+        year: 2019,
+        teams: [
+            team(1, 'Chilling with Mahomes', 'Isai', 11, 2),
+            team(2, 'I Wentz to Hyde my Chubb in...', 'Pico', 10, 3),
+            team(3, 'Purple Swag', 'Andy', 8, 5),
+            team(4, 'Kylermurraysbleachedassho...', 'Ariel', 8, 5),
+            team(5, 'Player 1', 'Brandon', 7, 6),
+            team(6, 'MacDaddy the Pimp', 'Dustin', 6, 7),
+            team(7, 'Barry McCokinner', 'Luis', 5, 8),
+            team(8, 'Mack N Cheese', 'Igoe', 4, 9),
+            team(9, 'Eddie', 'Eddie', 4, 9),
+            team(10, 'Orange and Blue Balls', 'Jared', 2, 11),
+        ],
+        podium: {
+            champion: 'Chilling with Mahomes',
+            runnerUp: 'I Wentz to Hyde my Chubb in...',
+            thirdPlace: 'Kylermurraysbleachedassho...',
+        },
+        mostPoints: { team: 'Chilling with Mahomes', manager: 'Isai', points: 1796.66 },
+        leastPoints: { team: 'Orange and Blue Balls', manager: 'Jared', points: 1269.06 },
+        toiletBowlLoser: { team: 'Barry McCokinner', manager: 'Luis' },
     }),
 
-    season(2022, [
-        team('Breeces is in Pieces', 'Isai'),
-        team('I GO', 'Igoe'),
-        team('Smokin this Herb', 'Pico'),
-        team('Taco for the win', 'Jared'),
-        team('BirdGang', 'Gabe'),
-        team('Tuacide Squad', 'Andy'),
-        team('Get Rich or Die Trying', 'Eddie'),
-        team('MacDaddy the Pimp', 'Dustin'),
-        team('Picosfatass', 'Ariel'),
-        team('Ham', 'Tony'),
-    ], {
-        champion: 'I GO',
-        runnerUp: 'Breeces is in Pieces',
-        thirdPlace: 'Smokin this Herb',
+    season({
+        year: 2020,
+        teams: [
+            team(1, 'Ham05', 'Tony', 10, 3),
+            team(2, 'MacDaddy the Pimp', 'Dustin', 9, 4),
+            team(3, 'Kylermurraybleachedasshole', 'Ariel', 8, 5),
+            team(4, 'I wentz to clyde my jones in U', 'Pico', 7, 6),
+            team(5, 'Eddie', 'Eddie', 7, 6),
+            team(6, 'Big Truss', 'Gabe', 6, 7),
+            team(7, 'Purple Swag', 'Andy', 6, 7),
+            team(8, 'Taco for the win', 'Jared', 5, 8),
+            team(9, 'Team IR', 'Igoe', 4, 9),
+            team(10, 'The ACL Sprainers', 'Isai', 3, 10),
+        ],
+        podium: {
+            champion: 'Ham05',
+            runnerUp: 'Big Truss',
+            thirdPlace: 'Eddie',
+        },
+        mostPoints: { team: 'Kylermurraybleachedasshole', manager: 'Ariel', points: 1711.20 },
+        leastPoints: { team: 'Purple Swag', manager: 'Andy', points: 1470.18 },
+        toiletBowlLoser: { team: 'Purple Swag', manager: 'Andy' },
+    }),
+
+    season({
+        year: 2021,
+        teams: [
+            team(1, "Rollin' with Mahomies", 'Pico', 11, 3),
+            team(2, 'MacDaddy the Pimp', 'Dustin', 11, 3),
+            team(3, 'Bad Juju', 'Igoe', 10, 4),
+            team(4, 'Taco for the Win', 'Jared', 8, 6),
+            team(5, 'Lights Rodgers Action', 'Eddie', 6, 8),
+            team(6, 'DhoponKyler', 'Ariel', 5, 9),
+            team(7, 'Sunday Scaries', 'Andy', 5, 9),
+            team(8, 'Champ Ham', 'Tony', 5, 9),
+            team(9, 'MegaWatt', 'Gabe', 5, 9),
+            team(10, 'The Hurts Locker', 'Isai', 4, 10),
+        ],
+        podium: {
+            champion: 'MacDaddy the Pimp',
+            runnerUp: "Rollin' with Mahomies",
+            thirdPlace: 'Taco for the Win',
+        },
+        mostPoints: { team: "Rollin' with Mahomies", manager: 'Pico', points: 1901.26 },
+        leastPoints: { team: 'MegaWatt', manager: 'Gabe', points: 1517.14 },
+        toiletBowlLoser: { team: 'The Hurts Locker', manager: 'Isai' },
+    }),
+
+    season({
+        year: 2022,
+        teams: [
+            team(1, 'Breeces is in Pieces', 'Isai', 10, 4),
+            team(2, 'I GO', 'Igoe', 10, 4),
+            team(3, 'Smokin this Herb', 'Pico', 8, 6),
+            team(4, 'Taco for the win', 'Jared', 8, 6),
+            team(5, 'BirdGang', 'Gabe', 7, 7),
+            team(6, 'Tuacide Squad', 'Andy', 7, 7),
+            team(7, 'Get Rich or Die Trying', 'Eddie', 7, 7),
+            team(8, 'MacDaddy the Pimp', 'Dustin', 6, 8),
+            team(9, 'Picosfatass', 'Ariel', 5, 9),
+            team(10, 'Ham', 'Tony', 2, 12),
+        ],
+        podium: {
+            champion: 'I GO',
+            runnerUp: 'Breeces is in Pieces',
+            thirdPlace: 'Smokin this Herb',
+        },
+        mostPoints: { team: 'BirdGang', manager: 'Gabe', points: 1786.28 },
+        leastPoints: { team: 'Ham', manager: 'Tony', points: 1372.56 },
+        toiletBowlLoser: { team: 'Picosfatass', manager: 'Ariel' },
     }),
 ];
 
@@ -221,12 +319,54 @@ export const getLegacyManagerSeasons = (managerName) => {
                 source: seasonData.source,
                 platform: seasonData.platform,
                 team: ownedTeam.name,
+                finish: ownedTeam.finish,
+                wins: ownedTeam.wins,
+                losses: ownedTeam.losses,
+                ties: ownedTeam.ties,
                 champion: normalize(seasonData.podium.champion) === normalize(ownedTeam.name),
                 runnerUp: normalize(seasonData.podium.runnerUp) === normalize(ownedTeam.name),
                 thirdPlace: normalize(seasonData.podium.thirdPlace) === normalize(ownedTeam.name),
+                mostPoints: normalize(seasonData.mostPoints?.manager) === managerKey,
+                leastPoints: normalize(seasonData.leastPoints?.manager) === managerKey,
+                toiletBowlLoser: normalize(seasonData.toiletBowlLoser?.manager) === managerKey,
             };
         })
         .filter(Boolean);
+};
+
+export const getLegacyManagerCareer = (managerName) => {
+    const seasons = getLegacyManagerSeasons(managerName);
+
+    const career = seasons.reduce(
+        (totals, entry) => {
+            totals.wins += entry.wins;
+            totals.losses += entry.losses;
+            totals.ties += entry.ties;
+            totals.championships += entry.champion ? 1 : 0;
+            totals.runnerUps += entry.runnerUp ? 1 : 0;
+            totals.thirdPlaces += entry.thirdPlace ? 1 : 0;
+            return totals;
+        },
+        {
+            manager: managerName,
+            source: LEGACY_SOURCE,
+            wins: 0,
+            losses: 0,
+            ties: 0,
+            championships: 0,
+            runnerUps: 0,
+            thirdPlaces: 0,
+        }
+    );
+
+    career.seasons = seasons.length;
+    career.games = career.wins + career.losses + career.ties;
+    career.winPercentage = career.games > 0
+        ? (career.wins + (career.ties * 0.5)) / career.games
+        : 0;
+    career.seasonHistory = seasons;
+
+    return career;
 };
 
 export const getLegacyManagerChampionships = (managerName) =>
