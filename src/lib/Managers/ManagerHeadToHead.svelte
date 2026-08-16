@@ -3,20 +3,48 @@
     import LinearProgress from '@smui/linear-progress';
     import { getManagerHeadToHeadMatrix } from '$lib/utils/helperFunctions/managerHeadToHeads';
 
-    export let managerID;
+    export let managerID = null;
+    export let rosterID = null;
     export let managers = [];
+    export let leagueTeamManagers = null;
 
     let matrix = {};
     let loading = true;
     let failed = false;
 
-    $: opponents = managerID
+    const resolveManagerID = (managerOption = null, fallbackRosterID = null) => {
+        if(managerOption?.managerID) return managerOption.managerID;
+
+        const roster = managerOption?.roster ?? fallbackRosterID;
+        if(roster == null || !leagueTeamManagers) return null;
+
+        const seasons = Object.keys(leagueTeamManagers.teamManagersMap || {})
+            .map(Number)
+            .filter(Number.isFinite)
+            .sort((a, b) => b - a);
+
+        for(const season of seasons) {
+            const rosterData = leagueTeamManagers.teamManagersMap?.[season]?.[roster];
+            const resolved = rosterData?.managers?.[0];
+            if(resolved) return resolved;
+        }
+
+        return null;
+    };
+
+    $: resolvedManagerID = managerID || resolveManagerID(null, rosterID);
+
+    $: opponents = resolvedManagerID
         ? managers
-            .filter((opponent) => opponent.managerID && opponent.managerID !== managerID)
+            .map((opponent) => ({
+                name: opponent.name,
+                managerID: resolveManagerID(opponent, opponent.roster)
+            }))
+            .filter((opponent) => opponent.managerID && opponent.managerID !== resolvedManagerID)
             .map((opponent) => ({
                 name: opponent.name,
                 ...(
-                    matrix?.[managerID]?.[opponent.managerID] ||
+                    matrix?.[resolvedManagerID]?.[opponent.managerID] ||
                     {wins: 0, losses: 0, ties: 0, games: 0}
                 )
             }))
@@ -27,11 +55,6 @@
     $: maxWins = Math.max(1, ...opponents.map((opponent) => opponent.wins));
 
     onMount(async () => {
-        if(!managerID) {
-            loading = false;
-            return;
-        }
-
         try {
             matrix = await getManagerHeadToHeadMatrix();
         } catch(err) {
@@ -158,6 +181,8 @@
         </div>
     {:else if failed}
         <div class="empty">Head-to-head history is unavailable right now.</div>
+    {:else if !resolvedManagerID}
+        <div class="empty">Unable to match this profile to a Sleeper manager.</div>
     {:else if opponents.length === 0}
         <div class="empty">No completed Sleeper head-to-head matchups yet.</div>
     {:else}
