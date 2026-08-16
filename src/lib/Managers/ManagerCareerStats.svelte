@@ -111,6 +111,10 @@
 </script>
 
 <style>
+    :global(.careerStats) {
+        display: none !important;
+    }
+
     .managerCareerStats {
         width: 97%;
         max-width: 800px;
