@@ -2,13 +2,14 @@
     import { getTeamNameFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
     import { Awards } from '$lib/components';
     import LegacyAwards from '$lib/Awards/LegacyAwards.svelte';
+    import AllTimeLeaderboard from '$lib/Awards/AllTimeLeaderboard.svelte';
     import { legacyHistory } from '$lib/utils/legacyHistory';
     import { waitForAll, leagueName } from '$lib/utils/helper';
     import LinearProgress from '@smui/linear-progress';
 
     export let data;
 
-    const { awardsData, teamManagersData } = data;
+    const { awardsData, teamManagersData, recordsData } = data;
 
     const canonicalManagerName = (manager) => {
         const normalized = String(manager || '').trim().toLowerCase();
@@ -124,12 +125,12 @@
         <p>Champions, podium finishes and season-by-season league history · Legacy + Sleeper eras</p>
     </div>
 
-    {#await waitForAll(awardsData, teamManagersData)}
+    {#await waitForAll(awardsData, teamManagersData, recordsData)}
         <div class="loading">
             <p>Retrieving league history...</p>
             <LinearProgress indeterminate />
         </div>
-    {:then [podiums, leagueTeamManagers]}
+    {:then [podiums, leagueTeamManagers, records]}
         {@const combinedSeasons = getCombinedSeasons(podiums)}
         {@const championshipCounts = getChampionshipCounts(podiums, leagueTeamManagers)}
 
@@ -152,6 +153,17 @@
                     <div class="summaryValue">{championshipCounts[0]?.championships || 0}</div>
                     <div class="summaryLabel">Most Championships</div>
                 </div>
+            </div>
+
+            <div class="sectionCard">
+                <h2 class="sectionTitle">🏅 All-Time Manager Leaderboard</h2>
+                <p class="sectionSub">Rankings prioritize championships, then playoff appearances, wins and win percentage. Toggle between the full league archive and Sleeper-only results.</p>
+
+                <AllTimeLeaderboard
+                    awards={podiums}
+                    {records}
+                    {leagueTeamManagers}
+                />
             </div>
 
             <div class="sectionCard">
