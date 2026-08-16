@@ -99,6 +99,7 @@
 
 <style>
     .matchup { width: 95%; max-width: 600px; margin: 10px auto; }
+    .matchupWide { width: 720px; max-width: calc(100vw - 48px); }
     .header { display: flex; justify-content: space-between; position: relative; border: 1px solid #bbb; border-radius: 10px; opacity: 0.8; cursor: pointer; transition: opacity 0.5s; overflow: hidden; }
     .header:hover { opacity: 1; }
     .opponent { display: flex; align-items: center; width: 46%; padding: 5px 2%; top: 0; z-index: 2; }
@@ -107,7 +108,7 @@
     :global(.homeGlow) { box-shadow: 0 0 6px 4px #3279cf; background-color: #00316b !important; }
     .away { justify-content: flex-end; right: 0; text-align: right; background-color: #8b6969; }
     :global(.awayGlow) { box-shadow: 0 0 6px 4px #d15454; background-color: #920505 !important; }
-    .name { margin: 0 5px; font-size: 1em; line-height: 1.1em; flex-grow: 1; word-break: break-word; color: #fff; font-style: italic; }
+    .name { margin: 0 5px; font-size: 1em; line-height: 1.1em; flex-grow: 1; word-break: normal; overflow-wrap: anywhere; color: #fff; font-style: italic; }
     .avatar { vertical-align: middle; border-radius: 50%; height: 35px; width: 35px; margin: 0; border: 0.25px solid #777; background-color: #eee; }
     .playerAvatar { position: relative; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px; }
     .pos { display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; max-width: 32px; min-width: 32px; height: 32px; }
@@ -122,17 +123,17 @@
     .iconAndTeam { display: flex; align-items: center; } .iconAndTeamHome { justify-content: flex-start; } .iconAndTeamAway { justify-content: flex-end; }
     .playerHome { padding: 0 1.5% 0 2.5%; text-align: left; } .playerAway { padding: 0 2.5% 0 1.5%; text-align: right; }
     .playerInfo { display: inline-block; padding: 0 6px; } .playerTeam { display: inline-block; color: #888; font-style: italic; text-align: center; font-size: 0.5em; }
-    .playerName { word-break: break-word; } .playerNameHome { text-align: left; } .playerNameAway { text-align: right; }
+    .playerName { word-break: normal; overflow-wrap: anywhere; } .playerNameHome { text-align: left; } .playerNameAway { text-align: right; }
     .dividerLine { display: block; position: absolute; top: 0; left: 50%; height: 100%; width: 0; border-left: 1px solid var(--eee); z-index: 1; }
     .close { display: block; width: 100%; background-color: var(--eee); text-align: center; cursor: pointer; z-index: 2; font-size: 1.1em; padding: 6px 0; } .close:hover { background-color: var(--ddd); }
-    .nameHolder { display: block; } .nameHolderR { justify-content: flex-end; text-align: right; } .nameHolderL { justify-content: flex-start; text-align: left; }
-    .totalPoints { line-height: 1.1em; color: #fff; } .totalPointsR { margin-right: 0.1em; text-align: right; } .totalPointsL { margin-left: 0.1em; text-align: left; }
-    .totalProjection { color: #ccc; font-size: 0.7em; font-style: italic; } .points { position: absolute; line-height: 1.1em; top: 1em; } .pointsL { left: 1em; } .pointsR { right: 1em; }
+    .nameHolder { display: block; min-width: 0; } .nameHolderR { justify-content: flex-end; text-align: right; } .nameHolderL { justify-content: flex-start; text-align: left; }
+    .totalPoints { line-height: 1.1em; color: #fff; white-space: nowrap; } .totalPointsR { margin-right: 0.1em; text-align: right; } .totalPointsL { margin-left: 0.1em; text-align: left; }
+    .totalProjection { color: #ccc; font-size: 0.7em; font-style: italic; } .points { position: absolute; line-height: 1.1em; top: 1em; white-space: nowrap; } .pointsL { left: 1em; } .pointsR { right: 1em; }
     .playerEmpty { height: 100%; color: #555; font-style: italic; display: flex; align-items: center; }
     .teamLogo { width: 21px; position: absolute; top: 0; } .teamHomeLogo { right: -16px; } .teamAwayLogo { left: -16px; }
     .benchHeader { position: relative; z-index: 3; padding: 8px 12px; border-top: 1px solid #bbb; background: var(--f3f3f3); text-align: center; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.7px; text-transform: uppercase; opacity: 0.72; }
     .benchLine { background: color-mix(in srgb, var(--f3f3f3) 45%, var(--fff)); } .benchLine .totalProjection { display: none; }
-    @media (max-width:500px){.name,.totalPoints,.nameHolder{font-size:.8em}.points{font-size:.9em}}
+    @media (max-width:500px){.matchupWide{max-width:calc(100vw - 24px)}.name,.totalPoints,.nameHolder{font-size:.8em}.points{font-size:.9em}}
     @media (max-width:410px){.name,.totalPoints,.nameHolder{font-size:.7em}.points{font-size:.75em}}
     @media (max-width:360px){.name,.totalPoints{font-size:.5em}}
     @media (max-width:340px){.teamLogo{width:20px}.teamHomeLogo{right:-7px}.teamAwayLogo{left:-7px}}
@@ -152,7 +153,7 @@
     </div>
 {/snippet}
 
-<div class="matchup">
+<div class="matchup{expandOverride ? ' matchupWide' : ''}">
     <div class="header" onclick={() => expandClose()} bind:this={el}>
         <div class="opponent home{winning == 'home' ? ' homeGlow' : ''}"><img class="avatar" src={home.manager.avatar} alt="home team avatar" /><div class="name">{home.manager.name}</div><div class="totalPoints totalPointsR">{round(homePointsTotal)}<div class="totalProjection">{round(homeProjectionTotal)}</div></div></div>
         <img class="divider" src="/{winning}Divider.jpg" alt="divider" />
