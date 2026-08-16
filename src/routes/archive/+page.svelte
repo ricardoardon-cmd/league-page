@@ -5,7 +5,8 @@
     const filters = ['All', 'Draft Day', 'Punishment'];
     const videos = [
         { id: 'QDbLYQWL9Uc', title: 'Combine 2025 pt1' },
-        { id: 'IqcXkIwQKNg', title: 'Combine 2025 pt2' }
+        { id: 'IqcXkIwQKNg', title: 'Combine 2025 pt2' },
+        { id: 'UaWTUPAhAPQ', title: 'Combine 2025 pt3' }
     ];
 
     const moments = [
