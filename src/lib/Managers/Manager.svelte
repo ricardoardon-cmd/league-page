@@ -441,6 +441,7 @@
         {records}
         {rosterID}
         managerID={viewManager.managerID}
+        managerName={viewManager.name}
         hideCareerStats={true}
     />
 
