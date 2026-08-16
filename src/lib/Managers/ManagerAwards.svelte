@@ -7,22 +7,17 @@
 
     let displayAwards = [];
     let formerGlobal = false;
+    let expandedGroupKey = null;
 
-    const capitalizeFirstLetter = (string) => {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    };
+    const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
 
     const checkIfDeserves = (awardRosterID, userRosterID, year) => {
-        if(!managerID || !year || !awardRosterID) {
-            return awardRosterID == userRosterID;
-        }
+        if(!managerID || !year || !awardRosterID) return awardRosterID == userRosterID;
         return checkIfManagerReceivedAward(leagueTeamManagers, awardRosterID, year, managerID);
     };
 
     const checkIfDeservesWithManagerID = (recordManagerID, userRosterID) => {
-        if(managerID) {
-            return recordManagerID == managerID;
-        }
+        if(managerID) return recordManagerID == managerID;
 
         for(const year in leagueTeamManagers.teamManagersMap) {
             for(const historicalRosterID in leagueTeamManagers.teamManagersMap[year]) {
@@ -40,51 +35,18 @@
         for(const legacy of legacySeasons) {
             const seasonData = getLegacySeason(legacy.year);
 
-            // Regular-season first place is a real legacy accolade too.
             if(legacy.finish === 1) {
-                displayAwards.push({
-                    award: 'Regular Season Champion',
-                    icon: '/awards/division.png',
-                    type: 'award',
-                    originalName: legacy.team,
-                    year: legacy.year,
-                    legacy: true
-                });
+                displayAwards.push({ award: 'Regular Season Champion', icon: '/awards/division.png', type: 'award', originalName: legacy.team, year: legacy.year, legacy: true });
             }
-
             if(legacy.champion) {
-                displayAwards.push({
-                    award: 'Champion',
-                    icon: '/awards/champion.png',
-                    type: 'award',
-                    originalName: legacy.team,
-                    year: legacy.year,
-                    legacy: true
-                });
+                displayAwards.push({ award: 'Champion', icon: '/awards/champion.png', type: 'award', originalName: legacy.team, year: legacy.year, legacy: true });
             }
-
             if(legacy.runnerUp) {
-                displayAwards.push({
-                    award: 'Second',
-                    icon: '/awards/second.png',
-                    type: 'award',
-                    originalName: legacy.team,
-                    year: legacy.year,
-                    legacy: true
-                });
+                displayAwards.push({ award: 'Second', icon: '/awards/second.png', type: 'award', originalName: legacy.team, year: legacy.year, legacy: true });
             }
-
             if(legacy.thirdPlace) {
-                displayAwards.push({
-                    award: 'Third',
-                    icon: '/awards/third.png',
-                    type: 'award',
-                    originalName: legacy.team,
-                    year: legacy.year,
-                    legacy: true
-                });
+                displayAwards.push({ award: 'Third', icon: '/awards/third.png', type: 'award', originalName: legacy.team, year: legacy.year, legacy: true });
             }
-
             if(legacy.mostPoints && seasonData?.mostPoints?.points != null) {
                 displayAwards.push({
                     award: 'Points Leader',
@@ -96,16 +58,8 @@
                     legacy: true
                 });
             }
-
             if(legacy.toiletBowlLoser) {
-                displayAwards.push({
-                    award: 'Toilet',
-                    icon: '/awards/toilet.png',
-                    type: 'award',
-                    originalName: legacy.team,
-                    year: legacy.year,
-                    legacy: true
-                });
+                displayAwards.push({ award: 'Toilet', icon: '/awards/toilet.png', type: 'award', originalName: legacy.team, year: legacy.year, legacy: true });
             }
         }
     };
@@ -113,8 +67,8 @@
     const computePodiums = (cRosterID, name) => {
         formerGlobal = false;
         displayAwards = [];
+        expandedGroupKey = null;
 
-        // Sleeper-era annual awards.
         for(const podium of awards || []) {
             for(const award in podium) {
                 if(award == 'year') continue;
@@ -154,7 +108,6 @@
             }
         }
 
-        // Sleeper-era record book entries.
         const leagueManagerRecords = [];
         for(const key in records?.regularSeasonData?.leagueManagerRecords || {}) {
             const record = records.regularSeasonData.leagueManagerRecords[key];
@@ -164,7 +117,6 @@
         const winRecords = [...leagueManagerRecords].sort((a, b) => b.wins - a.wins);
         const pointsRecords = [...leagueManagerRecords].sort((a, b) => b.fptsFor - a.fptsFor);
         const iqRecords = [...leagueManagerRecords].sort((a, b) => (b.fptsFor / b.potentialPoints) - (a.fptsFor / a.potentialPoints));
-
         const leagueWeekHighs = records?.regularSeasonData?.leagueWeekHighs || [];
         const seasonLongPoints = records?.regularSeasonData?.mostSeasonLongPoints || [];
 
@@ -176,38 +128,18 @@
             const iqRecord = iqRecords[i];
 
             if(checkIfDeservesWithManagerID(winRecord?.rosterID, cRosterID) && i < 3) {
-                displayAwards.push({
-                    award: i + 1,
-                    icon: '/awards/record-' + (i + 1) + '.png',
-                    type: 'All-Time Wins Record',
-                    extraInfo: winRecord.wins,
-                    wins: true
-                });
+                displayAwards.push({ award: i + 1, icon: '/awards/record-' + (i + 1) + '.png', type: 'All-Time Wins Record', extraInfo: winRecord.wins, wins: true });
             }
-
             if(checkIfDeservesWithManagerID(pointsRecord?.rosterID, cRosterID) && i < 3) {
-                displayAwards.push({
-                    award: i + 1,
-                    icon: '/awards/record-' + (i + 1) + '.png',
-                    type: 'All-Time Fantasy Points Record',
-                    extraInfo: round(pointsRecord.fptsFor)
-                });
+                displayAwards.push({ award: i + 1, icon: '/awards/record-' + (i + 1) + '.png', type: 'All-Time Fantasy Points Record', extraInfo: round(pointsRecord.fptsFor) });
             }
-
             if(checkIfDeservesWithManagerID(iqRecord?.rosterID, cRosterID) && i < 3) {
-                displayAwards.push({
-                    award: i + 1,
-                    icon: '/awards/record-' + (i + 1) + '.png',
-                    type: 'All-Time Lineup IQ Record',
-                    extraInfo: round(iqRecord.fptsFor * 100 / iqRecord.potentialPoints),
-                    iq: true
-                });
+                displayAwards.push({ award: i + 1, icon: '/awards/record-' + (i + 1) + '.png', type: 'All-Time Lineup IQ Record', extraInfo: round(iqRecord.fptsFor * 100 / iqRecord.potentialPoints), iq: true });
             }
 
             if(leagueWeekRecord && checkIfDeserves(leagueWeekRecord.rosterID, cRosterID, leagueWeekRecord.year)) {
                 const former = tookOver && tookOver > leagueWeekRecord.year;
                 if(former) formerGlobal = true;
-
                 displayAwards.push({
                     award: i + 1,
                     icon: '/awards/' + (i < 3 ? `record-${i + 1}` : 'generic') + '.png',
@@ -223,7 +155,6 @@
             if(seasonLongRecord && checkIfDeserves(seasonLongRecord.rosterID, cRosterID, seasonLongRecord.year)) {
                 const former = tookOver && tookOver > seasonLongRecord.year;
                 if(former) formerGlobal = true;
-
                 displayAwards.push({
                     award: i + 1,
                     icon: '/awards/' + (i < 3 ? `record-${i + 1}` : 'generic') + '.png',
@@ -242,7 +173,6 @@
                 if(checkIfDeserves(seasonPointsRecord.rosterID, cRosterID, yearRecords.year)) {
                     const former = tookOver && tookOver > yearRecords.year;
                     if(former) formerGlobal = true;
-
                     displayAwards.push({
                         award: i + 1,
                         icon: '/awards/' + (i < 3 ? `record-${i + 1}` : 'generic') + '.png',
@@ -257,7 +187,6 @@
             }
         }
 
-        // Add the reconstructed 2012-2022 NFL Fantasy accolades to the same case.
         if(name) addLegacyAwards();
 
         displayAwards.sort((a, b) => {
@@ -280,14 +209,50 @@
             case 7:
             case 8:
             case 9:
-            case 10:
-                return award + 'th Place';
+            case 10: return award + 'th Place';
             case 'Champion': return award;
             case 'Second':
             case 'Third': return award + ' Place';
             case 'Toilet': return award + ' Bowl';
             default: return award;
         }
+    };
+
+    const groupLabel = (award) => {
+        if(award.type === 'award') return computeAward(award.award);
+        return award.type.replace(/^\d{4}\s+/, '');
+    };
+
+    const groupKey = (award) => `${groupLabel(award)}|${award.icon}`;
+
+    const groupAwards = (items) => {
+        const groups = new Map();
+
+        for(const award of items) {
+            const key = groupKey(award);
+            if(!groups.has(key)) {
+                groups.set(key, {
+                    key,
+                    label: groupLabel(award),
+                    icon: award.icon,
+                    items: []
+                });
+            }
+            groups.get(key).items.push(award);
+        }
+
+        return [...groups.values()].sort((a, b) => {
+            const aYear = Math.max(...a.items.map((item) => Number(item.year) || 0));
+            const bYear = Math.max(...b.items.map((item) => Number(item.year) || 0));
+            return bYear - aYear;
+        });
+    };
+
+    $: groupedAwards = groupAwards(displayAwards);
+    $: expandedGroup = groupedAwards.find((group) => group.key === expandedGroupKey) || null;
+
+    const toggleGroup = (key) => {
+        expandedGroupKey = expandedGroupKey === key ? null : key;
     };
 </script>
 
@@ -302,9 +267,12 @@
     }
 
     .awardsCaseInner {
-        display: flex;
-        justify-content: space-evenly;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+        gap: 18px 12px;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 1.2em 1em .5em;
     }
 
     h3 {
@@ -314,58 +282,40 @@
         font-weight: 200;
     }
 
-    .award {
+    .groupButton {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        padding: 0;
+        cursor: pointer;
         display: flex;
         flex-direction: column;
-        justify-content: flex-start;
         align-items: center;
-        margin: 1em 0.5em 2em;
+        min-width: 0;
     }
 
-    .awardHeader, .awardLabel, .subText, .legacyTeam {
-        text-align: center;
-        line-height: 1.2em;
+    .groupButton:hover .awardIcon,
+    .groupButton:focus-visible .awardIcon,
+    .groupButton.active .awardIcon {
+        box-shadow: 0 0 0 2px var(--blueOne), 0 4px 12px var(--ccc);
+        transform: translateY(-2px);
     }
 
-    .awardHeader {
-        height: 2.4em;
-        font-size: 0.85em;
+    .groupButton:focus-visible { outline: none; }
+
+    .groupLabel {
         width: 110px;
-        margin-bottom: 0.5em;
+        min-height: 2.4em;
+        margin-bottom: .5em;
+        text-align: center;
+        font-size: .78em;
+        font-weight: 600;
+        line-height: 1.15em;
     }
 
-    .awardLabel {
-        font-size: 0.9em;
-        margin-top: 1em;
-        font-weight: 500;
-        width: 130px;
-    }
-
-    .subText, .legacyTeam {
-        font-size: 0.8em;
-        width: 130px;
-        color: var(--g555);
-        margin-top: 0.3em;
-        font-style: italic;
-    }
-
-    .legacyBadge {
-        display: inline-block;
-        margin-top: 0.35em;
-        padding: 2px 7px;
-        border: 1px solid var(--ccc);
-        border-radius: 999px;
-        font-size: 0.58em;
-        font-weight: 700;
-        letter-spacing: 0.4px;
-        text-transform: uppercase;
-        opacity: 0.7;
-    }
-
-    .sad {
-        color: var(--g999);
-        font-style: italic;
-    }
+    .iconWrap { position: relative; }
 
     .awardIcon {
         height: 80px;
@@ -374,83 +324,178 @@
         box-shadow: 0 0 4px 1px var(--ccc);
         text-align: center;
         overflow: hidden;
+        transition: transform .15s ease, box-shadow .15s ease;
     }
 
-    .awardImage {
-        height: 100%;
+    .awardImage { height: 100%; }
+
+    .countBadge {
+        position: absolute;
+        top: -8px;
+        right: -10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 27px;
+        height: 27px;
+        padding: 0 5px;
+        box-sizing: border-box;
+        border-radius: 999px;
+        background: var(--blueTwo);
+        border: 2px solid var(--fff);
+        color: #fff;
+        font-size: .72rem;
+        font-weight: 800;
+        box-shadow: 0 2px 6px rgba(0,0,0,.22);
     }
 
-    .disclaimer {
-        font-size: 0.8em;
+    .tapHint {
+        margin-top: 8px;
+        font-size: .62em;
+        color: var(--g999);
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    .detailsPanel {
+        max-width: 920px;
+        margin: 1em auto .5em;
+        padding: 18px;
+        border: 1px solid var(--ccc);
+        border-radius: 16px;
+        background: var(--f3f3f3);
+    }
+
+    .detailsTitle {
+        text-align: center;
+        margin: 0 0 14px;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .detailsGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
+
+    .detailItem {
+        padding: 12px 10px;
+        border: 1px solid var(--ccc);
+        border-radius: 12px;
+        background: var(--fff);
+        text-align: center;
+    }
+
+    .awardLabel {
+        font-size: .9em;
+        font-weight: 700;
+        line-height: 1.2em;
+    }
+
+    .subText, .legacyTeam {
+        font-size: .78em;
+        color: var(--g555);
+        margin-top: .35em;
+        font-style: italic;
+        line-height: 1.25em;
+    }
+
+    .legacyBadge {
+        display: inline-block;
+        margin-top: .45em;
+        padding: 2px 7px;
+        border: 1px solid var(--ccc);
+        border-radius: 999px;
+        font-size: .58em;
+        font-weight: 700;
+        letter-spacing: .4px;
+        text-transform: uppercase;
+        opacity: .7;
+    }
+
+    .sad, .disclaimer {
         color: var(--g999);
         font-style: italic;
         text-align: center;
-        margin: 0;
-        line-height: 1em;
     }
 
-    @media (max-width: 730px) {
-        .awardHeader {
-            height: 3.6em;
-            font-size: 0.8em;
-            width: 90px;
-        }
-
-        .awardLabel, .subText, .legacyTeam {
-            width: 90px;
-        }
-    }
+    .disclaimer { font-size: .8em; margin: 1em 0 0; }
 
     @media (max-width: 530px) {
-        .awardIcon {
-            height: 60px;
-            width: 60px;
+        .awardsCaseInner {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px 6px;
+            padding-left: .5em;
+            padding-right: .5em;
         }
 
-        .awardHeader {
-            height: 3.6em;
-            font-size: 0.58em;
-            width: 65px;
-        }
-
-        .awardLabel {
-            font-size: 0.7em;
-            width: 65px;
-        }
-
-        .subText, .legacyTeam {
-            font-size: 0.6em;
-            width: 65px;
-        }
+        .awardIcon { height: 60px; width: 60px; }
+        .groupLabel { width: 82px; font-size: .66em; }
+        .countBadge { min-width: 23px; height: 23px; font-size: .64rem; top: -7px; right: -8px; }
+        .tapHint { font-size: .54em; }
+        .detailsPanel { margin-left: 10px; margin-right: 10px; padding: 12px; }
+        .detailsGrid { grid-template-columns: 1fr 1fr; }
     }
 </style>
 
 <div class="awardsCase">
     <h3>Team Awards & Records</h3>
+
     <div class="awardsCaseInner">
-        {#each displayAwards as award}
-            <div class="award">
-                <div class="awardHeader">{award.type != 'award' ? award.type : ''}</div>
-                <div class="awardIcon">
-                    <img class="awardImage" src="{award.icon}" alt="trophy" />
-                </div>
-                <div class="awardLabel">
-                    {award.type == 'award' ? `${award.year} ` : ''}{computeAward(award.award)}{award.former ? '*' : ''}
-                </div>
-                {#if award.extraInfo}
-                    <div class="subText">
-                        {award.year ? `${award.year} ` : ''}{award.week ? `Week ${award.week} ` : ''}{award.year || award.week ? ' - ' : ''}{award.extraInfo}{award.wins ? ' Wins' : ''}{award.iq ? '%' : ''}{!award.wins && !award.iq ? 'pts' : ''}
+        {#each groupedAwards as group}
+            <button
+                type="button"
+                class:active={expandedGroupKey === group.key}
+                class="groupButton"
+                onclick={() => toggleGroup(group.key)}
+                aria-expanded={expandedGroupKey === group.key}
+            >
+                <div class="groupLabel">{group.label}</div>
+                <div class="iconWrap">
+                    <div class="awardIcon">
+                        <img class="awardImage" src={group.icon} alt={group.label} />
                     </div>
-                {/if}
-                {#if award.legacy && award.originalName}
-                    <div class="legacyTeam">{award.originalName}</div>
-                    <div class="legacyBadge">Legacy Era</div>
-                {/if}
-            </div>
+                    {#if group.items.length > 1}
+                        <span class="countBadge">×{group.items.length}</span>
+                    {/if}
+                </div>
+                <div class="tapHint">Tap for details</div>
+            </button>
         {:else}
             <p class="sad">...nothing yet</p>
         {/each}
     </div>
+
+    {#if expandedGroup}
+        <div class="detailsPanel">
+            <div class="detailsTitle">{expandedGroup.label}</div>
+            <div class="detailsGrid">
+                {#each expandedGroup.items as award}
+                    <div class="detailItem">
+                        <div class="awardLabel">
+                            {award.type == 'award' ? `${award.year} ` : ''}{computeAward(award.award)}{award.former ? '*' : ''}
+                        </div>
+                        {#if award.type != 'award'}
+                            <div class="subText">{award.type}</div>
+                        {/if}
+                        {#if award.extraInfo}
+                            <div class="subText">
+                                {award.year ? `${award.year} ` : ''}{award.week ? `Week ${award.week} ` : ''}{award.year || award.week ? ' - ' : ''}{award.extraInfo}{award.wins ? ' Wins' : ''}{award.iq ? '%' : ''}{!award.wins && !award.iq ? 'pts' : ''}
+                            </div>
+                        {/if}
+                        {#if award.originalName}
+                            <div class="legacyTeam">{award.originalName}</div>
+                        {/if}
+                        {#if award.legacy}
+                            <div class="legacyBadge">Legacy Era</div>
+                        {/if}
+                    </div>
+                {/each}
+            </div>
+        </div>
+    {/if}
+
     {#if formerGlobal}
         <p class="disclaimer">*Awarded under a previous manager</p>
     {/if}
