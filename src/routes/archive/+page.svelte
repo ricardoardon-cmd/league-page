@@ -20,7 +20,7 @@
     <section class="seasonStrip">
         <div><span>🏆</span><strong>Season Recap</strong><small>2025 Sleeper Season</small></div>
         <div><span>📸</span><strong>Photo Archive</strong><small>Draft Day + Punishment</small></div>
-        <div><span>🎬</span><strong>Season Film</strong><small>Video 1 added</small></div>
+        <div><span>🎬</span><strong>Season Films</strong><small>2 videos added</small></div>
     </section>
 
     <section class="storyCard">
@@ -29,17 +29,13 @@
     </section>
 
     <section class="videoCard">
-        <div class="videoEmbed">
-            <iframe
-                src="https://www.youtube-nocookie.com/embed/QDbLYQWL9Uc"
-                title="GGL 2025 season archive video"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerpolicy="strict-origin-when-cross-origin"
-                allowfullscreen
-            ></iframe>
-        </div>
-        <div class="videoCopy"><small>WATCH THE SEASON</small><h2>2025 Season Film · Video 1</h2><p>The first 2025 league video is now part of the archive and plays directly on the site. Additional 2025 videos can be stacked here as you send them.</p></div>
+        <div class="videoEmbed"><iframe src="https://www.youtube-nocookie.com/embed/QDbLYQWL9Uc" title="GGL 2025 season archive video 1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+        <div class="videoCopy"><small>WATCH THE SEASON</small><h2>2025 Season Film · Video 1</h2><p>The first 2025 league video is part of the archive and plays directly on the site.</p></div>
+    </section>
+
+    <section class="videoCard">
+        <div class="videoEmbed"><iframe src="https://www.youtube-nocookie.com/embed/IqcXkIwQKNg" title="GGL 2025 season archive video 2" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+        <div class="videoCopy"><small>WATCH THE SEASON</small><h2>2025 Season Film · Video 2</h2><p>The second 2025 league video is now included with the season archive.</p></div>
     </section>
 
     <section class="gallerySection">
