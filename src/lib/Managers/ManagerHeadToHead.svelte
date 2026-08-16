@@ -1,5 +1,6 @@
 <script>
     import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
     import LinearProgress from '@smui/linear-progress';
     import { getManagerHeadToHeadMatrix } from '$lib/utils/helperFunctions/managerHeadToHeads';
 
@@ -43,6 +44,7 @@
             .filter((opponent) => opponent.managerID && opponent.managerID !== resolvedManagerID)
             .map((opponent) => ({
                 name: opponent.name,
+                managerID: opponent.managerID,
                 ...(
                     matrix?.[resolvedManagerID]?.[opponent.managerID] ||
                     {wins: 0, losses: 0, ties: 0, games: 0}
@@ -53,6 +55,24 @@
         : [];
 
     $: maxWins = Math.max(1, ...opponents.map((opponent) => opponent.wins));
+
+    const openRivalry = (opponentManagerID) => {
+        if(!resolvedManagerID || !opponentManagerID) return;
+
+        const params = new URLSearchParams({
+            player_one: resolvedManagerID,
+            player_two: opponentManagerID
+        });
+
+        goto(`/rivalry?${params.toString()}`);
+    };
+
+    const handleRowKeydown = (event, opponentManagerID) => {
+        if(event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openRivalry(opponentManagerID);
+        }
+    };
 
     onMount(async () => {
         try {
@@ -97,7 +117,21 @@
         grid-template-columns: 105px minmax(0, 1fr) 64px;
         align-items: center;
         gap: 12px;
-        margin: 14px 0;
+        margin: 8px -8px;
+        padding: 6px 8px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .row:hover,
+    .row:focus-visible {
+        background: var(--f3f3f3);
+        outline: none;
+    }
+
+    .row:active {
+        transform: scale(0.995);
     }
 
     .name {
@@ -172,7 +206,7 @@
 
 <div class="headToHeadCard">
     <h3 class="chartTitle">🆚 Head-to-Head Wins</h3>
-    <p class="chartSub">Sleeper-era record against each manager</p>
+    <p class="chartSub">Sleeper-era record against each manager · Tap a matchup to open the rivalry</p>
 
     {#if loading}
         <div class="loading">
@@ -187,7 +221,14 @@
         <div class="empty">No completed Sleeper head-to-head matchups yet.</div>
     {:else}
         {#each opponents as opponent}
-            <div class="row">
+            <div
+                class="row"
+                role="link"
+                tabindex="0"
+                aria-label={`Open ${opponent.name} rivalry`}
+                onclick={() => openRivalry(opponent.managerID)}
+                onkeydown={(event) => handleRowKeydown(event, opponent.managerID)}
+            >
                 <div class="name" title={opponent.name}>{opponent.name}</div>
                 <div class="track" aria-label={`${opponent.wins} wins against ${opponent.name}`}>
                     <div
