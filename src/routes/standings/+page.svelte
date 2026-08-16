@@ -7,6 +7,8 @@
         standingsData,
         leagueTeamManagersData,
         playoffBracketData,
+        playoffMatchupsData,
+        playersData,
         availableSeasons,
         selectedSeason
     } = data);
@@ -26,6 +28,8 @@
             {standingsData}
             {leagueTeamManagersData}
             {playoffBracketData}
+            {playoffMatchupsData}
+            {playersData}
             {availableSeasons}
             {selectedSeason}
         />
