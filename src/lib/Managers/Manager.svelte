@@ -1,36 +1,37 @@
 <script>
     import Button, { Group, Label } from '@smui/button';
-	import LinearProgress from '@smui/linear-progress';
+    import LinearProgress from '@smui/linear-progress';
     import {loadPlayers, getLeagueTransactions} from '$lib/utils/helper';
-	import Roster from '../Rosters/Roster.svelte';
-	import TransactionsPage from '../Transactions/TransactionsPage.svelte';
+    import Roster from '../Rosters/Roster.svelte';
+    import TransactionsPage from '../Transactions/TransactionsPage.svelte';
     import { goto } from '$app/navigation';
-    import ManagerFantasyInfo from './ManagerFantasyInfo.svelte';
     import ManagerAwards from './ManagerAwards.svelte';
     import ManagerCareerStats from './ManagerCareerStats.svelte';
     import { onMount } from 'svelte';
-	import { getDatesActive, getRosterIDFromManagerID, getTeamNameFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
+    import { getDatesActive, getRosterIDFromManagerID, getTeamNameFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
 
     export let manager, managers, rostersData, leagueTeamManagers, rosterPositions, transactionsData, awards, records;
 
     let transactions = transactionsData.transactions;
 
     $: viewManager = managers[manager];
-
     $: datesActive = getDatesActive(leagueTeamManagers, viewManager.managerID);
 
     const startersAndReserve = rostersData.startersAndReserve;
     let rosters = rostersData.rosters;
 
-    $: ({rosterID, year} = viewManager.managerID ? getRosterIDFromManagerID(leagueTeamManagers, viewManager.managerID) : {rosterID: viewManager.roster, year: null});
+    $: ({rosterID, year} = viewManager.managerID
+        ? getRosterIDFromManagerID(leagueTeamManagers, viewManager.managerID)
+        : {rosterID: viewManager.roster, year: null});
 
     $: teamTransactions = transactions.filter(t => t.rosters.includes(parseInt(rosterID)));
-
     $: roster = rosters[rosterID];
-
-    $: coOwners = year && rosterID ? leagueTeamManagers.teamManagersMap[year][rosterID].managers.length > 1 : roster.co_owners;
-
-    $: commissioner = viewManager.managerID ? leagueTeamManagers.users[viewManager.managerID].is_owner : false;
+    $: coOwners = year && rosterID
+        ? leagueTeamManagers.teamManagersMap[year][rosterID].managers.length > 1
+        : roster.co_owners;
+    $: commissioner = viewManager.managerID
+        ? leagueTeamManagers.users[viewManager.managerID].is_owner
+        : false;
 
     let players, playersInfo;
     let loading = true;
@@ -38,12 +39,13 @@
     const refreshTransactions = async () => {
         const newTransactions = await getLeagueTransactions(false, true);
         transactions = newTransactions.transactions;
-    }
+    };
 
     onMount(async () => {
         if(transactionsData.stale) {
             refreshTransactions();
         }
+
         const playerData = await loadPlayers(null);
         playersInfo = playerData;
         players = playerData.players;
@@ -54,15 +56,17 @@
             playersInfo = newPlayerData;
             players = newPlayerData.players;
         }
-    })
+    });
 
     const changeManager = (newManager, noscroll = false) => {
-        if(!newManager) {
-            goto(`/managers`);
+        if(newManager === null || newManager === undefined || newManager === '') {
+            goto('/managers');
+            return;
         }
+
         manager = newManager;
         goto(`/manager?manager=${newManager}`, {noscroll});
-    }
+    };
 </script>
 
 <style>
@@ -77,108 +81,128 @@
         margin: 0 auto 4em;
     }
 
-   .managerPhoto {
-    display: block;
-    width: 150px;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 50%;
-    margin: 0 auto;
-    border: 5px solid var(--fff);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-}
+    .managerPhoto {
+        display: block;
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        margin: 0 auto;
+        border: 5px solid var(--fff);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    }
 
-.profileHero {
-    position: relative;
-    padding: 35px 25px 30px;
-    margin: 20px auto 25px;
-    max-width: 800px;
-    text-align: center;
-    border-radius: 24px;
-    background: var(--fff);
-    border: 1px solid var(--ccc);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-}
+    .profileHero {
+        position: relative;
+        padding: 35px 25px 30px;
+        margin: 20px auto 25px;
+        max-width: 800px;
+        text-align: center;
+        border-radius: 24px;
+        background: var(--fff);
+        border: 1px solid var(--ccc);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
 
-.profileStatus {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    margin-top: 18px;
-    padding: 6px 13px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border: 1px solid var(--ccc);
-    background: var(--f3f3f3);
-}
+    .profileStatus {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 18px;
+        padding: 6px 13px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: 1px solid var(--ccc);
+        background: var(--f3f3f3);
+    }
 
-.statusDot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #2e9d50;
-}
+    .statusDot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #2e9d50;
+    }
 
-.profileName {
-    margin: 18px 0 0;
-    font-size: 2.5em;
-    font-weight: 800;
-    line-height: 1.05;
-}
+    .profileName {
+        margin: 18px 0 0;
+        font-size: 2.5em;
+        font-weight: 800;
+        line-height: 1.05;
+    }
 
-.teamSub {
-    margin-top: 10px;
-    font-size: 1.05em;
-    line-height: 1.4em;
-    opacity: 0.65;
-}
+    .teamSub {
+        margin-top: 10px;
+        font-size: 0.4em;
+        line-height: 1em;
+        color: #666;
+        opacity: 0.65;
+    }
 
-.teamSub i {
-    display: block;
-    margin-top: 3px;
-    font-size: 1.35em;
-    font-weight: 800;
-    font-style: normal;
-    opacity: 1;
-}
+    .teamSub i {
+        display: block;
+        margin-top: 3px;
+        font-size: 1.35em;
+        font-weight: 800;
+        font-style: normal;
+        opacity: 1;
+    }
 
-.profileMeta {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 20px;
-}
+    .profileMeta {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 20px;
+    }
 
-.metaItem {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    border-radius: 10px;
-    font-size: 0.78rem;
-    background: var(--f3f3f3);
-    border: 1px solid var(--ccc);
-}
+    .metaItem {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        font-size: 0.78rem;
+        background: var(--f3f3f3);
+        border: 1px solid var(--ccc);
+    }
 
-.metaTeam {
-    height: 25px;
-    width: 25px;
-}
+    .metaRival {
+        cursor: pointer;
+        color: inherit;
+        font-family: inherit;
+    }
 
-.profileNav {
-    margin: 20px auto 30px;
-    text-align: center;
-}
+    .metaRival:hover {
+        border-color: var(--aaa);
+        box-shadow: 0 0 5px 1px var(--ccc);
+    }
+
+    .metaTeam,
+    .metaRivalImage {
+        height: 25px;
+        width: 25px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .tradeValue {
+        color: var(--blueOne);
+        font-weight: 800;
+    }
+
+    .profileNav {
+        margin: 20px auto 30px;
+        text-align: center;
+    }
 
     h2 {
         text-align: center;
         font-size: 2.8em;
-        margin: 1em 0 0em;
+        margin: 1em 0 0;
         line-height: 1em;
     }
 
@@ -189,40 +213,18 @@
         font-weight: 200;
     }
 
-    .basicInfo {
-        display: flex;
-        justify-content: space-evenly;
-        align-items: center;
-        height: 24px;
-        margin: 2em 0;
-    }
-
-    .basicInfo span {
-        color: #888;
-        font-size: 0.9em;
-    }
-
-    .infoChild {
-        font-style: italic;
-    }
-
     .infoContact {
         height: 20px;
         vertical-align: middle;
-        padding-left: 1em;
-    }
-
-    .infoTeam {
-        height: 48px;
     }
 
     .bio {
-        margin: 2em 1.5em 2em;
+        margin: 2em 1.5em;
         text-indent: 4em;
     }
 
     .philosophy {
-        margin: 2em 1.5em 2em;
+        margin: 2em 1.5em;
         text-indent: 4em;
     }
 
@@ -233,35 +235,26 @@
         margin: 80px auto;
     }
 
-    .teamSub {
-        font-size: 0.4em;
-        line-height: 1em;
-        color: #666;
-    }
-
     .managerNav {
         margin: 4em 0 2em;
         text-align: center;
     }
 
-    .upper {
-        margin-top: 0;
-    }
-
     .commissionerBadge {
-        display: flex;
+        display: inline-flex;
         justify-content: center;
         align-items: center;
         height: 25px;
         width: 25px;
+        margin-left: 6px;
         font-weight: 600;
         border-radius: 15px;
         background-color: var(--blueTwo);
         border: 1px solid var(--blueOne);
+        vertical-align: middle;
     }
 
     .commissionerBadge span {
-        font-style: normal;
         color: #fff;
     }
 
@@ -277,141 +270,118 @@
             font-size: 0.8em;
         }
     }
-
-	@media (max-width: 450px) {
-        .basicInfo {
-            height: 20px;
-        }
-
-        .basicInfo span {
-            font-size: 0.75em;
-        }
-
-        .infoTeam {
-            height: 30px;
-        }
-	}
-
-    @media (max-width: 370px) {
-        .basicInfo {
-            height: 18px;
-        }
-
-        .basicInfo span {
-            font-size: 0.6em;
-        }
-
-        .infoTeam {
-            height: 24px;
-        }
-    }
 </style>
 
 <div class="managerContainer">
     <div class="managerConstrained">
-       <div class="profileHero">
+        <div class="profileHero">
+            <img
+                class="managerPhoto"
+                src={viewManager.photo}
+                alt={viewManager.name}
+            />
 
-    <img
-        class="managerPhoto"
-        src="{viewManager.photo}"
-        alt="{viewManager.name}"
-    />
-
-    <div class="profileStatus">
-        <span class="statusDot"></span>
-        2026 · Pre-Draft
-    </div>
-
-    <h2 class="profileName">
-        {viewManager.name}
-
-        {#if commissioner}
-            <span class="commissionerBadge">
-                <span>C</span>
-            </span>
-        {/if}
-    </h2>
-
-    <div class="teamSub">
-        {coOwners ? 'Co-' : ''}Manager of
-        <i>
-            {getTeamNameFromTeamManagers(
-                leagueTeamManagers,
-                rosterID,
-                year
-            )}
-        </i>
-    </div>
-
-    <div class="profileMeta">
-        {#if viewManager.location}
-            <div class="metaItem">
-                📍 {viewManager.location}
+            <div class="profileStatus">
+                <span class="statusDot"></span>
+                2026 · Pre-Draft
             </div>
-        {/if}
 
-        {#if viewManager.managerID && datesActive.start}
-            <div class="metaItem">
-                🗓️ Since '{datesActive.start.toString().substr(2)}
+            <h2 class="profileName">
+                {viewManager.name}
+                {#if commissioner}
+                    <span class="commissionerBadge"><span>C</span></span>
+                {/if}
+            </h2>
+
+            <div class="teamSub">
+                {coOwners ? 'Co-' : ''}Manager of
+                <i>{getTeamNameFromTeamManagers(leagueTeamManagers, rosterID, year)}</i>
             </div>
-        {:else if viewManager.fantasyStart}
-            <div class="metaItem">
-                🏈 Fantasy since '{viewManager.fantasyStart.toString().substr(2)}
+
+            <div class="profileMeta">
+                {#if viewManager.location}
+                    <div class="metaItem">📍 {viewManager.location}</div>
+                {/if}
+
+                {#if viewManager.managerID && datesActive.start}
+                    <div class="metaItem">🏈 Fantasy since '{datesActive.start.toString().substr(2)}</div>
+                {:else if viewManager.fantasyStart}
+                    <div class="metaItem">🏈 Fantasy since '{viewManager.fantasyStart.toString().substr(2)}</div>
+                {/if}
+
+                {#if viewManager.preferredContact}
+                    <div class="metaItem">
+                        <img
+                            class="infoContact"
+                            src="/{viewManager.preferredContact}.png"
+                            alt={viewManager.preferredContact}
+                        />
+                        {viewManager.preferredContact}
+                    </div>
+                {/if}
+
+                {#if viewManager.favoriteTeam}
+                    <div class="metaItem">
+                        <img
+                            class="metaTeam"
+                            src="https://sleepercdn.com/images/team_logos/nfl/{viewManager.favoriteTeam}.png"
+                            alt="Favorite NFL team"
+                        />
+                        Favorite Team
+                    </div>
+                {/if}
+
+                {#if viewManager.tradingScale}
+                    <div class="metaItem">
+                        🔄 Desire to Trade
+                        <span class="tradeValue">{viewManager.tradingScale}/10</span>
+                    </div>
+                {/if}
+
+                {#if viewManager.rival}
+                    <button
+                        type="button"
+                        class="metaItem metaRival"
+                        onclick={() => changeManager(viewManager.rival.link, true)}
+                    >
+                        <img
+                            class="metaRivalImage"
+                            src={viewManager.rival.image}
+                            alt="{viewManager.rival.name} rival"
+                        />
+                        Rival: {viewManager.rival.name}
+                    </button>
+                {/if}
             </div>
-        {/if}
+        </div>
 
-        {#if viewManager.preferredContact}
-            <div class="metaItem">
-                <img
-                    class="infoContact"
-                    src="/{viewManager.preferredContact}.png"
-                    alt="{viewManager.preferredContact}"
-                />
-                {viewManager.preferredContact}
-            </div>
-        {/if}
+        <div class="profileNav">
+            <Group variant="outlined">
+                {#if manager == 0}
+                    <Button disabled class="selectionButtons" variant="outlined">
+                        <Label>← Previous</Label>
+                    </Button>
+                {:else}
+                    <Button class="selectionButtons" onclick={() => changeManager(parseInt(manager) - 1, true)} variant="outlined">
+                        <Label>← Previous</Label>
+                    </Button>
+                {/if}
 
-        {#if viewManager.favoriteTeam}
-            <div class="metaItem">
-                <img
-                    class="metaTeam"
-                    src="https://sleepercdn.com/images/team_logos/nfl/{viewManager.favoriteTeam}.png"
-                    alt="Favorite NFL team"
-                />
-                Favorite Team
-            </div>
-        {/if}
-    </div>
+                <Button class="selectionButtons" onclick={() => goto('/managers')} variant="outlined">
+                    <Label>All Teams</Label>
+                </Button>
 
-</div>
-
-<div class="profileNav">
-    <Group variant="outlined">
-        {#if manager == 0}
-            <Button disabled class="selectionButtons" onclick={() => changeManager(parseInt(manager) - 1, true)} variant="outlined">
-                <Label>← Previous</Label>
-            </Button>
-        {:else}
-            <Button class="selectionButtons" onclick={() => changeManager(parseInt(manager) - 1, true)} variant="outlined">
-                <Label>← Previous</Label>
-            </Button>
-        {/if}
-
-        <Button class="selectionButtons" onclick={() => goto('/managers')} variant="outlined">
-            <Label>All Teams</Label>
-        </Button>
-
-        {#if manager == managers.length - 1}
-            <Button disabled class="selectionButtons" onclick={() => changeManager(parseInt(manager) + 1, true)} variant="outlined">
-                <Label>Next →</Label>
-            </Button>
-        {:else}
-            <Button class="selectionButtons" onclick={() => changeManager(parseInt(manager) + 1, true)} variant="outlined">
-                <Label>Next →</Label>
-            </Button>
-        {/if}
-    </Group>
-</div>
+                {#if manager == managers.length - 1}
+                    <Button disabled class="selectionButtons" variant="outlined">
+                        <Label>Next →</Label>
+                    </Button>
+                {:else}
+                    <Button class="selectionButtons" onclick={() => changeManager(parseInt(manager) + 1, true)} variant="outlined">
+                        <Label>Next →</Label>
+                    </Button>
+                {/if}
+            </Group>
+        </div>
 
         <p class="bio">{@html viewManager.bio}</p>
 
@@ -420,10 +390,6 @@
             <p class="philosophy">{@html viewManager.philosophy}</p>
         {/if}
     </div>
-
-    {#if !loading}
-        <ManagerFantasyInfo {viewManager} {players} {changeManager} />
-    {/if}
 
     <ManagerCareerStats
         {leagueTeamManagers}
@@ -462,14 +428,14 @@
                 <LinearProgress indeterminate />
             </div>
         {:else}
-            <TransactionsPage {playersInfo} transactions={teamTransactions} {leagueTeamManagers} show='both' query='' page={0} perPage={5} />
+            <TransactionsPage {playersInfo} transactions={teamTransactions} {leagueTeamManagers} show="both" query="" page={0} perPage={5} />
         {/if}
     </div>
 
     <div class="managerNav">
         <Group variant="outlined">
             {#if manager == 0}
-                <Button disabled class="selectionButtons" onclick={() => changeManager(parseInt(manager) - 1)} variant="outlined">
+                <Button disabled class="selectionButtons" variant="outlined">
                     <Label>Previous Manager</Label>
                 </Button>
             {:else}
@@ -477,11 +443,13 @@
                     <Label>Previous Manager</Label>
                 </Button>
             {/if}
+
             <Button class="selectionButtons" onclick={() => goto('/managers')} variant="outlined">
                 <Label>All Managers</Label>
             </Button>
+
             {#if manager == managers.length - 1}
-                <Button disabled class="selectionButtons" onclick={() => changeManager(parseInt(manager) + 1)} variant="outlined">
+                <Button disabled class="selectionButtons" variant="outlined">
                     <Label>Next Manager</Label>
                 </Button>
             {:else}
@@ -491,5 +459,4 @@
             {/if}
         </Group>
     </div>
-
 </div>
