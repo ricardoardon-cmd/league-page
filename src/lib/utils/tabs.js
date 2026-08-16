@@ -75,11 +75,13 @@ export const tabs = [
                 icon: 'history_edu',
                 label: 'Constitution',
                 dest: '/constitution',
+                hidden: true,
             },
             {
                 icon: 'sports_football',
                 label: 'Go to Sleeper',
-                dest: `https://sleeper.app/leagues/${leagueID}`,
+                dest: `https://sleeper.com/leagues/${leagueID}/league`,
+                external: true,
             },
         ]
     },
