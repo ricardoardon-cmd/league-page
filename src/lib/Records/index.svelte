@@ -56,13 +56,20 @@
         display = value;
         mobileCategory = 'all';
     };
+
+    const jumpToRecord = (category, id) => {
+        mobileCategory = category;
+        setTimeout(() => {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 60);
+    };
 </script>
 
 <style>
     .rankingsWrapper { margin: 0 auto; width: 100%; max-width: 1200px; }
     .empty { margin: 10em 0 4em; text-align: center; }
     .buttonHolder { text-align: center; margin: 2em 0 0; }
-    .mobileRecordNav { display: none; }
+    .mobileRecordNav, .mobileRecordSubnav { display: none; }
 
     @media (max-width: 700px) {
         .buttonHolder { margin: 1.1em 0 0; }
@@ -70,12 +77,40 @@
             display: flex; gap: 7px; width: calc(100% - 20px); margin: 14px auto 2px; padding: 4px;
             box-sizing: border-box; overflow-x: auto; scrollbar-width: none;
         }
-        .mobileRecordNav::-webkit-scrollbar { display: none; }
+        .mobileRecordNav::-webkit-scrollbar, .mobileRecordSubnav::-webkit-scrollbar { display: none; }
         .categoryButton {
             flex: 0 0 auto; min-height: 38px; padding: 7px 12px; border: 1px solid var(--ccc); border-radius: 999px;
             background: var(--f3f3f3); color: inherit; font: inherit; font-size: .68rem; font-weight: 850; white-space: nowrap; cursor: pointer;
         }
         .categoryButton.active { background: var(--blueTwo); border-color: var(--blueOne); color: #fff; }
+
+        .mobileRecordSubnav {
+            display: flex;
+            gap: 7px;
+            width: calc(100% - 28px);
+            margin: 2px auto 8px;
+            padding: 2px 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .quickJumpButton {
+            flex: 0 0 auto;
+            min-height: 30px;
+            padding: 5px 10px;
+            border: 1px solid var(--ccc);
+            border-radius: 999px;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            font-size: .62rem;
+            font-weight: 750;
+            white-space: nowrap;
+            cursor: pointer;
+            opacity: .82;
+        }
+
+        .quickJumpButton:active { transform: scale(.98); }
 
         .category-scoring :global(.seasonHighTable), .category-scoring :global(.seasonLowTable),
         .category-scoring :global(.blowoutAnchor), .category-scoring :global(.closestAnchor),
@@ -94,8 +129,8 @@
 
         .category-rankings :global(.fullFlex), .category-rankings :global(.recordQuickLinks) { display: none !important; }
         .recordsContent :global(.recordsHeader) { margin-top: 18px; }
-        .recordsContent :global(.recordQuickLinks) { margin-bottom: 16px; }
-        .recordsContent :global(.fullFlex) { margin-bottom: 28px; }
+        .recordsContent :global(.recordQuickLinks) { display: none !important; }
+        .recordsContent :global(.fullFlex) { margin-top: 16px; margin-bottom: 28px; }
     }
 
     @media (max-width: 540px) { :global(.buttonHolder .selectionButtons) { font-size: 0.6em; } }
@@ -124,6 +159,19 @@
             <button class:active={mobileCategory === 'matchups'} class="categoryButton" onclick={() => mobileCategory = 'matchups'}>⚔️ Matchups</button>
             <button class:active={mobileCategory === 'rankings'} class="categoryButton" onclick={() => mobileCategory = 'rankings'}>📊 Rankings</button>
         </nav>
+
+        {#if mobileCategory === 'all' || mobileCategory === 'scoring' || mobileCategory === 'matchups'}
+            <nav class="mobileRecordSubnav" aria-label="Quick record links">
+                {#if mobileCategory === 'all' || mobileCategory === 'scoring'}
+                    <button class="quickJumpButton" onclick={() => jumpToRecord('scoring', 'scoring-highs')}>🔥 Scoring Highs</button>
+                    <button class="quickJumpButton" onclick={() => jumpToRecord('scoring', 'scoring-lows')}>🧊 Scoring Lows</button>
+                {/if}
+                {#if mobileCategory === 'all' || mobileCategory === 'matchups'}
+                    <button class="quickJumpButton" onclick={() => jumpToRecord('matchups', 'blowouts')}>💥 Largest Blowouts</button>
+                    <button class="quickJumpButton" onclick={() => jumpToRecord('matchups', 'closest-wins')}>🤏 Closest Wins</button>
+                {/if}
+            </nav>
+        {/if}
     {/if}
 
     <div class="recordsContent category-{mobileCategory}">
