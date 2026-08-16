@@ -198,9 +198,12 @@
 
     <ManagerCareerStats {leagueTeamManagers} {awards} {records} {rosterID} managerID={viewManager.managerID} managerName={viewManager.name} />
 
-    {#if viewManager.managerID}
-        <ManagerHeadToHead managerID={viewManager.managerID} {managers} />
-    {/if}
+    <ManagerHeadToHead
+        managerID={viewManager.managerID}
+        {rosterID}
+        {managers}
+        {leagueTeamManagers}
+    />
 
     <ManagerAwards {leagueTeamManagers} tookOver={viewManager.tookOver} {awards} {records} {rosterID} managerID={viewManager.managerID} managerName={viewManager.name} hideCareerStats={true} />
 
