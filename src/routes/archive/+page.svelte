@@ -20,7 +20,8 @@
         ],
         2024: [],
         2023: [
-            { id: 'MTnuTXIR8HQ', title: '2023 Short 1' }
+            { id: 'MTnuTXIR8HQ', title: '2023 Short 1' },
+            { id: 'UJNrzNSC0JE', title: '2023 Short 2' }
         ]
     };
 
