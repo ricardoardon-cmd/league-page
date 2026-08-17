@@ -20,7 +20,13 @@
             { id: 'fETRMXxkyB4', title: 'Combine 2025 pt9' }
         ],
         2024: [
-            { id: 'W4ux4DjZVBo', title: '2024 Video 1' }
+            { id: 'W4ux4DjZVBo', title: '2024 Video 1' },
+            { id: '7NTD0m9g6js', title: '2024 Video 2' },
+            { id: 'Rjg3Y6bxQ5A', title: '2024 Video 3' },
+            { id: '-gBptw3BmFg', title: '2024 Video 4' },
+            { id: 'jE7QnxQ85FA', title: '2024 Video 5' },
+            { id: '8bLzeI5zQ8w', title: '2024 Video 6' },
+            { id: 'T2uT50SjwPQ', title: '2024 Video 7' }
         ],
         2023: [
             { id: 'MTnuTXIR8HQ', title: '2023 Short 1' },
