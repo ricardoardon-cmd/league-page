@@ -18,7 +18,9 @@
             { id: 'AkK_nKafvt4', title: 'Combine 2025 pt7' },
             { id: 'ku7TOkLlAN8', title: 'Combine 2025 pt8' }
         ],
-        2024: [],
+        2024: [
+            { id: 'W4ux4DjZVBo', title: '2024 Video 1' }
+        ],
         2023: [
             { id: 'MTnuTXIR8HQ', title: '2023 Short 1' },
             { id: 'UJNrzNSC0JE', title: '2023 Short 2' }
