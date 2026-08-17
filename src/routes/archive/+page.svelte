@@ -14,7 +14,8 @@
             { id: 'saPK13MCYq0', title: 'Combine 2025 pt4' },
             { id: 'PgUK4bmnt_M', title: 'Combine 2025 pt5' },
             { id: '97Z13uwFJc0', title: 'Combine 2025 pt6' },
-            { id: 'AkK_nKafvt4', title: 'Combine 2025 pt7' }
+            { id: 'AkK_nKafvt4', title: 'Combine 2025 pt7' },
+            { id: 'ku7TOkLlAN8', title: 'Combine 2025 pt8' }
         ],
         2024: [],
         2023: []
