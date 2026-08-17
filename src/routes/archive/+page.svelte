@@ -8,7 +8,8 @@
         { id: 'IqcXkIwQKNg', title: 'Combine 2025 pt2' },
         { id: 'UaWTUPAhAPQ', title: 'Combine 2025 pt3' },
         { id: 'saPK13MCYq0', title: 'Combine 2025 pt4' },
-        { id: 'PgUK4bmnt_M', title: 'Combine 2025 pt5' }
+        { id: 'PgUK4bmnt_M', title: 'Combine 2025 pt5' },
+        { id: '97Z13uwFJc0', title: 'Combine 2025 pt6' }
     ];
 
     const combineResults = [
