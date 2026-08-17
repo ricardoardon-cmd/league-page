@@ -7,7 +7,10 @@
     const filters = ['All', 'Draft Day', 'Punishment'];
 
     const videosByYear = {
-        2026: [],
+        2026: [
+            { id: 'zJtycX-e5hg', title: '2026 Video 1' },
+            { id: 'p4tLDVhYPMs', title: '2026 Video 2' }
+        ],
         2025: [
             { id: 'QDbLYQWL9Uc', title: 'Combine 2025 pt1' },
             { id: 'IqcXkIwQKNg', title: 'Combine 2025 pt2' },
