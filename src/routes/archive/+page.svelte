@@ -49,8 +49,7 @@
 
     const momentsByYear = {
         2025: [
-            { src: '/archive/2025/league-group.jpg', tag: 'Draft Day', title: '2025 League Crew', featured: true },
-            { src: '/league-photo.jpg', tag: 'Draft Day', title: 'The leagues group', featured: false }
+            { src: '/archive/2025/league-group.jpg', tag: 'Draft Day', title: '2025 League Crew', featured: true }
         ],
         2024: [],
         2023: []
@@ -92,7 +91,7 @@
         <div class="eyebrow">GGL LEAGUE ARCHIVE · SLEEPER ERA</div>
         <h1>{activeYear} Season</h1>
         {#if activeYear === 2025}
-            <div class="heroImage"><img src="/archive/2025/league-group.jpg" alt="2025 league group" /></div>
+            <div class="heroImage"><img src="/league-photo.jpg" alt="2025 league group" /></div>
         {/if}
     </section>
 
