@@ -19,7 +19,9 @@
             { id: 'ku7TOkLlAN8', title: 'Combine 2025 pt8' }
         ],
         2024: [],
-        2023: []
+        2023: [
+            { id: 'MTnuTXIR8HQ', title: '2023 Short 1' }
+        ]
     };
 
     const combineByYear = {
@@ -170,7 +172,7 @@
         </section>
     {/if}
 
-    {#if activeYear === 2023}
+    {#if activeYear === 2023 && videos.length === 0 && combineResults.length === 0 && moments.length === 0}
         <section class="emptySeason">
             <div class="emptyIcon">📦</div>
             <h2>2023 archive coming next</h2>
