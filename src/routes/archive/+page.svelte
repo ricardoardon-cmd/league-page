@@ -49,7 +49,8 @@
 
     const momentsByYear = {
         2025: [
-            { src: '/archive/2025/league-group.jpg', tag: 'Draft Day', title: '2025 League Crew', featured: true }
+            { src: '/archive/2025/league-group.jpg', tag: 'Draft Day', title: '2025 League Crew', featured: true },
+            { src: '/league-photo.jpg', tag: 'Draft Day', title: 'The leagues group', featured: false }
         ],
         2024: [],
         2023: []
