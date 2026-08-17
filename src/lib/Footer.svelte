@@ -29,17 +29,6 @@
         resize(el?.getBoundingClientRect(), true);
 	})
 
-    let managersOutOfDate = false;
-    if(managers) {
-        for(const manager of managers) {
-            if(manager.roster && !manager.managerID) {
-                managersOutOfDate = true;
-                resize(el?.getBoundingClientRect(), true);
-                break;
-            }
-        }
-    }
-
 	const year = new Date().getFullYear();
 
     $: resize(el?.getBoundingClientRect(), false, innerWidth);
@@ -99,13 +88,9 @@
 
 <div class="footerSpacer" style="height: {footerHeight}px;" />
 
-<!-- footer with update notice -->
 <footer bind:this={el}>
     {#if outOfDate}
 	    <p class="updateNotice">There is an update available for your League Page. <a href="https://github.com/nmelhado/league-page/blob/master/TRAINING_WHEELS.md#iv-updates">Follow the Update Instructions</a> to get all of the newest features!</p>
-    {/if}
-    {#if managersOutOfDate}
-	    <p class="updateNotice">Your managers page needs an update, <a href="https://github.com/nmelhado/league-page/blob/master/TRAINING_WHEELS.md#2-add-managers">please follow the instructions</a> to get the most up-to-date experience.</p>
     {/if}
 	<div id="navigation">
 		<ul>
@@ -114,8 +99,7 @@
 					<li><div class="navLink" onclick={() => goto(tab.dest)}>{tab.label}</div></li>
 				{:else}
 					{#each tab.children as child}
-                        <!-- Shouldn't show Managers tab unless managers has been populated -->
-				        {#if child.label != "Managers" || managers.length > 0}
+                        {#if child.label != "Managers" || managers.length > 0}
 							{#if child.label == "Go to Sleeper"}
 								<li><div class="navLink" onclick={() => window.location = child.dest}>{child.label}</div></li>
 							{:else}
