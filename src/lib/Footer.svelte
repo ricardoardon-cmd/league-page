@@ -30,6 +30,7 @@
 	})
 
 	const year = new Date().getFullYear();
+    const hiddenFooterLabels = ['Blog', 'Constitution'];
 
     $: resize(el?.getBoundingClientRect(), false, innerWidth);
 </script>
@@ -96,10 +97,12 @@
 		<ul>
 			{#each tabs as tab}
 				{#if !tab.nest}
-					<li><div class="navLink" onclick={() => goto(tab.dest)}>{tab.label}</div></li>
+                    {#if !hiddenFooterLabels.includes(tab.label)}
+					    <li><div class="navLink" onclick={() => goto(tab.dest)}>{tab.label}</div></li>
+                    {/if}
 				{:else}
 					{#each tab.children as child}
-                        {#if child.label != "Managers" || managers.length > 0}
+                        {#if !hiddenFooterLabels.includes(child.label) && (child.label != "Managers" || managers.length > 0)}
 							{#if child.label == "Go to Sleeper"}
 								<li><div class="navLink" onclick={() => window.location = child.dest}>{child.label}</div></li>
 							{:else}
