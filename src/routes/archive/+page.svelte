@@ -1,12 +1,13 @@
 <script>
-    let activeYear = 2025;
+    let activeYear = 2026;
     let activeFilter = 'All';
     let activeVideo = 0;
 
-    const years = [2025, 2024, 2023];
+    const years = [2026, 2025, 2024, 2023];
     const filters = ['All', 'Draft Day', 'Punishment'];
 
     const videosByYear = {
+        2026: [],
         2025: [
             { id: 'QDbLYQWL9Uc', title: 'Combine 2025 pt1' },
             { id: 'IqcXkIwQKNg', title: 'Combine 2025 pt2' },
@@ -22,6 +23,7 @@
     };
 
     const combineByYear = {
+        2026: [],
         2025: [
             { name: 'Tony', time: '1:56.09', place: 1 },
             { name: 'Ariel', time: '2:18.17', place: 2 },
@@ -50,6 +52,7 @@
     };
 
     const momentsByYear = {
+        2026: [],
         2025: [
             { src: '/archive/2025/league-group.jpg', tag: 'Draft Day', title: '2025 League Crew', featured: true }
         ],
