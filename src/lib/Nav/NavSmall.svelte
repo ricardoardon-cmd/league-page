@@ -15,6 +15,24 @@
 	let active = $state(page.url.pathname);
 	let open = $state(false);
 
+	const menuIcons = {
+		Home: '🏠',
+		Matchups: '🏈',
+		'Trades & Waivers': '↔️',
+		Rosters: '📋',
+		Players: '👤',
+		Managers: '👥',
+		Rivalry: '⚔️',
+		Standings: '🏆',
+		Drafts: '🎯',
+		History: '🏛️',
+		'Season Archive': '🗃️',
+		Records: '📊',
+		'Go to Sleeper': '💤'
+	};
+
+	const getMenuIcon = (label) => menuIcons[label] || '•';
+
 	const selectTab = (tab) => {
 		open = false;
 		if (tab.external) {
@@ -50,6 +68,17 @@
 		color: #858585 !important;
 	}
 
+	:global(.drawerEmoji) {
+		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif !important;
+		font-size: 1.45rem !important;
+		line-height: 1;
+		width: 40px;
+		min-width: 40px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
 	.nav-back {
 		position: fixed;
 		z-index: 8;
@@ -77,7 +106,7 @@
 			{#each tabs as tab}
 				{#if !tab.hidden && !tab.nest && (tab.label != 'Blog' || (tab.label == 'Blog' && enableBlog))}
 					<Item href="javascript:void(0)" onSMUIAction={() => selectTab(tab)} ontouchstart={() => {if(!tab.external) preloadData(tab.dest)}} onmouseover={() => {if(!tab.external) preloadData(tab.dest)}} activated={active == tab.dest} >
-						<Graphic class="material-icons{active == tab.dest ? "" : " nav-item"}" aria-hidden="true">{tab.icon}</Graphic>
+						<Graphic class="drawerEmoji" aria-hidden="true">{getMenuIcon(tab.label)}</Graphic>
 						<Text class="{active == tab.dest ? "" : "nav-item"}">{tab.label}</Text>
 					</Item>
 				{/if}
@@ -91,13 +120,13 @@
 							{#if subTab.label == 'Managers'}
 								{#if managers.length}
 									<Item href="javascript:void(0)" onSMUIAction={() => selectTab(subTab)} activated={active == subTab.dest} ontouchstart={() => preloadData(subTab.dest)} onmouseover={() => preloadData(subTab.dest)}>
-										<Graphic class="material-icons{active == subTab.dest ? "" : " nav-item"}" aria-hidden="true">{subTab.icon}</Graphic>
+										<Graphic class="drawerEmoji" aria-hidden="true">{getMenuIcon(subTab.label)}</Graphic>
 										<Text class="{active == subTab.dest ? "" : "nav-item"}">{subTab.label}</Text>
 									</Item>
 								{/if}
 							{:else}
 								<Item href="javascript:void(0)" onSMUIAction={() => selectTab(subTab)} activated={active == subTab.dest} ontouchstart={() => {if(!subTab.external) preloadData(subTab.dest)}} onmouseover={() => {if(!subTab.external) preloadData(subTab.dest)}}>
-									<Graphic class="material-icons{active == subTab.dest ? "" : " nav-item"}" aria-hidden="true">{subTab.icon}</Graphic>
+									<Graphic class="drawerEmoji" aria-hidden="true">{getMenuIcon(subTab.label)}</Graphic>
 									<Text class="{active == subTab.dest ? "" : "nav-item"}">{subTab.label}</Text>
 								</Item>
 							{/if}
