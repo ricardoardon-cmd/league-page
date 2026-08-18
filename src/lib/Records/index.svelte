@@ -50,11 +50,11 @@
     if(leagueData.stale) refreshRecords();
 
     let display = $state("allTime");
-    let mobileCategory = $state('all');
+    let mobileCategory = $state('scoring');
 
     const setDisplay = (value) => {
         display = value;
-        mobileCategory = 'all';
+        mobileCategory = 'scoring';
     };
 
     const jumpToRecord = (category, id) => {
@@ -79,7 +79,7 @@
         }
         .mobileRecordNav::-webkit-scrollbar, .mobileRecordSubnav::-webkit-scrollbar { display: none; }
         .categoryButton {
-            flex: 0 0 auto; min-height: 38px; padding: 7px 12px; border: 1px solid var(--ccc); border-radius: 999px;
+            flex: 1 0 auto; min-height: 38px; padding: 7px 12px; border: 1px solid var(--ccc); border-radius: 999px;
             background: var(--f3f3f3); color: inherit; font: inherit; font-size: .68rem; font-weight: 850; white-space: nowrap; cursor: pointer;
         }
         .categoryButton.active { background: var(--blueTwo); border-color: var(--blueOne); color: #fff; }
@@ -88,15 +88,15 @@
             display: flex;
             gap: 7px;
             width: calc(100% - 28px);
-            margin: 2px auto 8px;
+            margin: 6px auto 10px;
             padding: 2px 0;
             overflow-x: auto;
             scrollbar-width: none;
         }
 
         .quickJumpButton {
-            flex: 0 0 auto;
-            min-height: 30px;
+            flex: 1 0 auto;
+            min-height: 32px;
             padding: 5px 10px;
             border: 1px solid var(--ccc);
             border-radius: 999px;
@@ -153,20 +153,19 @@
 
     {#if display == "allTime"}
         <nav class="mobileRecordNav" aria-label="Record categories">
-            <button class:active={mobileCategory === 'all'} class="categoryButton" onclick={() => mobileCategory = 'all'}>All</button>
             <button class:active={mobileCategory === 'scoring'} class="categoryButton" onclick={() => mobileCategory = 'scoring'}>🔥 Scoring</button>
             <button class:active={mobileCategory === 'season'} class="categoryButton" onclick={() => mobileCategory = 'season'}>📅 Seasons</button>
             <button class:active={mobileCategory === 'matchups'} class="categoryButton" onclick={() => mobileCategory = 'matchups'}>⚔️ Matchups</button>
             <button class:active={mobileCategory === 'rankings'} class="categoryButton" onclick={() => mobileCategory = 'rankings'}>📊 Rankings</button>
         </nav>
 
-        {#if mobileCategory === 'all' || mobileCategory === 'scoring' || mobileCategory === 'matchups'}
-            <nav class="mobileRecordSubnav" aria-label="Quick record links">
-                {#if mobileCategory === 'all' || mobileCategory === 'scoring'}
+        {#if mobileCategory === 'scoring' || mobileCategory === 'matchups'}
+            <nav class="mobileRecordSubnav" aria-label="Record subcategories">
+                {#if mobileCategory === 'scoring'}
                     <button class="quickJumpButton" onclick={() => jumpToRecord('scoring', 'scoring-highs')}>🔥 Scoring Highs</button>
                     <button class="quickJumpButton" onclick={() => jumpToRecord('scoring', 'scoring-lows')}>🧊 Scoring Lows</button>
                 {/if}
-                {#if mobileCategory === 'all' || mobileCategory === 'matchups'}
+                {#if mobileCategory === 'matchups'}
                     <button class="quickJumpButton" onclick={() => jumpToRecord('matchups', 'blowouts')}>💥 Largest Blowouts</button>
                     <button class="quickJumpButton" onclick={() => jumpToRecord('matchups', 'closest-wins')}>🤏 Closest Wins</button>
                 {/if}
