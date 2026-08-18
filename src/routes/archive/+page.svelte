@@ -71,7 +71,12 @@
     const momentsByYear = {
         2026: [],
         2025: [
-            { src: '/archive/2025/league-group.jpg', tag: 'Draft Day', title: '2025 League Crew', featured: true }
+            { src: '/archive/2025/league-group.jpg', tag: 'Draft Day', title: '2025 League Crew', featured: true },
+            { src: '/archive/2025/PXL_20250830_222034437.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 1' },
+            { src: '/archive/2025/PXL_20250830_225012923.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 2' },
+            { src: '/archive/2025/PXL_20250831_025137414.MP.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 3' },
+            { src: '/archive/2025/PXL_20250831_043646757.MP.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 4' },
+            { src: '/archive/2025/IMG_20250831_100127.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 5' }
         ],
         2024: [],
         2023: [],
