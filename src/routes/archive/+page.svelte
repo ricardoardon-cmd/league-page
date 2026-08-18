@@ -71,7 +71,22 @@
             { src: '/archive/2025/PXL_20250824_010417066.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 8' },
             { src: '/archive/2025/PXL_20250824_015847634.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 9' }
         ],
-        2024: [], 2023: [], '2022-legacy': []
+        2024: [
+            { src: '/archive/2024/PXL_20240831_213916522.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 1' },
+            { src: '/archive/2024/PXL_20240831_215631799.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 2' },
+            { src: '/archive/2024/PXL_20240901_044423976.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 3' }
+        ],
+        2023: [
+            { src: '/archive/2023/IMG_20230902_131002_01.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 1' },
+            { src: '/archive/2023/PXL_20230903_053041349.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 2' },
+            { src: '/archive/2023/PXL_20230903_053055439.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 3' },
+            { src: '/archive/2023/PXL_20230903_053059462.MP.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 4' },
+            { src: '/archive/2023/PXL_20230903_151113654.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 5' }
+        ],
+        '2022-legacy': [
+            { src: '/archive/2022-legacy/PXL_20220827_224438267.jpg', tag: 'League History', title: '2022 Legacy Photo 1' },
+            { src: '/archive/2022-legacy/PXL_20220828_045811908.NIGHT.jpg', tag: 'League History', title: '2022 Legacy Photo 2' }
+        ]
     };
 
     $: isLegacy = activeYear === '2022-legacy';
