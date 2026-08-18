@@ -1,31 +1,27 @@
 {
-  "short_name": "League Page",
-  "name": "League Page",
+  "id": "/",
+  "short_name": "GGL",
+  "name": "GGL Fantasy Football League",
+  "description": "GGL fantasy football league hub for standings, matchups, records, drafts, archives and more.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#00316b",
+  "theme_color": "#00316b",
   "icons": [
     {
-      "src": "/favicons/android-chrome-192x192.png",
-      "sizes": "192x192",
+      "src": "/managers/GGL.png",
+      "sizes": "any",
       "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/favicons/android-chrome-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any maskable"
     }
   ],
-  "start_url": "/",
-  "background_color": "#fff",
-  "display": "standalone",
-  "scope": "/",
-  "theme_color": "#fff",
   "shortcuts": [
     {
-      "name": "Trades and Waivers",
-      "short_name": "Transactions",
-      "description": "View league trades and waivers",
-      "url": "/transactions"
+      "name": "Standings",
+      "short_name": "Standings",
+      "description": "View league standings",
+      "url": "/standings"
     },
     {
       "name": "Matchups",
@@ -34,29 +30,22 @@
       "url": "/matchups"
     },
     {
-      "name": "Rosters",
-      "short_name": "Rosters",
-      "description": "View league rosters",
-      "url": "/rosters"
+      "name": "Records",
+      "short_name": "Records",
+      "description": "View league records",
+      "url": "/records"
     },
     {
       "name": "Drafts",
       "short_name": "Drafts",
-      "description": "View league upcoming and past drafts",
+      "description": "View league drafts and draft analysis",
       "url": "/drafts"
     },
     {
-      "name": "Trophy Room",
-      "short_name": "Trophy Room",
-      "description": "View the managers' past awards and accomplishments",
-      "url": "/awards"
-    },
-    {
-      "name": "Resources & News",
-      "short_name": "Resources",
-      "description": "View fantasy football resources and news",
-      "url": "/resources"
+      "name": "Season Archives",
+      "short_name": "Archives",
+      "description": "View league photos, videos and season memories",
+      "url": "/archive"
     }
-  ],
-  "description": "Information about the League"
+  ]
 }
