@@ -76,7 +76,11 @@
             { src: '/archive/2025/PXL_20250830_225012923.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 2' },
             { src: '/archive/2025/PXL_20250831_025137414.MP.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 3' },
             { src: '/archive/2025/PXL_20250831_043646757.MP.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 4' },
-            { src: '/archive/2025/IMG_20250831_100127.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 5' }
+            { src: '/archive/2025/IMG_20250831_100127.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 5' },
+            { src: '/archive/2025/PXL_20250824_002112997.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 6' },
+            { src: '/archive/2025/PXL_20250824_002617390.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 7' },
+            { src: '/archive/2025/PXL_20250824_010417066.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 8' },
+            { src: '/archive/2025/PXL_20250824_015847634.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 9' }
         ],
         2024: [],
         2023: [],
