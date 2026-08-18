@@ -54,6 +54,11 @@
 		<!-- SMUI Styles -->
 		<link rel="stylesheet" href="/smui.css" media="(prefers-color-scheme: light)" />
 		<link rel="stylesheet" href="/smui-dark.css" media="(prefers-color-scheme: dark)" />
+
+		<!-- Keep archive year navigation beneath the mobile drawer -->
+		<style>
+			.yearNav { z-index: 1 !important; }
+		</style>
 		%sveltekit.head%
 	</head>
 	<body>
