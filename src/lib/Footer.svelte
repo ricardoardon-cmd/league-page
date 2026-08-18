@@ -114,7 +114,7 @@
 			{/each}
 		</ul>
 	</div>
-	<span class="copyright">&copy; 2021 - {year} <a href="https://github.com/nmelhado/league-page">League Page</a></span>
+	<span class="copyright">&copy; 2021 - {year}</span>
 	<br />
 	<span class="creator">Built by Pico</span>
 </footer>
