@@ -10,14 +10,8 @@
   "theme_color": "#00316b",
   "icons": [
     {
-      "src": "/favicons/android-chrome-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/favicons/android-chrome-512x512.png",
-      "sizes": "512x512",
+      "src": "/managers/GGL.png",
+      "sizes": "any",
       "type": "image/png",
       "purpose": "any maskable"
     }
