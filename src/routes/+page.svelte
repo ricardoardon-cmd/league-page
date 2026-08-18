@@ -15,7 +15,7 @@
         getAvatarFromTeamManagers,
         getTeamFromTeamManagers
     } from '$lib/utils/helperFunctions/universalFunctions';
-    import { dues, dynasty } from '$lib/utils/leagueInfo';
+    import { dues } from '$lib/utils/leagueInfo';
 
     const nflState = getNflState();
     const podiumsData = getAwards();
@@ -72,50 +72,16 @@
         justify-content: flex-start;
         align-items: flex-end;
         position: relative;
+        width: 100%;
     }
 
-    .hero h1 {
-        margin: 0;
-        font-size: 2.7rem;
-        font-weight: 800;
-        letter-spacing: -1px;
-        text-shadow: 0 2px 10px rgba(0,0,0,.75);
-    }
-
-    .hero p {
-        margin: 8px 0 0;
-        opacity: .85;
-        font-size: 1.05rem;
-        text-shadow: 0 2px 10px rgba(0,0,0,.75);
-    }
-
-    .status {
-        position: absolute;
-        top: 0;
-        right: 0;
-        min-width: 130px;
-        padding: 12px 18px;
-        border-radius: 12px;
-        text-align: center;
-        color: #fff;
-        background: rgba(0,0,0,.42);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255,255,255,.28);
-    }
-
-    .statusLabel {
-        display: block;
-        font-size: .75rem;
-        text-transform: uppercase;
-        opacity: .7;
-        letter-spacing: 1px;
-    }
-
-    .statusValue {
-        display: block;
-        margin-top: 3px;
-        font-size: 1.1rem;
+    .heroBrand {
+        width: 100%;
+        font-size: 1.45rem;
         font-weight: 700;
+        letter-spacing: .01em;
+        white-space: nowrap;
+        text-shadow: 0 2px 10px rgba(0,0,0,.8);
     }
 
     .stats {
@@ -356,21 +322,14 @@
         .heroTop {
             min-height: 155px;
             justify-content: flex-end;
-            align-items: flex-start;
-            flex-direction: column;
+            align-items: flex-end;
         }
 
-        .hero h1 { font-size: 1.8rem; }
-        .hero p { margin-top: 4px; font-size: .88rem; }
-
-        .status {
-            min-width: 92px;
-            padding: 6px 9px;
-            border-radius: 10px;
+        .heroBrand {
+            font-size: clamp(.76rem, 3.9vw, 1rem);
+            font-weight: 700;
+            white-space: nowrap;
         }
-
-        .statusLabel { font-size: .54rem; }
-        .statusValue { font-size: .82rem; }
 
         .stats {
             grid-template-columns: repeat(4, minmax(0,1fr));
@@ -425,7 +384,6 @@
             font-size: 1.2rem;
         }
 
-        /* Compact mobile League Center: 10 links become five short rows. */
         .navigation {
             grid-template-columns: repeat(2, minmax(0,1fr));
             gap: 7px;
@@ -497,6 +455,7 @@
 
     @media (max-width: 370px) {
         .dashboard { padding-left: 7px; padding-right: 7px; }
+        .heroBrand { font-size: .72rem; }
         .navCard { gap: 6px; padding-left: 7px; padding-right: 7px; }
         .navIcon { width: 25px; font-size: 1.15rem; }
         .navTitle { font-size: .74rem; }
@@ -508,14 +467,7 @@
     <main class="dashboard">
         <section class="hero">
             <div class="heroTop">
-                <div>
-                    <h1>{leagueName}</h1>
-                    <p>Fantasy Football League Hub</p>
-                </div>
-                <div class="status">
-                    <span class="statusLabel">League Format</span>
-                    <span class="statusValue">{dynasty ? 'Dynasty' : 'Redraft'}</span>
-                </div>
+                <div class="heroBrand">{leagueName} Fantasy Football League Hub</div>
             </div>
         </section>
 
