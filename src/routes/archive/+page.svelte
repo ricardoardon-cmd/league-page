@@ -85,7 +85,13 @@
         ],
         '2022-legacy': [
             { src: '/archive/2022-legacy/PXL_20220827_224438267.jpg', tag: 'League History', title: '2022 Legacy Photo 1' },
-            { src: '/archive/2022-legacy/PXL_20220828_045811908.NIGHT.jpg', tag: 'League History', title: '2022 Legacy Photo 2' }
+            { src: '/archive/2022-legacy/PXL_20220828_045811908.NIGHT.jpg', tag: 'League History', title: '2022 Legacy Photo 2' },
+            { src: '/archive/2022-legacy/PXL_20210822_005518501.MP.jpg', tag: 'League History', title: '2021 Legacy Photo 1' },
+            { src: '/archive/2022-legacy/PXL_20210822_005929187.MP.jpg', tag: 'League History', title: '2021 Legacy Photo 2' },
+            { src: '/archive/2022-legacy/PXL_20210822_010340081.MP.jpg', tag: 'League History', title: '2021 Legacy Photo 3' },
+            { src: '/archive/2022-legacy/PXL_20210822_010346969.jpg', tag: 'League History', title: '2021 Legacy Photo 4' },
+            { src: '/archive/2022-legacy/PXL_20210822_010541654.jpg', tag: 'League History', title: '2021 Legacy Photo 5' },
+            { src: '/archive/2022-legacy/PXL_20210822_074046487.jpg', tag: 'League History', title: '2021 Legacy Photo 6' }
         ]
     };
 
