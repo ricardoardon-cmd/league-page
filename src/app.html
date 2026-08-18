@@ -34,10 +34,67 @@
 			.yearNav,
 			.videoArrow,
 			.photoArrow { z-index: 1 !important; }
+
+			#ggl-splash {
+				display: none;
+				position: fixed;
+				inset: 0;
+				z-index: 2147483647;
+				align-items: center;
+				justify-content: center;
+				background: #00316b;
+				opacity: 1;
+				transition: opacity 180ms ease;
+			}
+
+			#ggl-splash img {
+				width: min(42vw, 220px);
+				height: auto;
+				display: block;
+			}
+
+			@media (display-mode: standalone) {
+				#ggl-splash { display: flex; }
+			}
+
+			#ggl-splash.ggl-splash-hide {
+				opacity: 0;
+				pointer-events: none;
+			}
 		</style>
 		%sveltekit.head%
 	</head>
 	<body>
+		<div id="ggl-splash" aria-hidden="true">
+			<img src="/managers/GGL.png" alt="" />
+		</div>
 		<div id="svelte">%sveltekit.body%</div>
+		<script>
+			(function () {
+				var splash = document.getElementById('ggl-splash');
+				var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+				if (!standalone || !splash) return;
+
+				var started = Date.now();
+				var minimumVisibleTime = 450;
+
+				function hideSplash() {
+					var remaining = Math.max(0, minimumVisibleTime - (Date.now() - started));
+					setTimeout(function () {
+						splash.classList.add('ggl-splash-hide');
+						setTimeout(function () {
+							splash.remove();
+						}, 200);
+					}, remaining);
+				}
+
+				if (document.readyState === 'complete') {
+					hideSplash();
+				} else {
+					window.addEventListener('load', hideSplash, { once: true });
+					setTimeout(hideSplash, 2500);
+				}
+			})();
+		</script>
 	</body>
 </html>
