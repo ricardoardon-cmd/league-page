@@ -29,7 +29,9 @@
         { title: 'Transactions', description: 'Trades, waivers, adds and drops.', icon: '🔄', href: '/transactions' },
         { title: 'Drafts', description: 'Draft history and selections.', icon: '🎯', href: '/drafts' },
         { title: 'Records', description: 'League records and historical achievements.', icon: '📊', href: '/records' },
-        { title: 'Rivalries', description: 'Head-to-head history and rivalries.', icon: '⚔️', href: '/rivalry' }
+        { title: 'Rivalries', description: 'Head-to-head history and rivalries.', icon: '⚔️', href: '/rivalry' },
+        { title: 'Season Archives', description: 'Photos, videos and memories from every season.', icon: '🗃️', href: '/archive' },
+        { title: 'Sleeper', description: 'Open the GGL league on Sleeper.', icon: '💤', href: 'https://sleeper.com/leagues/1352122466314489856' }
     ];
 </script>
 
@@ -423,7 +425,7 @@
             font-size: 1.2rem;
         }
 
-        /* Compact mobile League Center: 8 links become four short rows. */
+        /* Compact mobile League Center: 10 links become five short rows. */
         .navigation {
             grid-template-columns: repeat(2, minmax(0,1fr));
             gap: 7px;
