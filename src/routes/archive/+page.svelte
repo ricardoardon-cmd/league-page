@@ -74,7 +74,12 @@
         2024: [
             { src: '/archive/2024/PXL_20240831_213916522.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 1' },
             { src: '/archive/2024/PXL_20240831_215631799.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 2' },
-            { src: '/archive/2024/PXL_20240901_044423976.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 3' }
+            { src: '/archive/2024/PXL_20240901_044423976.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 3' },
+            { src: '/archive/2024/PXL_20250824_002112997.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 4' },
+            { src: '/archive/2024/PXL_20250824_002617390.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 5' },
+            { src: '/archive/2024/PXL_20250824_003037345.MP.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 6' },
+            { src: '/archive/2024/PXL_20250824_010417066.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 7' },
+            { src: '/archive/2024/PXL_20250824_015847634.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 8' }
         ],
         2023: [
             { src: '/archive/2023/IMG_20230902_131002_01.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 1' },
