@@ -14,6 +14,7 @@ export const tabs = [
             { icon: 'local_fire_department', label: 'Rivalry', dest: '/rivalry' },
             { icon: 'leaderboard', label: 'Standings', dest: '/standings' },
             { icon: 'view_comfy', label: 'Drafts', dest: '/drafts' },
+            { icon: 'psychology', label: 'Mock Draft', dest: '/mock-draft' },
             { icon: 'emoji_events', label: 'History', dest: '/awards' },
             { icon: 'photo_library', label: 'Season Archive', dest: '/archive' },
             { icon: 'military_tech', label: 'Records', dest: '/records' },

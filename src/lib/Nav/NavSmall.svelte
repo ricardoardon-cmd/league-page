@@ -25,6 +25,7 @@
 		Rivalry: '⚔️',
 		Standings: '🏆',
 		Drafts: '🎯',
+		'Mock Draft': '🧠',
 		History: '🏛️',
 		'Season Archive': '🗃️',
 		Records: '📊',
