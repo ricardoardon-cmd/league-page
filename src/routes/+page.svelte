@@ -316,7 +316,7 @@
             padding: 16px;
             margin-bottom: 12px;
             border-radius: 14px;
-            background-position: center 35%;
+            background-position: center 28%;
         }
 
         .heroTop {
