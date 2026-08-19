@@ -1,7 +1,8 @@
 import { loadPlayers } from '$lib/utils/helper';
 
-// Verified current FantasyPros Superflex anchors. They keep the very top of the
-// board Superflex-aware while Sleeper standard ADP supplies the complete pool.
+// Verified current FantasyPros Superflex anchors. Sleeper's verified deep 2026
+// week-1 ADP feed supplies the complete pool; standard-scoring preferences will
+// be handled by GGL ranking/CPU logic instead of relying on an unavailable feed.
 const FANTASYPROS_SUPERFLEX_2026 = [
     'Josh Allen','Drake Maye','Lamar Jackson','Joe Burrow','Jayden Daniels',"Ja'Marr Chase",
     'Puka Nacua','Bijan Robinson','Jahmyr Gibbs','Jalen Hurts','Jaxon Smith-Njigba','Justin Herbert'
@@ -16,16 +17,13 @@ function projectionPlayerId(row={}) {
 }
 function projectionAdp(row={}) {
     const stats=row.stats||row.projection||row;
-    // Standard is intentionally first. Other standard aliases are fallbacks only.
-    for(const key of ['adp_dd_std','adp_std','adp_dd_standard','adp_standard']) {
+    for(const key of ['adp_dd_ppr','adp_ppr']) {
         const n=Number(stats?.[key] ?? row?.[key]);
         if(Number.isFinite(n) && n>0 && n<999) return n;
     }
     return null;
 }
 
-// Sleeper standard ADP is a normal 1-QB market, so blend it with a Superflex QB
-// curve. Non-QBs retain their real standard-scoring market order.
 function superflexAdp(position,adp,qbRank) {
     if(position!=='QB') return adp;
     let target;
@@ -40,8 +38,8 @@ function superflexAdp(position,adp,qbRank) {
 
 async function loadSleeperAdp(fetch) {
     const endpoints=[
-        'https://api.sleeper.com/projections/nfl/2026/1?season_type=regular&order_by=adp_dd_std',
-        'https://api.sleeper.com/projections/nfl/2026/1?season_type=regular&order_by=adp_std'
+        'https://api.sleeper.com/projections/nfl/2026/1?season_type=regular&order_by=adp_dd_ppr',
+        'https://api.sleeper.com/projections/nfl/2026/1?season_type=regular&order_by=adp_ppr'
     ];
     for(const url of endpoints){
         try{
@@ -50,7 +48,7 @@ async function loadSleeperAdp(fetch) {
             const rows=await response.json();
             if(Array.isArray(rows)&&rows.length) return rows;
             if(rows&&typeof rows==='object') return Object.values(rows);
-        }catch(e){console.warn('Sleeper standard ADP fetch failed',url,e);}
+        }catch(e){console.warn('Sleeper ADP fetch failed',url,e);}
     }
     return [];
 }
@@ -74,7 +72,7 @@ export async function load({fetch}) {
     const ranked=[];
     for(const [id,p] of Object.entries(players)){
         const position=playerPosition(p),adp=adpById.get(String(id));
-        if(adp===undefined){p.ggl_rank=99999;p.ggl_rank_source='No Sleeper standard ADP';continue;}
+        if(adp===undefined){p.ggl_rank=99999;p.ggl_rank_source='No Sleeper ADP';continue;}
         const anchor=anchors.get(normalize(playerName(p)));
         let score=superflexAdp(position,adp,qbRank.get(String(id))||999);
         if(anchor) score=anchor;
@@ -89,14 +87,14 @@ export async function load({fetch}) {
         entry.p.ggl_rank=index+1;
         entry.p.search_rank=index+1;
         entry.p.ggl_rank_source=anchors.has(normalize(playerName(entry.p)))
-            ? 'FantasyPros Superflex anchor + Sleeper standard ADP'
+            ? 'FantasyPros Superflex anchor + Sleeper ADP'
             : entry.position==='QB'
-                ? 'Sleeper standard ADP + GGL Superflex QB premium'
-                : 'Sleeper 2026 standard ADP';
+                ? 'Sleeper ADP + GGL Superflex QB premium'
+                : 'Sleeper 2026 ADP base';
     });
 
     if(ranked.length<50){
-        console.warn(`Sleeper standard ADP returned only ${ranked.length} ranked players; using search-rank fallback.`);
+        console.warn(`Sleeper ADP returned only ${ranked.length} ranked players; using search-rank fallback.`);
         const fallback=Object.entries(players)
             .filter(([,p])=>['QB','RB','WR','TE','K','DEF'].includes(playerPosition(p)))
             .sort((a,b)=>{
