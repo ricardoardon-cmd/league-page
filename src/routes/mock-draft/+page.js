@@ -2,184 +2,104 @@ import { loadPlayers } from '$lib/utils/helper';
 
 // Verified FantasyPros 2026 Superflex anchors stay at the top of the board.
 const FANTASYPROS_SUPERFLEX_2026 = [
-    'Josh Allen',
-    'Drake Maye',
-    'Lamar Jackson',
-    'Joe Burrow',
-    'Bijan Robinson',
-    'Jayden Daniels',
-    'Jahmyr Gibbs',
-    'Jalen Hurts',
-    "Ja'Marr Chase",
-    'Puka Nacua',
-    'Justin Herbert',
-    'Jaxon Smith-Njigba'
+    'Josh Allen','Drake Maye','Lamar Jackson','Joe Burrow','Bijan Robinson','Jayden Daniels',
+    'Jahmyr Gibbs','Jalen Hurts',"Ja'Marr Chase",'Puka Nacua','Justin Herbert','Jaxon Smith-Njigba'
 ];
 
-// Small verified Sleeper market anchors. The rest of the board is generated
-// dynamically from Sleeper's player pool instead of a hand-maintained ADP list.
-const SLEEPER_POSITION_ADP_2026 = {
-    QB: {
-        'Josh Allen': 1,
-        'Lamar Jackson': 2,
-        'Drake Maye': 3,
-        'Joe Burrow': 4,
-        'Jayden Daniels': 5
-    },
-    WR: {
-        "Ja'Marr Chase": 1,
-        'Puka Nacua': 2,
-        'Jaxon Smith-Njigba': 3,
-        'CeeDee Lamb': 4,
-        'Amon-Ra St. Brown': 5
-    },
-    TE: {
-        'Trey McBride': 1,
-        'Brock Bowers': 2,
-        'Colston Loveland': 3,
-        'Tyler Warren': 4,
-        'Harold Fannin Jr.': 5
+const normalize = (value = '') => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+const playerName = (p={}) => `${p.fn||p.first_name||''} ${p.ln||p.last_name||''}`.trim();
+const playerPosition = (p={}) => { const x=p.pos||p.position||''; return x==='DST'?'DEF':x; };
+const rawRank = (p={}) => { const n=Number(p.search_rank??p.rank); return Number.isFinite(n)&&n>0?n:null; };
+const isActive = (p={}) => p.active !== false && !['Inactive','Retired'].includes(p.status);
+
+// Build a deterministic rank inside each position. Sleeper search_rank is used when
+// present, then depth-chart order, then experience/name only as tie breakers.
+// This prevents missing/equal search ranks from collapsing the board alphabetically.
+function buildPositionRanks(players) {
+    const groups={QB:[],RB:[],WR:[],TE:[],K:[],DEF:[]};
+    for (const [id,p] of Object.entries(players)) {
+        const position=playerPosition(p);
+        if (!groups[position] || !isActive(p) || !playerName(p)) continue;
+        groups[position].push({id,p});
     }
-};
-
-const SLEEPER_OVERALL_ADP_2026 = {
-    'Bijan Robinson': 1,
-    'Jahmyr Gibbs': 2,
-    'Jonathan Taylor': 3,
-    'Christian McCaffrey': 4,
-    'James Cook III': 5
-};
-
-const normalize = (value = '') =>
-    value
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]/g, '');
-
-const normalizedMap = (source = {}) =>
-    Object.fromEntries(Object.entries(source).map(([name, value]) => [normalize(name), value]));
-
-function playerName(player = {}) {
-    return `${player?.fn || player?.first_name || ''} ${player?.ln || player?.last_name || ''}`.trim();
+    const result=new Map();
+    for (const [position,list] of Object.entries(groups)) {
+        list.sort((a,b)=>{
+            const ar=rawRank(a.p), br=rawRank(b.p);
+            if (ar!==null || br!==null) {
+                if (ar===null) return 1;
+                if (br===null) return -1;
+                if (ar!==br) return ar-br;
+            }
+            const ad=Number(a.p.depth_chart_order??99), bd=Number(b.p.depth_chart_order??99);
+            if (ad!==bd) return ad-bd;
+            const ae=Number(a.p.years_exp??0), be=Number(b.p.years_exp??0);
+            if (ae!==be) return be-ae;
+            return playerName(a.p).localeCompare(playerName(b.p));
+        });
+        list.forEach((entry,index)=>result.set(entry.id,{position,posRank:index+1}));
+    }
+    return result;
 }
 
-function playerPosition(player = {}) {
-    const position = player?.pos || player?.position || '';
-    return position === 'DST' ? 'DEF' : position;
-}
-
-function sleeperBaseRank(player = {}) {
-    const value = Number(player?.search_rank ?? player?.rank ?? 9999);
-    return Number.isFinite(value) && value > 0 ? value : 9999;
-}
-
-// Convert Sleeper's broad player ordering into a GGL Superflex board.
-// This is intentionally a format adjustment, not a claim that search_rank is ADP.
-// QB gets the strongest premium, TE a modest scarcity premium, while RB/WR track
-// the market more closely. K/DEF are intentionally pushed to the final rounds.
-function dynamicSuperflexScore(player = {}) {
-    const base = sleeperBaseRank(player);
-    const position = playerPosition(player);
-
-    if (base >= 9999) return 99999;
-
-    switch (position) {
+// Approximate 10-team Superflex draft slots from positional rank. These curves are
+// deliberately format-aware rather than pretending Sleeper search_rank is ADP.
+function superflexSlot(position,posRank) {
+    switch(position) {
         case 'QB':
-            return base * 0.48 + 18;
+            if(posRank<=6) return 2+posRank*2.2;
+            if(posRank<=12) return 15+(posRank-6)*4.2;
+            if(posRank<=20) return 40+(posRank-12)*6;
+            return 88+(posRank-20)*8;
         case 'RB':
-            return base * 0.92 + 38;
+            if(posRank<=8) return 5+posRank*2.8;
+            if(posRank<=24) return 27+(posRank-8)*3.6;
+            return 85+(posRank-24)*4.8;
         case 'WR':
-            return base * 0.94 + 40;
+            if(posRank<=10) return 6+posRank*2.5;
+            if(posRank<=30) return 31+(posRank-10)*3.1;
+            return 93+(posRank-30)*4.1;
         case 'TE':
-            return base * 0.82 + 70;
-        case 'K':
-            return base + 850;
-        case 'DEF':
-            return base + 900;
-        default:
-            return base + 1200;
+            if(posRank<=3) return 18+posRank*7;
+            if(posRank<=12) return 42+(posRank-3)*7;
+            return 106+(posRank-12)*8;
+        case 'K': return 145+posRank*2;
+        case 'DEF': return 142+posRank*2.2;
+        default: return 9999;
     }
 }
 
-// Blend verified Sleeper market anchors into the dynamic board. These values
-// guide the model without requiring us to invent a complete Sleeper ADP dataset.
-function verifiedMarketScore(position, positionalAdp, overallAdp) {
-    if (Number.isFinite(overallAdp)) return 35 + overallAdp * 8;
-    if (!Number.isFinite(positionalAdp)) return null;
+export async function load({fetch}) {
+    const playerData=await loadPlayers(fetch);
+    const players=playerData?.players||{};
+    const anchors=new Map(FANTASYPROS_SUPERFLEX_2026.map((name,index)=>[normalize(name),index+1]));
+    const positional=buildPositionRanks(players);
+    const pool=[];
 
-    switch (position) {
-        case 'QB': return 28 + positionalAdp * 9;
-        case 'RB': return 48 + positionalAdp * 10;
-        case 'WR': return 50 + positionalAdp * 10;
-        case 'TE': return 82 + positionalAdp * 13;
-        default: return null;
-    }
-}
-
-export async function load({ fetch }) {
-    const playerData = await loadPlayers(fetch);
-    const players = playerData?.players || {};
-
-    const fantasyProsRanks = Object.fromEntries(
-        FANTASYPROS_SUPERFLEX_2026.map((name, index) => [normalize(name), index + 1])
-    );
-    const sleeperOverall = normalizedMap(SLEEPER_OVERALL_ADP_2026);
-    const sleeperByPosition = Object.fromEntries(
-        Object.entries(SLEEPER_POSITION_ADP_2026).map(([position, values]) => [position, normalizedMap(values)])
-    );
-
-    const dynamicPool = [];
-
-    for (const [id, player] of Object.entries(players)) {
-        const name = playerName(player);
-        const key = normalize(name);
-        const position = playerPosition(player);
-        const fpRank = fantasyProsRanks[key];
-        const overallAdp = sleeperOverall[key];
-        const positionalAdp = sleeperByPosition[position]?.[key];
-        const marketScore = verifiedMarketScore(position, positionalAdp, overallAdp);
-        const dynamicScore = dynamicSuperflexScore(player);
-
-        player.sleeper_adp = Number.isFinite(overallAdp) ? overallAdp : null;
-        player.sleeper_position_adp = Number.isFinite(positionalAdp) ? positionalAdp : null;
-        player.ggl_dynamic_score = dynamicScore;
-
-        if (fpRank) {
-            player.ggl_rank = fpRank;
-            player.ggl_rank_source = 'FantasyPros Superflex ECR';
+    for (const [id,p] of Object.entries(players)) {
+        const name=playerName(p), position=playerPosition(p), anchor=anchors.get(normalize(name));
+        if(anchor){
+            p.ggl_rank=anchor;
+            p.ggl_rank_source='FantasyPros Superflex ECR';
             continue;
         }
-
-        dynamicPool.push({
-            id,
-            player,
-            score: marketScore === null ? dynamicScore : Math.min(dynamicScore, marketScore),
-            source: marketScore === null
-                ? 'GGL dynamic Superflex model'
-                : 'Sleeper market anchor + GGL Superflex model'
-        });
+        const info=positional.get(id);
+        if(!info){p.ggl_rank=99999;p.ggl_rank_source='Not in draft pool';continue;}
+        const original=rawRank(p);
+        // Small market nudge preserves useful Sleeper ordering without allowing missing
+        // values to create giant ties. Positional curve remains the dominant signal.
+        const marketNudge=original===null?0:Math.min(original,500)*0.015;
+        pool.push({id,p,score:superflexSlot(position,info.posRank)+marketNudge,posRank:info.posRank,position});
     }
 
-    // Turn model scores into a clean continuous board directly after the verified
-    // FantasyPros anchors. Tie breakers use Sleeper's original player ordering.
-    dynamicPool.sort((a, b) =>
-        a.score - b.score ||
-        sleeperBaseRank(a.player) - sleeperBaseRank(b.player) ||
-        playerName(a.player).localeCompare(playerName(b.player))
-    );
-
-    dynamicPool.forEach((entry, index) => {
-        const rank = FANTASYPROS_SUPERFLEX_2026.length + index + 1;
-        entry.player.ggl_rank = rank;
-        entry.player.ggl_rank_source = entry.source;
+    pool.sort((a,b)=>a.score-b.score || a.posRank-b.posRank || String(a.id).localeCompare(String(b.id)));
+    pool.forEach((entry,index)=>{
+        entry.p.ggl_rank=FANTASYPROS_SUPERFLEX_2026.length+index+1;
+        entry.p.ggl_rank_source='GGL Superflex positional board';
+        entry.p.ggl_position_rank=entry.posRank;
     });
 
-    // Keep the existing mock UI/CPU compatible: it currently reads search_rank.
-    // ggl_rank remains the canonical value so we can switch the UI explicitly later.
-    for (const player of Object.values(players)) {
-        player.search_rank = player.ggl_rank ?? 99999;
-    }
-
-    return { playerData };
+    // Current mock UI and CPU read search_rank, so feed them the canonical GGL rank.
+    for(const p of Object.values(players)) p.search_rank=p.ggl_rank??99999;
+    return {playerData};
 }
