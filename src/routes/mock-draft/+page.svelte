@@ -20,6 +20,8 @@ function pname(p){
     return pos(p)==='DEF' ? (p.t||p.team||`${f} ${l}`.trim()) : (`${f} ${l}`.trim()||p.full_name||'Unknown Player');
 }
 function rank(p){ const n=Number(p.search_rank??p.rank??9999); return Number.isFinite(n)&&n>0?n:9999; }
+function isAutoTeam(team){ return !!team?.is_cpu && !!team?.player_token; }
+function isOpenCpu(team){ return !!team?.is_cpu && !team?.player_token; }
 function hdr(prefer){ return {apikey:KEY,Authorization:`Bearer ${KEY}`,'Content-Type':'application/json',...(prefer?{Prefer:prefer}:{})}; }
 async function req(path,o={}){
     const r=await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{...o,headers:{...hdr(o.prefer),...(o.headers||{})}});
@@ -34,7 +36,7 @@ function ctx(n=Number(room?.current_pick||1)){
 }
 
 $: current=room?ctx():null;
-$: myTurn=room?.status==='drafting'&&current?.team?.player_token===clientToken;
+$: myTurn=room?.status==='drafting'&&current?.team?.player_token===clientToken&&!current?.team?.is_cpu;
 $: drafted=new Set(picks.map(p=>String(p.player_id)));
 $: available=players
     .filter(p=>!drafted.has(String(p.id)))
@@ -78,11 +80,16 @@ async function claim(t){
     if(!name.trim()){ error='Enter your name before claiming a team.'; return; }
     const mine=teams.find(x=>x.player_token===clientToken);
     if(mine&&mine.id!==t.id) await req(`mock_teams?id=eq.${mine.id}`,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({manager_name:null,player_token:null,is_cpu:true})});
-    await req(`mock_teams?id=eq.${t.id}&is_cpu=eq.true`,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({manager_name:name.trim(),player_token:clientToken,is_cpu:false})});
+    await req(`mock_teams?id=eq.${t.id}&is_cpu=eq.true&player_token=is.null`,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({manager_name:name.trim(),player_token:clientToken,is_cpu:false})});
     await refresh();
 }
 async function release(t){
     await req(`mock_teams?id=eq.${t.id}`,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({manager_name:null,player_token:null,is_cpu:true})});
+    await refresh();
+}
+async function resumeManual(t){
+    if(t?.player_token!==clientToken || !isAutoTeam(t)) return;
+    await req(`mock_teams?id=eq.${t.id}`,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({is_cpu:false})});
     await refresh();
 }
 async function startDraft(){
@@ -121,10 +128,19 @@ async function maybeCpu(){
     finally{ cpuWorking=false; }
 }
 async function autoHuman(){
-    if(!myTurn||secondsLeft>0||cpuWorking)return;
+    if(room?.status!=='drafting'||secondsLeft>0||cpuWorking)return;
+    const c=ctx();
+    if(!c.team || c.team.is_cpu) return;
     cpuWorking=true;
-    try{ const c=ctx(),p=bestCpu(c.team,c.round); if(p)await makePick(p,c.team); }
-    finally{ cpuWorking=false; }
+    try{
+        // A timed-out human stays attached to their slot, but the slot becomes CPU
+        // controlled for all future rounds until that manager chooses Resume Manual.
+        await req(`mock_teams?id=eq.${c.team.id}&is_cpu=eq.false`,{
+            method:'PATCH',prefer:'return=minimal',body:JSON.stringify({is_cpu:true})
+        });
+        const p=bestCpu(c.team,c.round);
+        if(p) await makePick(p,c.team);
+    }finally{ cpuWorking=false; }
 }
 async function finishDraft(){
     if(room?.host_id!==clientToken)return;
@@ -202,21 +218,21 @@ onMount(async()=>{
 <div class="top"><b>Active Lobby</b><div class="topActions"><button class="share" onclick={shareMock}>↗ Share Mock</button><button onclick={leave}>Leave</button></div></div>
 {#if shareNotice}<div class="notice">{shareNotice}</div>{/if}
 <section class="card"><label>Your display name<input bind:value={name}></label></section>
-<h2>Draft Order <small>{teams.filter(t=>!t.is_cpu).length}/10 joined</small></h2>
-<div class="teams">{#each teams as t}<div class:mine={t.player_token===clientToken} class="team"><b>{t.draft_slot}. {t.is_cpu?'GGL CPU':t.manager_name}</b>{#if t.player_token===clientToken}<button onclick={()=>release(t)}>Release</button>{:else if t.is_cpu}<button onclick={()=>claim(t)}>Claim</button>{:else}<span>Taken</span>{/if}</div>{/each}</div>
+<h2>Draft Order <small>{teams.filter(t=>!isOpenCpu(t)).length}/10 joined</small></h2>
+<div class="teams">{#each teams as t}<div class:mine={t.player_token===clientToken} class="team"><b>{t.draft_slot}. {isOpenCpu(t)?'GGL CPU':t.manager_name}{isAutoTeam(t)?' · AUTO':''}</b>{#if t.player_token===clientToken}{#if isAutoTeam(t)}<button onclick={()=>resumeManual(t)}>Resume Manual</button>{:else}<button onclick={()=>release(t)}>Release</button>{/if}{:else if isOpenCpu(t)}<button onclick={()=>claim(t)}>Claim</button>{:else}<span>{isAutoTeam(t)?'Auto Draft':'Taken'}</span>{/if}</div>{/each}</div>
 {#if room.host_id===clientToken}<div class="host"><button class="primary" onclick={startDraft}>Start Draft</button><button class="share" onclick={shareMock}>↗ Share Mock</button><button class="danger" onclick={deleteDraft}>Delete Mock</button></div>{:else}<p class="muted">Waiting for the host to start.</p>{/if}
 
 {:else if mode==='draft'}
 <div class="top">
     <button onclick={leave}>← Leave</button>
-    <div><small>{room.status==='completed'?'Draft complete':`Round ${current?.round} · Pick ${current?.overallPick} · Slot ${current?.slot}`}</small><b>{room.status==='completed'?'GGL Mock Complete':`${current?.team?.is_cpu?'GGL CPU':current?.team?.manager_name||'Team'} is on the clock`}</b></div>
-    <div class:turn={myTurn} class="clock">{room.status==='completed'?'FINAL':current?.team?.is_cpu?'CPU':`${secondsLeft}s`}</div>
+    <div><small>{room.status==='completed'?'Draft complete':`Round ${current?.round} · Pick ${current?.overallPick} · Slot ${current?.slot}`}</small><b>{room.status==='completed'?'GGL Mock Complete':`${isOpenCpu(current?.team)?'GGL CPU':current?.team?.manager_name||'Team'}${isAutoTeam(current?.team)?' (AUTO)':''} is on the clock`}</b></div>
+    <div class:turn={myTurn} class="clock">{room.status==='completed'?'FINAL':current?.team?.is_cpu?'AUTO':`${secondsLeft}s`}</div>
 </div>
-<div class="hostbar"><button class="share" onclick={shareMock}>↗ Share Mock</button>{#if room.host_id===clientToken}<button onclick={finishDraft} disabled={room.status==='completed'}>Finish Draft</button><button class="danger" onclick={deleteDraft}>Delete Mock</button>{/if}</div>
+<div class="hostbar"><button class="share" onclick={shareMock}>↗ Share Mock</button>{#if teams.find(t=>t.player_token===clientToken&&isAutoTeam(t))}<button onclick={()=>resumeManual(teams.find(t=>t.player_token===clientToken))}>Resume Manual</button>{/if}{#if room.host_id===clientToken}<button onclick={finishDraft} disabled={room.status==='completed'}>Finish Draft</button><button class="danger" onclick={deleteDraft}>Delete Mock</button>{/if}</div>
 {#if shareNotice}<div class="notice">{shareNotice}</div>{/if}
 <div class="layout">
-<section class="panel"><h2>Draft Board <small>Snake · {picks.length}/{Number(room.team_count||10)*Number(room.rounds||16)}</small></h2><div class="scroll"><div class="board"><div class="head">Rd</div>{#each teams as t}<div class="head">S{t.draft_slot}<small>{t.is_cpu?'CPU':t.manager_name}</small></div>{/each}{#each Array.from({length:Number(room.rounds||16)},(_,i)=>i+1) as r}<div class="head">R{r}</div>{#each teams as t}{@const o=overallFor(r,Number(t.draft_slot),Number(room.team_count||10))}{@const pk=picks.find(x=>x.overall_pick===o)}<div class:now={room.current_pick===o&&room.status==='drafting'} class:mine={t.player_token===clientToken} class={`pick ${pk?`p-${pk.position}`:''}`}><small>#{o}</small><b>{pk?pk.player_name:(t.is_cpu?'CPU':t.manager_name)}</b><span>{pk?.position||'—'}</span></div>{/each}{/each}</div></div></section>
-<section class="panel players"><h2>Available Players <small>{myTurn?'Make your pick':'Best available'}</small></h2><input bind:value={search} placeholder="Search player or team"><div class="filters">{#each ['ALL',...POS] as p}<button class:on={positionFilter===p} onclick={()=>positionFilter=p}>{p}</button>{/each}</div><div class="list">{#each available as p}<button class={`player p-${pos(p)}`} onclick={()=>draftPlayer(p)} disabled={!myTurn||room.status!=='drafting'}><span>{rank(p)<9999?rank(p):'—'}</span><b>{pname(p)}<small>{pos(p)} · {p.t||p.team||'FA'}</small></b><strong>{myTurn?'Draft':pos(p)}</strong></button>{/each}</div><p class="muted">Human picks have 60 seconds. If time expires, GGL CPU makes the best available roster-aware pick.</p></section>
+<section class="panel"><h2>Draft Board <small>Snake · {picks.length}/{Number(room.team_count||10)*Number(room.rounds||16)}</small></h2><div class="scroll"><div class="board"><div class="head">Rd</div>{#each teams as t}<div class="head">S{t.draft_slot}<small>{isOpenCpu(t)?'CPU':t.manager_name}{isAutoTeam(t)?' · AUTO':''}</small></div>{/each}{#each Array.from({length:Number(room.rounds||16)},(_,i)=>i+1) as r}<div class="head">R{r}</div>{#each teams as t}{@const o=overallFor(r,Number(t.draft_slot),Number(room.team_count||10))}{@const pk=picks.find(x=>x.overall_pick===o)}<div class:now={room.current_pick===o&&room.status==='drafting'} class:mine={t.player_token===clientToken} class={`pick ${pk?`p-${pk.position}`:''}`}><small>#{o}</small><b>{pk?pk.player_name:(isOpenCpu(t)?'CPU':t.manager_name)}</b><span>{pk?.position||'—'}</span></div>{/each}{/each}</div></div></section>
+<section class="panel players"><h2>Available Players <small>{myTurn?'Make your pick':teams.find(t=>t.player_token===clientToken&&isAutoTeam(t))?'Your team is on Auto Draft':'Best available'}</small></h2><input bind:value={search} placeholder="Search player or team"><div class="filters">{#each ['ALL',...POS] as p}<button class:on={positionFilter===p} onclick={()=>positionFilter=p}>{p}</button>{/each}</div><div class="list">{#each available as p}<button class={`player p-${pos(p)}`} onclick={()=>draftPlayer(p)} disabled={!myTurn||room.status!=='drafting'}><span>{rank(p)<9999?rank(p):'—'}</span><b>{pname(p)}<small>{pos(p)} · {p.t||p.team||'FA'}</small></b><strong>{myTurn?'Draft':pos(p)}</strong></button>{/each}</div><p class="muted">Human picks have 60 seconds. If time expires, that team switches to Auto Draft and stays there until its manager taps Resume Manual.</p></section>
 </div>
 {/if}
 {#if error}<div class="error">{error}</div>{/if}
