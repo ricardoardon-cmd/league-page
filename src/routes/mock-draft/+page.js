@@ -1,6 +1,6 @@
 import { loadPlayers } from '$lib/utils/helper';
 
-// FantasyPros 2026 Superflex ECR: verified top tier.
+// Verified FantasyPros 2026 Superflex anchors stay at the top of the board.
 const FANTASYPROS_SUPERFLEX_2026 = [
     'Josh Allen',
     'Drake Maye',
@@ -16,9 +16,8 @@ const FANTASYPROS_SUPERFLEX_2026 = [
     'Jaxon Smith-Njigba'
 ];
 
-// Current 2026 Sleeper market ordering verified through FantasyPros ADP tables.
-// These are positional Sleeper ADP values, not Superflex overall ADP, so the
-// GGL layer converts them into a Superflex-aware market score below.
+// Small verified Sleeper market anchors. The rest of the board is generated
+// dynamically from Sleeper's player pool instead of a hand-maintained ADP list.
 const SLEEPER_POSITION_ADP_2026 = {
     QB: {
         'Josh Allen': 1,
@@ -43,7 +42,6 @@ const SLEEPER_POSITION_ADP_2026 = {
     }
 };
 
-// Sleeper standard overall ADP values currently exposed by FantasyPros.
 const SLEEPER_OVERALL_ADP_2026 = {
     'Bijan Robinson': 1,
     'Jahmyr Gibbs': 2,
@@ -62,17 +60,61 @@ const normalize = (value = '') =>
 const normalizedMap = (source = {}) =>
     Object.fromEntries(Object.entries(source).map(([name, value]) => [normalize(name), value]));
 
-// Convert verified Sleeper positional market ranks to a Superflex-aware value.
-// QB is intentionally elevated because raw Sleeper ADP is a 1-QB market.
-function superflexMarketRank(position, positionalAdp, overallAdp) {
-    if (Number.isFinite(overallAdp)) return 100 + overallAdp;
+function playerName(player = {}) {
+    return `${player?.fn || player?.first_name || ''} ${player?.ln || player?.last_name || ''}`.trim();
+}
+
+function playerPosition(player = {}) {
+    const position = player?.pos || player?.position || '';
+    return position === 'DST' ? 'DEF' : position;
+}
+
+function sleeperBaseRank(player = {}) {
+    const value = Number(player?.search_rank ?? player?.rank ?? 9999);
+    return Number.isFinite(value) && value > 0 ? value : 9999;
+}
+
+// Convert Sleeper's broad player ordering into a GGL Superflex board.
+// This is intentionally a format adjustment, not a claim that search_rank is ADP.
+// QB gets the strongest premium, TE a modest scarcity premium, while RB/WR track
+// the market more closely. K/DEF are intentionally pushed to the final rounds.
+function dynamicSuperflexScore(player = {}) {
+    const base = sleeperBaseRank(player);
+    const position = playerPosition(player);
+
+    if (base >= 9999) return 99999;
+
+    switch (position) {
+        case 'QB':
+            return base * 0.48 + 18;
+        case 'RB':
+            return base * 0.92 + 38;
+        case 'WR':
+            return base * 0.94 + 40;
+        case 'TE':
+            return base * 0.82 + 70;
+        case 'K':
+            return base + 850;
+        case 'DEF':
+            return base + 900;
+        default:
+            return base + 1200;
+    }
+}
+
+// Blend verified Sleeper market anchors into the dynamic board. These values
+// guide the model without requiring us to invent a complete Sleeper ADP dataset.
+function verifiedMarketScore(position, positionalAdp, overallAdp) {
+    if (Number.isFinite(overallAdp)) return 35 + overallAdp * 8;
     if (!Number.isFinite(positionalAdp)) return null;
 
-    if (position === 'QB') return 120 + positionalAdp * 7;
-    if (position === 'WR') return 170 + positionalAdp * 8;
-    if (position === 'RB') return 170 + positionalAdp * 8;
-    if (position === 'TE') return 230 + positionalAdp * 12;
-    return null;
+    switch (position) {
+        case 'QB': return 28 + positionalAdp * 9;
+        case 'RB': return 48 + positionalAdp * 10;
+        case 'WR': return 50 + positionalAdp * 10;
+        case 'TE': return 82 + positionalAdp * 13;
+        default: return null;
+    }
 }
 
 export async function load({ fetch }) {
@@ -87,33 +129,56 @@ export async function load({ fetch }) {
         Object.entries(SLEEPER_POSITION_ADP_2026).map(([position, values]) => [position, normalizedMap(values)])
     );
 
-    for (const player of Object.values(players)) {
-        const fullName = `${player?.fn || player?.first_name || ''} ${player?.ln || player?.last_name || ''}`.trim();
-        const key = normalize(fullName);
-        const position = player?.pos === 'DST' ? 'DEF' : (player?.pos || player?.position || '');
+    const dynamicPool = [];
+
+    for (const [id, player] of Object.entries(players)) {
+        const name = playerName(player);
+        const key = normalize(name);
+        const position = playerPosition(player);
         const fpRank = fantasyProsRanks[key];
         const overallAdp = sleeperOverall[key];
         const positionalAdp = sleeperByPosition[position]?.[key];
-        const marketRank = superflexMarketRank(position, positionalAdp, overallAdp);
-        const sleeperSearchRank = Number(player?.search_rank ?? player?.rank ?? 9999);
+        const marketScore = verifiedMarketScore(position, positionalAdp, overallAdp);
+        const dynamicScore = dynamicSuperflexScore(player);
 
         player.sleeper_adp = Number.isFinite(overallAdp) ? overallAdp : null;
         player.sleeper_position_adp = Number.isFinite(positionalAdp) ? positionalAdp : null;
+        player.ggl_dynamic_score = dynamicScore;
 
         if (fpRank) {
             player.ggl_rank = fpRank;
-            player.search_rank = fpRank;
             player.ggl_rank_source = 'FantasyPros Superflex ECR';
-        } else if (marketRank !== null) {
-            player.ggl_rank = marketRank;
-            player.search_rank = marketRank;
-            player.ggl_rank_source = 'Sleeper ADP + GGL Superflex adjustment';
-        } else {
-            const fallbackRank = Number.isFinite(sleeperSearchRank) && sleeperSearchRank > 0 ? 1000 + sleeperSearchRank : 9999;
-            player.ggl_rank = fallbackRank;
-            player.search_rank = fallbackRank;
-            player.ggl_rank_source = 'Sleeper player-rank fallback';
+            continue;
         }
+
+        dynamicPool.push({
+            id,
+            player,
+            score: marketScore === null ? dynamicScore : Math.min(dynamicScore, marketScore),
+            source: marketScore === null
+                ? 'GGL dynamic Superflex model'
+                : 'Sleeper market anchor + GGL Superflex model'
+        });
+    }
+
+    // Turn model scores into a clean continuous board directly after the verified
+    // FantasyPros anchors. Tie breakers use Sleeper's original player ordering.
+    dynamicPool.sort((a, b) =>
+        a.score - b.score ||
+        sleeperBaseRank(a.player) - sleeperBaseRank(b.player) ||
+        playerName(a.player).localeCompare(playerName(b.player))
+    );
+
+    dynamicPool.forEach((entry, index) => {
+        const rank = FANTASYPROS_SUPERFLEX_2026.length + index + 1;
+        entry.player.ggl_rank = rank;
+        entry.player.ggl_rank_source = entry.source;
+    });
+
+    // Keep the existing mock UI/CPU compatible: it currently reads search_rank.
+    // ggl_rank remains the canonical value so we can switch the UI explicitly later.
+    for (const player of Object.values(players)) {
+        player.search_rank = player.ggl_rank ?? 99999;
     }
 
     return { playerData };
