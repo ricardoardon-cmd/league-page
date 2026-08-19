@@ -1,108 +1,50 @@
 import { loadPlayers } from '$lib/utils/helper';
 
-// Verified current FantasyPros Superflex anchors. Sleeper's verified deep 2026
-// week-1 ADP feed supplies the complete pool; standard-scoring preferences will
-// be handled by GGL ranking/CPU logic instead of relying on an unavailable feed.
-const FANTASYPROS_SUPERFLEX_2026 = [
-    'Josh Allen','Drake Maye','Lamar Jackson','Joe Burrow','Jayden Daniels',"Ja'Marr Chase",
-    'Puka Nacua','Bijan Robinson','Jahmyr Gibbs','Jalen Hurts','Jaxon Smith-Njigba','Justin Herbert'
+// 2026 Superflex/2QB master board. The first 100 are taken directly from the
+// current August Superflex market board; Sleeper ADP is used only as deep fallback.
+const SUPERFLEX_TOP_100 = [
+'Josh Allen','Lamar Jackson','Jahmyr Gibbs','Jayden Daniels','Bijan Robinson','Drake Maye',"Ja'Marr Chase",'Joe Burrow','Puka Nacua','Christian McCaffrey','Jalen Hurts','Jaxon Smith-Njigba','Jonathan Taylor','Amon-Ra St. Brown','CeeDee Lamb','Justin Herbert','James Cook III','Caleb Williams','Justin Jefferson','Saquon Barkley','Trevor Lawrence','Derrick Henry','Kenneth Walker III','Ashton Jeanty','Chase Brown','Dak Prescott','Drake London','Omarion Hampton',"De'Von Achane",'Jaxson Dart','Brock Bowers','George Pickens','A.J. Brown','Nico Collins','Chris Olave','Kyren Williams','Matthew Stafford','Javonte Williams','Brock Purdy','Bo Nix','Jeremiyah Love','Malik Nabers','Trey McBride','DeVonta Smith','Josh Jacobs','Jared Goff','Travis Etienne Jr.','Breece Hall','Baker Mayfield','Tee Higgins','Zay Flowers','Rashee Rice','Ladd McConkey','Garrett Wilson','Emeka Egbuka','Kyler Murray','Davante Adams',"D'Andre Swift",'Jaylen Waddle','Colston Loveland','Luther Burden III','Cam Skattebo','Patrick Mahomes II','Jordan Love','Jameson Williams','Tyler Shough','Terry McLaurin','Tetairoa McMillan','Mike Evans','David Montgomery','DJ Moore','Bucky Irving','Jadarian Price','Malik Willis','Bhayshul Tuten','Christian Watson','Quinshon Judkins','Jordyn Tyson','Parker Washington','Sam Darnold','Rhamondre Stevenson','C.J. Stroud','TreVeyon Henderson','Tony Pollard','Carnell Tate','Daniel Jones','Marvin Harrison Jr.','Tyler Warren','Rico Dowdle','Rome Odunze','Tucker Kraft','Brian Thomas Jr.','Cam Ward','DK Metcalf','Jaylen Warren','Bryce Young','Jordan Addison','Sam LaPorta','Jayden Reed','J.K. Dobbins'
 ];
 
 const normalize=(v='')=>v.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
 const playerName=(p={})=>`${p.fn||p.first_name||''} ${p.ln||p.last_name||''}`.trim();
 const playerPosition=(p={})=>{const x=p.pos||p.position||'';return x==='DST'?'DEF':x;};
 
-function projectionPlayerId(row={}) {
-    return String(row.player_id ?? row.player?.player_id ?? row.player?.id ?? row.id ?? '');
+function projectionPlayerId(row={}){return String(row.player_id??row.player?.player_id??row.player?.id??row.id??'');}
+function projectionAdp(row={}){
+ const stats=row.stats||row.projection||row;
+ for(const key of ['adp_dd_ppr','adp_ppr']){const n=Number(stats?.[key]??row?.[key]);if(Number.isFinite(n)&&n>0&&n<999)return n;}
+ return null;
 }
-function projectionAdp(row={}) {
-    const stats=row.stats||row.projection||row;
-    for(const key of ['adp_dd_ppr','adp_ppr']) {
-        const n=Number(stats?.[key] ?? row?.[key]);
-        if(Number.isFinite(n) && n>0 && n<999) return n;
-    }
-    return null;
-}
-
-function superflexAdp(position,adp,qbRank) {
-    if(position!=='QB') return adp;
-    let target;
-    if(qbRank<=5) target=1+(qbRank-1)*2.0;
-    else if(qbRank<=8) target=11+(qbRank-6)*3.0;
-    else if(qbRank<=12) target=20+(qbRank-9)*4.0;
-    else if(qbRank<=16) target=36+(qbRank-13)*6.0;
-    else if(qbRank<=20) target=60+(qbRank-17)*8.0;
-    else return adp;
-    return target*0.75 + adp*0.25;
+async function loadSleeperAdp(fetch){
+ for(const url of ['https://api.sleeper.com/projections/nfl/2026/1?season_type=regular&order_by=adp_dd_ppr','https://api.sleeper.com/projections/nfl/2026/1?season_type=regular&order_by=adp_ppr']){
+  try{const r=await fetch(url,{headers:{accept:'application/json'}});if(!r.ok)continue;const rows=await r.json();if(Array.isArray(rows)&&rows.length)return rows;if(rows&&typeof rows==='object')return Object.values(rows);}catch(e){console.warn('Sleeper ADP fetch failed',e);}
+ }
+ return [];
 }
 
-async function loadSleeperAdp(fetch) {
-    const endpoints=[
-        'https://api.sleeper.com/projections/nfl/2026/1?season_type=regular&order_by=adp_dd_ppr',
-        'https://api.sleeper.com/projections/nfl/2026/1?season_type=regular&order_by=adp_ppr'
-    ];
-    for(const url of endpoints){
-        try{
-            const response=await fetch(url,{headers:{accept:'application/json'}});
-            if(!response.ok) continue;
-            const rows=await response.json();
-            if(Array.isArray(rows)&&rows.length) return rows;
-            if(rows&&typeof rows==='object') return Object.values(rows);
-        }catch(e){console.warn('Sleeper ADP fetch failed',url,e);}
-    }
-    return [];
-}
+export async function load({fetch}){
+ const [playerData,adpRows]=await Promise.all([loadPlayers(fetch),loadSleeperAdp(fetch)]);
+ const players=playerData?.players||{};
+ const master=new Map(SUPERFLEX_TOP_100.map((name,i)=>[normalize(name),i+1]));
+ const adpById=new Map();
+ for(const row of adpRows){const id=projectionPlayerId(row),adp=projectionAdp(row);if(id&&adp!==null)adpById.set(id,adp);}
 
-export async function load({fetch}) {
-    const [playerData,adpRows]=await Promise.all([loadPlayers(fetch),loadSleeperAdp(fetch)]);
-    const players=playerData?.players||{};
-    const anchors=new Map(FANTASYPROS_SUPERFLEX_2026.map((name,index)=>[normalize(name),index+1]));
+ // Primary board: authoritative Superflex order. No additional QB multiplier.
+ const ranked=[],fallback=[];
+ for(const [id,p] of Object.entries(players)){
+  const fixed=master.get(normalize(playerName(p)));
+  if(fixed){ranked.push({id,p,score:fixed});continue;}
+  const adp=adpById.get(String(id));
+  if(adp!==undefined&&['QB','RB','WR','TE','K','DEF'].includes(playerPosition(p)))fallback.push({id,p,adp});
+  else{p.ggl_rank=99999;p.search_rank=99999;p.ggl_rank_source='Outside draft pool';}
+ }
+ ranked.sort((a,b)=>a.score-b.score);
+ ranked.forEach((x,i)=>{x.p.ggl_rank=i+1;x.p.search_rank=i+1;x.p.ggl_rank_source='2026 Superflex/2QB master board';});
 
-    const adpById=new Map();
-    for(const row of adpRows){
-        const id=projectionPlayerId(row),adp=projectionAdp(row);
-        if(id&&adp!==null) adpById.set(id,adp);
-    }
+ // Players outside the master board remain usable, but can never jump ahead of it.
+ fallback.sort((a,b)=>a.adp-b.adp||String(a.id).localeCompare(String(b.id)));
+ fallback.forEach((x,i)=>{x.p.ggl_rank=101+i;x.p.search_rank=101+i;x.p.sleeper_adp=x.adp;x.p.ggl_rank_source='Sleeper deep-pool fallback';});
 
-    const qbs=Object.entries(players)
-        .filter(([id,p])=>playerPosition(p)==='QB'&&adpById.has(String(id)))
-        .sort((a,b)=>adpById.get(String(a[0]))-adpById.get(String(b[0])));
-    const qbRank=new Map(qbs.map(([id],index)=>[String(id),index+1]));
-
-    const ranked=[];
-    for(const [id,p] of Object.entries(players)){
-        const position=playerPosition(p),adp=adpById.get(String(id));
-        if(adp===undefined){p.ggl_rank=99999;p.ggl_rank_source='No Sleeper ADP';continue;}
-        const anchor=anchors.get(normalize(playerName(p)));
-        let score=superflexAdp(position,adp,qbRank.get(String(id))||999);
-        if(anchor) score=anchor;
-        if(position==='K') score=Math.max(score,145);
-        if(position==='DEF') score=Math.max(score,142);
-        ranked.push({id,p,score,adp,position});
-        p.sleeper_adp=adp;
-    }
-
-    ranked.sort((a,b)=>a.score-b.score||a.adp-b.adp||String(a.id).localeCompare(String(b.id)));
-    ranked.forEach((entry,index)=>{
-        entry.p.ggl_rank=index+1;
-        entry.p.search_rank=index+1;
-        entry.p.ggl_rank_source=anchors.has(normalize(playerName(entry.p)))
-            ? 'FantasyPros Superflex anchor + Sleeper ADP'
-            : entry.position==='QB'
-                ? 'Sleeper ADP + GGL Superflex QB premium'
-                : 'Sleeper 2026 ADP base';
-    });
-
-    if(ranked.length<50){
-        console.warn(`Sleeper ADP returned only ${ranked.length} ranked players; using search-rank fallback.`);
-        const fallback=Object.entries(players)
-            .filter(([,p])=>['QB','RB','WR','TE','K','DEF'].includes(playerPosition(p)))
-            .sort((a,b)=>{
-                const ar=Number(a[1].search_rank??a[1].rank??99999),br=Number(b[1].search_rank??b[1].rank??99999);
-                return ar-br||String(a[0]).localeCompare(String(b[0]));
-            });
-        fallback.forEach(([id,p],index)=>{p.ggl_rank=index+1;p.search_rank=index+1;p.ggl_rank_source='Sleeper fallback';});
-    }
-
-    return {playerData,adpCount:ranked.length};
+ return {playerData,adpCount:ranked.length+fallback.length};
 }
