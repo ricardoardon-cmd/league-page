@@ -2,7 +2,7 @@
 import { onMount } from 'svelte';
 export let data;
 
-const URL = 'https://uawddygirnbpmkjhqcvu.supabase.co';
+const SUPABASE_URL = 'https://uawddygirnbpmkjhqcvu.supabase.co';
 const KEY = 'sb_publishable_bEps0rM2t0HJsA6BPLjQPg_becZ1PsM';
 const POS = ['QB','RB','WR','TE','K','DEF'];
 
@@ -22,7 +22,7 @@ function pname(p){
 function rank(p){ const n=Number(p.search_rank??p.rank??9999); return Number.isFinite(n)&&n>0?n:9999; }
 function hdr(prefer){ return {apikey:KEY,Authorization:`Bearer ${KEY}`,'Content-Type':'application/json',...(prefer?{Prefer:prefer}:{})}; }
 async function req(path,o={}){
-    const r=await fetch(`${URL}/rest/v1/${path}`,{...o,headers:{...hdr(o.prefer),...(o.headers||{})}});
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{...o,headers:{...hdr(o.prefer),...(o.headers||{})}});
     if(!r.ok) throw new Error(await r.text()||`Request failed ${r.status}`);
     const t=await r.text(); return t?JSON.parse(t):null;
 }
