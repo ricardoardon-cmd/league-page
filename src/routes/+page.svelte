@@ -13,7 +13,8 @@
     import { Transactions, PowerRankings } from '$lib/components';
     import {
         getAvatarFromTeamManagers,
-        getTeamFromTeamManagers
+        getTeamFromTeamManagers,
+        renderManagerNames
     } from '$lib/utils/helperFunctions/universalFunctions';
     import { dues } from '$lib/utils/leagueInfo';
 
@@ -43,7 +44,7 @@
     .heroTop { min-height: 240px; display: flex; justify-content: flex-start; align-items: flex-end; position: relative; width: 100%; }
     .heroBrand { width: 100%; font-size: 1.45rem; font-weight: 700; letter-spacing: .01em; white-space: nowrap; text-shadow: 0 2px 10px rgba(0,0,0,.8); }
     .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
-    .statCard,.intro,.navCard,.panel,#currentChamp { background: var(--f3f3f3); color: inherit; }
+    .statCard,.intro,.navCard,.panel,.awardCard { background: var(--f3f3f3); color: inherit; }
     .statCard { border-radius: 14px; padding: 20px; box-shadow: 0 3px 12px rgba(0,0,0,.08); border: 1px solid var(--ccc); }
     .statIcon { font-size: 1.5rem; }
     .statLabel { margin-top: 10px; font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; opacity: .7; }
@@ -63,18 +64,21 @@
     .navIcon { font-size: 1.8rem; margin-bottom: 10px; }
     .navTitle { font-weight: 700; font-size: 1.05rem; }
     .navDescription { margin-top: 5px; font-size: .85rem; line-height: 1.4; opacity: .75; }
-    .contentGrid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 25px; align-items: start; }
+    .highlightAwards { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 15px; margin-bottom: 20px; }
+    .awardCard { display: grid; grid-template-columns: 108px minmax(0,1fr); align-items: center; gap: 16px; min-height: 145px; padding: 18px; border-radius: 14px; border: 1px solid var(--ccc); box-shadow: 0 3px 12px rgba(0,0,0,.06); }
+    .awardVisual { position: relative; width: 100px; height: 100px; cursor: pointer; }
+    .awardAvatar { position: absolute; left: 50%; top: 50%; width: 70px; height: 70px; transform: translate(-50%,-50%); border-radius: 50%; border: 1px solid #ccc; object-fit: cover; }
+    .awardLaurel { position: absolute; left: 50%; top: 50%; width: 100px; transform: translate(-50%,-50%); }
+    .loserBadge { position: absolute; right: 0; bottom: 2px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--fff); border: 1px solid var(--ccc); font-size: 1.3rem; }
+    .awardTitle { margin-bottom: 4px; font-size: 1.12rem; font-weight: 800; }
+    .awardYear { font-size: .78rem; opacity: .62; }
+    .awardName { margin-top: 6px; font-size: 1.12rem; font-weight: 800; cursor: pointer; }
+    .awardTeam { margin-top: 2px; font-size: .73rem; opacity: .62; }
+    .contentGrid { display: grid; grid-template-columns: 1fr; gap: 0; align-items: start; }
     .panel { padding: 20px; margin-bottom: 25px; border-radius: 14px; border: 1px solid var(--ccc); box-shadow: 0 3px 12px rgba(0,0,0,.06); }
     .panelTitle { margin-bottom: 15px; font-size: 1.3rem; font-weight: 700; }
-    #currentChamp { padding: 25px; margin-bottom: 25px; border-radius: 14px; border: 1px solid var(--ccc); box-shadow: 0 3px 12px rgba(0,0,0,.06); text-align: center; }
-    #champ { position: relative; width: 150px; height: 150px; margin: 15px auto; cursor: pointer; }
-    .first { position: absolute; left: 50%; top: 43%; width: 80px; height: 80px; transform: translate(-50%, -50%); border-radius: 50%; border: 1px solid #ccc; object-fit: cover; }
-    .laurel { position: absolute; left: 50%; top: 50%; width: 135px; height: auto; transform: translate(-50%, -50%); }
-    .champTitle { margin-bottom: 5px; font-size: 1.4rem; font-weight: 700; }
-    .champTeam { display: inline-block; font-size: 1.4rem; font-weight: 700; cursor: pointer; }
-    .champYear { font-size: .9rem; opacity: .68; }
     a { color: inherit; }
-    @media (max-width: 1000px) { .stats { grid-template-columns: repeat(2, 1fr); } .navigation { grid-template-columns: repeat(2, 1fr); } .contentGrid { grid-template-columns: 1fr; } }
+    @media (max-width: 1000px) { .stats { grid-template-columns: repeat(2, 1fr); } .navigation { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 650px) {
         .dashboard { padding: 14px 10px 34px; }
         .hero { min-height: 185px; padding: 16px; margin-bottom: 12px; border-radius: 14px; background-position: center 22%; }
@@ -98,19 +102,20 @@
         .navIcon { width: 29px; margin: 0; flex-shrink: 0; text-align: center; font-size: 1.3rem; }
         .navTitle { min-width: 0; font-size: .82rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .navDescription { display: none; }
-        .contentGrid { gap: 10px; }
-        .contentGrid > aside { order: -1; }
+        .highlightAwards { gap: 7px; margin-bottom: 10px; }
+        .awardCard { grid-template-columns: 52px minmax(0,1fr); gap: 7px; min-height: 92px; padding: 9px 8px; border-radius: 11px; }
+        .awardVisual { width: 50px; height: 50px; }
+        .awardAvatar { width: 36px; height: 36px; }
+        .awardLaurel { width: 50px; }
+        .loserBadge { width: 21px; height: 21px; right: -1px; bottom: -1px; font-size: .8rem; }
+        .awardTitle { margin: 0; font-size: .73rem; line-height: 1.1; }
+        .awardYear { margin-top: 3px; font-size: .56rem; }
+        .awardName { margin-top: 4px; font-size: .76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .awardTeam { font-size: .55rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .panel { padding: 13px; margin-bottom: 12px; border-radius: 12px; }
         .panelTitle { margin-bottom: 10px; font-size: 1.05rem; }
-        #currentChamp { display: grid; grid-template-columns: 72px minmax(0,1fr); grid-template-rows: auto auto auto; align-items: center; column-gap: 10px; padding: 12px; margin-bottom: 2px; text-align: left; }
-        #currentChamp .champTitle { grid-column: 2; grid-row: 1; margin: 0; font-size: .98rem; }
-        #currentChamp .champYear { grid-column: 2; grid-row: 2; font-size: .72rem; }
-        #currentChamp .champTeam { grid-column: 2; grid-row: 3; font-size: 1rem; }
-        #champ { grid-column: 1; grid-row: 1 / 4; width: 70px; height: 70px; margin: 0; }
-        .first { width: 42px; height: 42px; }
-        .laurel { width: 68px; }
     }
-    @media (max-width: 370px) { .dashboard { padding-left: 7px; padding-right: 7px; } .heroBrand { font-size: .72rem; } .navCard { gap: 6px; padding-left: 7px; padding-right: 7px; } .navIcon { width: 25px; font-size: 1.15rem; } .navTitle { font-size: .74rem; } .statLabel { font-size: .43rem; } }
+    @media (max-width: 370px) { .dashboard { padding-left: 7px; padding-right: 7px; } .heroBrand { font-size: .72rem; } .navCard { gap: 6px; padding-left: 7px; padding-right: 7px; } .navIcon { width: 25px; font-size: 1.15rem; } .navTitle { font-size: .74rem; } .statLabel { font-size: .43rem; } .awardTitle { font-size: .66rem; } .awardName { font-size: .7rem; } }
 </style>
 
 <div id="home">
@@ -127,9 +132,47 @@
         <h2 class="sectionTitle">League Center</h2>
         <section class="navigation">{#each navigation as item}<a class="navCard" href={item.href}><div class="navIcon">{item.icon}</div><div><div class="navTitle">{item.title}</div><div class="navDescription">{item.description}</div></div></a>{/each}</section>
         <h2 class="sectionTitle">League Highlights</h2>
+
+        {#await waitForAll(podiumsData, leagueTeamManagersData)}
+            <div class="panel"><p>Retrieving league history...</p><LinearProgress indeterminate /></div>
+        {:then [podiums, leagueTeamManagers]}
+            {#if podiums[0]}
+                <section class="highlightAwards">
+                    <div class="awardCard">
+                        <div class="awardVisual" onclick={() => {if (managers.length) gotoManager({year: podiums[0].year,leagueTeamManagers,rosterID: parseInt(podiums[0].champion)});}}>
+                            <img src={getAvatarFromTeamManagers(leagueTeamManagers, podiums[0].champion, podiums[0].year)} class="awardAvatar" alt="defending champion" />
+                            <img src="/laurel.png" class="awardLaurel" alt="champion laurel" />
+                        </div>
+                        <div>
+                            <div class="awardTitle">🏆 Defending Champion</div>
+                            <div class="awardYear">{podiums[0].year} Champion</div>
+                            <div class="awardName" onclick={() => gotoManager({year: podiums[0].year,leagueTeamManagers,rosterID: parseInt(podiums[0].champion)})}>{getTeamFromTeamManagers(leagueTeamManagers, podiums[0].champion, podiums[0].year).name}</div>
+                        </div>
+                    </div>
+
+                    <div class="awardCard">
+                        <div class="awardVisual" onclick={() => {if (managers.length) gotoManager({year: podiums[0].year,leagueTeamManagers,rosterID: parseInt(podiums[0].toilet)});}}>
+                            <img src={getAvatarFromTeamManagers(leagueTeamManagers, podiums[0].toilet, podiums[0].year)} class="awardAvatar" alt="defending loser" />
+                            <div class="loserBadge">💩</div>
+                        </div>
+                        <div>
+                            <div class="awardTitle">💩 Defending Loser</div>
+                            <div class="awardYear">{podiums[0].year} Last Place</div>
+                            <div class="awardName" onclick={() => gotoManager({year: podiums[0].year,leagueTeamManagers,rosterID: parseInt(podiums[0].toilet)})}>{renderManagerNames(leagueTeamManagers, podiums[0].toilet, podiums[0].year)}</div>
+                            <div class="awardTeam">{getTeamFromTeamManagers(leagueTeamManagers, podiums[0].toilet, podiums[0].year).name}</div>
+                        </div>
+                    </div>
+                </section>
+            {:else}
+                <div class="panel"><p>No former season results.</p></div>
+            {/if}
+        {:catch}
+            <div class="panel"><p>Unable to retrieve league history.</p></div>
+        {/await}
+
         <section class="contentGrid">
-            <div><div class="panel"><div class="panelTitle">🔥 Power Rankings</div><PowerRankings /></div><div class="panel"><div class="panelTitle">🔄 Recent Transactions</div><Transactions /></div></div>
-            <aside><div id="currentChamp">{#await waitForAll(podiumsData, leagueTeamManagersData)}<p>Retrieving league history...</p><LinearProgress indeterminate />{:then [podiums, leagueTeamManagers]}{#if podiums[0]}<div class="champTitle">🏆 Defending Champion</div><div class="champYear">{podiums[0].year} Champion</div><div id="champ" onclick={() => {if (managers.length) {gotoManager({year: podiums[0].year,leagueTeamManagers,rosterID: parseInt(podiums[0].champion)});}}}><img src={getAvatarFromTeamManagers(leagueTeamManagers, podiums[0].champion, podiums[0].year)} class="first" alt="champion" /><img src="/laurel.png" class="laurel" alt="champion laurel" /></div><div class="champTeam" onclick={() => gotoManager({year: podiums[0].year,leagueTeamManagers,rosterID: parseInt(podiums[0].champion)})}>{getTeamFromTeamManagers(leagueTeamManagers, podiums[0].champion, podiums[0].year).name}</div>{:else}<p>No former champions.</p>{/if}{:catch}<p>Unable to retrieve championship history.</p>{/await}</div></aside>
+            <div class="panel"><div class="panelTitle">🔥 Power Rankings</div><PowerRankings /></div>
+            <div class="panel"><div class="panelTitle">🔄 Recent Transactions</div><Transactions /></div>
         </section>
     </main>
 </div>
