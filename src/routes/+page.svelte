@@ -32,8 +32,7 @@
         { title: 'Records', description: 'League records and historical achievements.', icon: '📊', href: '/records' },
         { title: 'Rivalries', description: 'Head-to-head history and rivalries.', icon: '⚔️', href: '/rivalry' },
         { title: 'Season Archives', description: 'Photos, videos and memories from every season.', icon: '🗃️', href: '/archive' },
-        { title: 'Sleeper', description: 'Open the GGL league on Sleeper.', icon: '💤', href: 'https://sleeper.com/leagues/1352122466314489856' },
-        { title: 'Mock Draft', description: 'Enter the GGL Draft Lab for multiplayer mocks and draft strategy.', icon: '🧠', href: '/mock-draft' }
+        { title: 'Sleeper', description: 'Open the GGL league on Sleeper.', icon: '💤', href: 'https://sleeper.com/leagues/1352122466314489856' }
     ];
 </script>
 
@@ -134,45 +133,50 @@
         <h2 class="sectionTitle">League Highlights</h2>
 
         {#await waitForAll(podiumsData, leagueTeamManagersData)}
-            <div class="panel"><p>Retrieving league history...</p><LinearProgress indeterminate /></div>
-        {:then [podiums, leagueTeamManagers]}
-            {#if podiums[0]}
-                <section class="highlightAwards">
+            <div class="panel">Loading league highlights...</div>
+        {:then values}
+            {@const awards = values[0]}
+            {@const leagueTeamManagers = values[1]}
+            {@const champ = awards?.champion}
+            {@const toilet = awards?.toilet}
+            <section class="highlightAwards">
+                {#if champ}
                     <div class="awardCard">
-                        <div class="awardVisual" onclick={() => {if (managers.length) gotoManager({year: podiums[0].year,leagueTeamManagers,rosterID: parseInt(podiums[0].champion)});}}>
-                            <img src={getAvatarFromTeamManagers(leagueTeamManagers, podiums[0].champion, podiums[0].year)} class="awardAvatar" alt="defending champion" />
-                            <img src="/laurel.png" class="awardLaurel" alt="champion laurel" />
+                        <div class="awardVisual" on:click={() => gotoManager(champ.managerID)}>
+                            <img class="awardAvatar" src={getAvatarFromTeamManagers(champ.managerID, leagueTeamManagers)} alt="" />
+                            <img class="awardLaurel" src="/laurel.png" alt="" />
                         </div>
                         <div>
-                            <div class="awardTitle">🏆 Defending Champion</div>
-                            <div class="awardYear">{podiums[0].year} Champion</div>
-                            <div class="awardName" onclick={() => gotoManager({year: podiums[0].year,leagueTeamManagers,rosterID: parseInt(podiums[0].champion)})}>{getTeamFromTeamManagers(leagueTeamManagers, podiums[0].champion, podiums[0].year).name}</div>
+                            <div class="awardTitle">🏆 League Champion</div>
+                            <div class="awardYear">{champ.year}</div>
+                            <div class="awardName" on:click={() => gotoManager(champ.managerID)}>{renderManagerNames(champ.managerID)}</div>
+                            <div class="awardTeam">{getTeamFromTeamManagers(champ.managerID, champ.year, leagueTeamManagers)}</div>
                         </div>
                     </div>
-
+                {/if}
+                {#if toilet}
                     <div class="awardCard">
-                        <div class="awardVisual" onclick={() => {if (managers.length) gotoManager({year: podiums[0].year,leagueTeamManagers,rosterID: parseInt(podiums[0].toilet)});}}>
-                            <img src={getAvatarFromTeamManagers(leagueTeamManagers, podiums[0].toilet, podiums[0].year)} class="awardAvatar" alt="defending loser" />
-                            <div class="loserBadge">💩</div>
+                        <div class="awardVisual" on:click={() => gotoManager(toilet.managerID)}>
+                            <img class="awardAvatar" src={getAvatarFromTeamManagers(toilet.managerID, leagueTeamManagers)} alt="" />
+                            <img class="awardLaurel" src="/laurel.png" alt="" />
+                            <div class="loserBadge">🚽</div>
                         </div>
                         <div>
-                            <div class="awardTitle">💩 Defending Loser</div>
-                            <div class="awardYear">{podiums[0].year} Last Place</div>
-                            <div class="awardName" onclick={() => gotoManager({year: podiums[0].year,leagueTeamManagers,rosterID: parseInt(podiums[0].toilet)})}>{renderManagerNames(leagueTeamManagers, podiums[0].toilet, podiums[0].year)}</div>
-                            <div class="awardTeam">{getTeamFromTeamManagers(leagueTeamManagers, podiums[0].toilet, podiums[0].year).name}</div>
+                            <div class="awardTitle">🚽 Toilet Bowl</div>
+                            <div class="awardYear">{toilet.year}</div>
+                            <div class="awardName" on:click={() => gotoManager(toilet.managerID)}>{renderManagerNames(toilet.managerID)}</div>
+                            <div class="awardTeam">{getTeamFromTeamManagers(toilet.managerID, toilet.year, leagueTeamManagers)}</div>
                         </div>
                     </div>
-                </section>
-            {:else}
-                <div class="panel"><p>No former season results.</p></div>
-            {/if}
+                {/if}
+            </section>
         {:catch}
-            <div class="panel"><p>Unable to retrieve league history.</p></div>
+            <div class="panel">Unable to load league highlights.</div>
         {/await}
 
         <section class="contentGrid">
-            <div class="panel"><div class="panelTitle">🔥 Power Rankings</div><PowerRankings /></div>
-            <div class="panel"><div class="panelTitle">🔄 Recent Transactions</div><Transactions /></div>
+            <div class="panel"><div class="panelTitle">Recent Transactions</div><Transactions /></div>
+            <div class="panel"><div class="panelTitle">Power Rankings</div><PowerRankings /></div>
         </section>
     </main>
 </div>
