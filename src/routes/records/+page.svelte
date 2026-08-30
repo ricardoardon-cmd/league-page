@@ -17,6 +17,36 @@
         max-width: 500px;
         margin: 80px auto;
     }
+
+    /* Improve readability of the records page, especially the expanded matchup on phones. */
+    @media (max-width: 700px) {
+        :global(.scoringHighTable tbody tr.recordMatchupRow td),
+        :global(.scoringLowTable tbody tr.recordMatchupRow td) {
+            font-size: .86rem !important;
+        }
+
+        :global(.scoringHighTable th),
+        :global(.scoringLowTable th) {
+            font-size: .8rem !important;
+        }
+
+        :global(.scoringHighTable thead tr:first-child th),
+        :global(.scoringLowTable thead tr:first-child th) {
+            font-size: .95rem !important;
+        }
+
+        :global(.recordDetail) {
+            font-size: .92em !important;
+        }
+
+        :global(.recordDetailTitle) {
+            font-size: .92rem !important;
+        }
+
+        :global(.recordClose) {
+            font-size: .82rem !important;
+        }
+    }
 </style>
 
 <div id="main">
