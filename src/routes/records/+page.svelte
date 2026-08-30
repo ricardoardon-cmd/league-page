@@ -46,6 +46,32 @@
         :global(.recordClose) {
             font-size: .82rem !important;
         }
+
+        /* The embedded historical matchup has its own aggressive mobile font reductions.
+           Override only inside the Records expansion so normal Matchups pages stay unchanged. */
+        :global(.recordDetail .playerName) {
+            font-size: 1rem !important;
+            line-height: 1.15 !important;
+        }
+
+        :global(.recordDetail .points) {
+            font-size: 1rem !important;
+            line-height: 1.15 !important;
+        }
+
+        :global(.recordDetail .playerTeam) {
+            font-size: .68rem !important;
+            line-height: 1.15 !important;
+        }
+
+        :global(.recordDetail .totalProjection) {
+            font-size: .72rem !important;
+        }
+
+        :global(.recordDetail .pos) {
+            font-size: .78rem !important;
+            font-weight: 700;
+        }
     }
 </style>
 
