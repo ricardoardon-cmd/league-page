@@ -40,7 +40,13 @@
     };
 
     const combineByYear = {
-        2026: [],
+        2026: [
+            { name: 'Dustin', time: '2:48.01', place: 1 }, { name: 'Isai', time: '2:59.16', place: 2 },
+            { name: 'Ariel', time: '2:59.27', place: 3 }, { name: 'Igoe', time: '3:05.86', place: 4 },
+            { name: 'Tony', time: '3:10.50', place: 5 }, { name: 'Pico', time: '3:18.61', place: 6 },
+            { name: 'Eddie', time: '3:25.33', place: 7 }, { name: 'Gabe', time: '4:04.43', place: 8 },
+            { name: 'Jared', time: '4:44.07', place: 9 }, { name: 'Andy', time: '5:41.27', place: 10 }
+        ],
         2025: [
             { name: 'Tony', time: '1:56.09', place: 1 }, { name: 'Ariel', time: '2:18.17', place: 2 },
             { name: 'Andy', time: '2:26.81', place: 3 }, { name: 'Eddie', time: '2:28.86', place: 4 },
@@ -137,7 +143,6 @@
         <h1>{isLegacy ? '2022–Legacy' : `${activeYear} Season`}</h1>
         {#if activeYear === 2025}<div class="heroImage"><img src="/league-photo.jpg" alt="2025 league group" /></div>{/if}
     </section>
-
     {#if !isLegacy && videos.length > 0}
         <section class="videoSection">
             <div class="videoHeading"><div><small>WATCH THE SEASON</small><h2>🎬 {activeYear}</h2></div><span>{activeVideo + 1} / {videos.length}</span></div>
