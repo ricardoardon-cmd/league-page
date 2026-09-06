@@ -13,29 +13,19 @@
             { id: 'p4tLDVhYPMs', title: '2026 Video 2' }
         ],
         2025: [
-            { id: 'QDbLYQWL9Uc', title: 'Combine 2025 pt1' },
-            { id: 'IqcXkIwQKNg', title: 'Combine 2025 pt2' },
-            { id: 'UaWTUPAhAPQ', title: 'Combine 2025 pt3' },
-            { id: 'saPK13MCYq0', title: 'Combine 2025 pt4' },
-            { id: 'PgUK4bmnt_M', title: 'Combine 2025 pt5' },
-            { id: '97Z13uwFJc0', title: 'Combine 2025 pt6' },
-            { id: 'AkK_nKafvt4', title: 'Combine 2025 pt7' },
-            { id: 'ku7TOkLlAN8', title: 'Combine 2025 pt8' },
+            { id: 'QDbLYQWL9Uc', title: 'Combine 2025 pt1' }, { id: 'IqcXkIwQKNg', title: 'Combine 2025 pt2' },
+            { id: 'UaWTUPAhAPQ', title: 'Combine 2025 pt3' }, { id: 'saPK13MCYq0', title: 'Combine 2025 pt4' },
+            { id: 'PgUK4bmnt_M', title: 'Combine 2025 pt5' }, { id: '97Z13uwFJc0', title: 'Combine 2025 pt6' },
+            { id: 'AkK_nKafvt4', title: 'Combine 2025 pt7' }, { id: 'ku7TOkLlAN8', title: 'Combine 2025 pt8' },
             { id: 'fETRMXxkyB4', title: 'Combine 2025 pt9' }
         ],
         2024: [
-            { id: 'W4ux4DjZVBo', title: '2024 Video 1' },
-            { id: '7NTD0m9g6js', title: '2024 Video 2' },
-            { id: 'Rjg3Y6bxQ5A', title: '2024 Video 3' },
-            { id: '-gBptw3BmFg', title: '2024 Video 4' },
-            { id: 'jE7QnxQ85FA', title: '2024 Video 5' },
-            { id: '8bLzeI5zQ8w', title: '2024 Video 6' },
+            { id: 'W4ux4DjZVBo', title: '2024 Video 1' }, { id: '7NTD0m9g6js', title: '2024 Video 2' },
+            { id: 'Rjg3Y6bxQ5A', title: '2024 Video 3' }, { id: '-gBptw3BmFg', title: '2024 Video 4' },
+            { id: 'jE7QnxQ85FA', title: '2024 Video 5' }, { id: '8bLzeI5zQ8w', title: '2024 Video 6' },
             { id: 'T2uT50SjwPQ', title: '2024 Video 7' }
         ],
-        2023: [
-            { id: 'MTnuTXIR8HQ', title: '2023 Short 1' },
-            { id: 'UJNrzNSC0JE', title: '2023 Short 2' }
-        ],
+        2023: [{ id: 'MTnuTXIR8HQ', title: '2023 Short 1' }, { id: 'UJNrzNSC0JE', title: '2023 Short 2' }],
         '2022-legacy': []
     };
 
@@ -65,7 +55,14 @@
     };
 
     const momentsByYear = {
-        2026: [],
+        2026: [
+            { src: '/archive/2026/PXL_20260905_212001654.jpg', tag: 'Draft Day', title: '2026 Draft Day Photo 1' },
+            { src: '/archive/2026/PXL_20260905_220919139.jpg', tag: 'Draft Day', title: '2026 Draft Day Photo 2' },
+            { src: '/archive/2026/PXL_20260905_224143253.jpg', tag: 'Draft Day', title: '2026 Draft Day Photo 3' },
+            { src: '/archive/2026/PXL_20260906_043902859.jpg', tag: 'Draft Day', title: '2026 Draft Day Photo 4' },
+            { src: '/archive/2026/IMG_20260906_110151.heic', tag: 'Draft Day', title: '2026 Draft Day Photo 5' },
+            { src: '/archive/2026/IMG_20260906_110151%20(1).heic', tag: 'Draft Day', title: '2026 Draft Day Photo 6' }
+        ],
         2025: [
             { src: '/archive/2025/PXL_20250830_222034437.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 1' },
             { src: '/archive/2025/PXL_20250830_225012923.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 2' },
@@ -122,71 +119,19 @@
     const nextPhoto = () => activePhoto = (activePhoto + 1) % visibleMoments.length;
     const previousPhoto = () => activePhoto = (activePhoto - 1 + visibleMoments.length) % visibleMoments.length;
     const selectFilter = (filter) => { activeFilter = filter; activePhoto = 0; };
-
-    const selectYear = (year) => {
-        activeYear = year; activeFilter = 'All'; activeVideo = 0; activePhoto = 0;
-    };
-
+    const selectYear = (year) => { activeYear = year; activeFilter = 'All'; activeVideo = 0; activePhoto = 0; };
     const medal = (place) => place === 1 ? '🥇' : place === 2 ? '🥈' : place === 3 ? '🥉' : '';
 </script>
 
 <svelte:head><title>{yearLabel} Archive | GGL</title></svelte:head>
 
 <div class="archivePage">
-    <nav class="yearNav" aria-label="Season archive years">
-        <span class="yearNavLabel">Season</span>
-        <div class="yearButtons">{#each years as year}<button class:active={activeYear === year} onclick={() => selectYear(year)}>{year === '2022-legacy' ? '2022–Legacy' : year}</button>{/each}</div>
-    </nav>
-
-    <section class="hero">
-        <div class="eyebrow">GGL LEAGUE ARCHIVE · SLEEPER ERA</div>
-        <h1>{isLegacy ? '2022–Legacy' : `${activeYear} Season`}</h1>
-        {#if activeYear === 2025}<div class="heroImage"><img src="/league-photo.jpg" alt="2025 league group" /></div>{/if}
-    </section>
-    {#if !isLegacy && videos.length > 0}
-        <section class="videoSection">
-            <div class="videoHeading"><div><small>WATCH THE SEASON</small><h2>🎬 {activeYear}</h2></div><span>{activeVideo + 1} / {videos.length}</span></div>
-            <div class="videoCarousel">
-                <button class="videoArrow left" onclick={previousVideo} aria-label="Previous video">‹</button>
-                <div class="videoStage"><div class="videoEmbed"><iframe src={`https://www.youtube-nocookie.com/embed/${currentVideo.id}`} title={`GGL ${activeYear} ${currentVideo.title}`} frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div class="videoTitle">{currentVideo.title}</div></div>
-                <button class="videoArrow right" onclick={nextVideo} aria-label="Next video">›</button>
-            </div>
-            <div class="videoDots" aria-label="Choose a video">{#each videos as video, index}<button class:active={activeVideo === index} onclick={() => activeVideo = index} aria-label={`Play ${video.title}`}></button>{/each}</div>
-            <div class="swipeHint">Tap the arrows or dots for the next video</div>
-        </section>
-    {/if}
-
-    {#if !isLegacy && combineResults.length > 0}
-        <section class="combineSection">
-            <div class="combineHeading"><div><small>OFFICIAL RESULTS</small><h2>🏃 {activeYear} Combine</h2></div><span>{combineResults.length} managers</span></div>
-            <div class="podium">{#each podium as result}<div class="podiumCard place-{result.place}"><div class="podiumMedal">{medal(result.place)}</div><div class="podiumPlace">#{result.place}</div><strong>{result.name}</strong><span>{result.time}</span></div>{/each}</div>
-            <div class="combineList">{#each field as result}<div class="combineRow"><span class="combinePlace">{result.place}</span><strong>{result.name}</strong><span class="combineTime">{result.time}</span></div>{/each}</div>
-        </section>
-    {/if}
-
-    {#if moments.length > 0}
-        <section class="gallerySection">
-            <div class="galleryHeader"><div><small>{isLegacy ? 'LEAGUE HISTORY' : 'SEASON MEMORIES'}</small><h2>📸 {yearLabel}</h2></div><span>{visibleMoments.length ? activePhoto + 1 : 0} / {visibleMoments.length}</span></div>
-            {#if !isLegacy}<div class="filters">{#each filters as filter}<button class:active={activeFilter === filter} onclick={() => selectFilter(filter)}>{filter}</button>{/each}</div>{/if}
-            {#if visibleMoments.length > 0}
-                <div class="photoCarousel">
-                    <button class="photoArrow left" onclick={previousPhoto} aria-label="Previous photo">‹</button>
-                    <div class="photoStage"><img src={currentPhoto.src} alt={currentPhoto.title} /><div class="photoCaption"><span>{currentPhoto.tag}</span><strong>{currentPhoto.title}</strong></div></div>
-                    <button class="photoArrow right" onclick={nextPhoto} aria-label="Next photo">›</button>
-                </div>
-                <div class="photoDots" aria-label="Choose a photo">{#each visibleMoments as moment, index}<button class:active={activePhoto === index} onclick={() => activePhoto = index} aria-label={`View ${moment.title}`}></button>{/each}</div>
-                <div class="swipeHint">Tap the arrows or dots for the next photo</div>
-            {:else}<div class="comingSoon">No photos loaded in this category yet.</div>{/if}
-        </section>
-    {:else if isLegacy}
-        <section class="legacyEmpty"><div class="emptyIcon">📷</div><small>LEAGUE HISTORY</small><h2>2022 and earlier</h2><p>This archive is ready for older league photos as they are found.</p></section>
-    {:else if activeYear !== 2023}
-        <section class="mediaComingSoon"><strong>📸 {activeYear} photos and videos coming next</strong></section>
-    {/if}
-
-    {#if activeYear === 2023 && videos.length === 0 && combineResults.length === 0 && moments.length === 0}
-        <section class="emptySeason"><div class="emptyIcon">📦</div><h2>2023 archive coming next</h2><p>We can add the 2023 photos, videos and season-specific extras here as you send them.</p></section>
-    {/if}
+    <nav class="yearNav" aria-label="Season archive years"><span class="yearNavLabel">Season</span><div class="yearButtons">{#each years as year}<button class:active={activeYear === year} onclick={() => selectYear(year)}>{year === '2022-legacy' ? '2022–Legacy' : year}</button>{/each}</div></nav>
+    <section class="hero"><div class="eyebrow">GGL LEAGUE ARCHIVE · SLEEPER ERA</div><h1>{isLegacy ? '2022–Legacy' : `${activeYear} Season`}</h1>{#if activeYear === 2025}<div class="heroImage"><img src="/league-photo.jpg" alt="2025 league group" /></div>{/if}</section>
+    {#if !isLegacy && videos.length > 0}<section class="videoSection"><div class="videoHeading"><div><small>WATCH THE SEASON</small><h2>🎬 {activeYear}</h2></div><span>{activeVideo + 1} / {videos.length}</span></div><div class="videoCarousel"><button class="videoArrow left" onclick={previousVideo} aria-label="Previous video">‹</button><div class="videoStage"><div class="videoEmbed"><iframe src={`https://www.youtube-nocookie.com/embed/${currentVideo.id}`} title={`GGL ${activeYear} ${currentVideo.title}`} frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div class="videoTitle">{currentVideo.title}</div></div><button class="videoArrow right" onclick={nextVideo} aria-label="Next video">›</button></div><div class="videoDots" aria-label="Choose a video">{#each videos as video, index}<button class:active={activeVideo === index} onclick={() => activeVideo = index} aria-label={`Play ${video.title}`}></button>{/each}</div><div class="swipeHint">Tap the arrows or dots for the next video</div></section>{/if}
+    {#if !isLegacy && combineResults.length > 0}<section class="combineSection"><div class="combineHeading"><div><small>OFFICIAL RESULTS</small><h2>🏃 {activeYear} Combine</h2></div><span>{combineResults.length} managers</span></div><div class="podium">{#each podium as result}<div class="podiumCard place-{result.place}"><div class="podiumMedal">{medal(result.place)}</div><div class="podiumPlace">#{result.place}</div><strong>{result.name}</strong><span>{result.time}</span></div>{/each}</div><div class="combineList">{#each field as result}<div class="combineRow"><span class="combinePlace">{result.place}</span><strong>{result.name}</strong><span class="combineTime">{result.time}</span></div>{/each}</div></section>{/if}
+    {#if moments.length > 0}<section class="gallerySection"><div class="galleryHeader"><div><small>{isLegacy ? 'LEAGUE HISTORY' : 'SEASON MEMORIES'}</small><h2>📸 {yearLabel}</h2></div><span>{visibleMoments.length ? activePhoto + 1 : 0} / {visibleMoments.length}</span></div>{#if !isLegacy}<div class="filters">{#each filters as filter}<button class:active={activeFilter === filter} onclick={() => selectFilter(filter)}>{filter}</button>{/each}</div>{/if}{#if visibleMoments.length > 0}<div class="photoCarousel"><button class="photoArrow left" onclick={previousPhoto} aria-label="Previous photo">‹</button><div class="photoStage"><img src={currentPhoto.src} alt={currentPhoto.title} /><div class="photoCaption"><span>{currentPhoto.tag}</span><strong>{currentPhoto.title}</strong></div></div><button class="photoArrow right" onclick={nextPhoto} aria-label="Next photo">›</button></div><div class="photoDots" aria-label="Choose a photo">{#each visibleMoments as moment, index}<button class:active={activePhoto === index} onclick={() => activePhoto = index} aria-label={`View ${moment.title}`}></button>{/each}</div><div class="swipeHint">Tap the arrows or dots for the next photo</div>{:else}<div class="comingSoon">No photos loaded in this category yet.</div>{/if}</section>{:else if isLegacy}<section class="legacyEmpty"><div class="emptyIcon">📷</div><small>LEAGUE HISTORY</small><h2>2022 and earlier</h2><p>This archive is ready for older league photos as they are found.</p></section>{:else if activeYear !== 2023}<section class="mediaComingSoon"><strong>📸 {activeYear} photos and videos coming next</strong></section>{/if}
+    {#if activeYear === 2023 && videos.length === 0 && combineResults.length === 0 && moments.length === 0}<section class="emptySeason"><div class="emptyIcon">📦</div><h2>2023 archive coming next</h2><p>We can add the 2023 photos, videos and season-specific extras here as you send them.</p></section>{/if}
 </div>
 
 <style>
