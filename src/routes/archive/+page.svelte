@@ -8,49 +8,17 @@
     const filters = ['All', 'Draft Day', 'Punishment'];
 
     const videosByYear = {
-        2026: [
-            { id: 'zJtycX-e5hg', title: '2026 Video 1' },
-            { id: 'p4tLDVhYPMs', title: '2026 Video 2' }
-        ],
-        2025: [
-            { id: 'QDbLYQWL9Uc', title: 'Combine 2025 pt1' }, { id: 'IqcXkIwQKNg', title: 'Combine 2025 pt2' },
-            { id: 'UaWTUPAhAPQ', title: 'Combine 2025 pt3' }, { id: 'saPK13MCYq0', title: 'Combine 2025 pt4' },
-            { id: 'PgUK4bmnt_M', title: 'Combine 2025 pt5' }, { id: '97Z13uwFJc0', title: 'Combine 2025 pt6' },
-            { id: 'AkK_nKafvt4', title: 'Combine 2025 pt7' }, { id: 'ku7TOkLlAN8', title: 'Combine 2025 pt8' },
-            { id: 'fETRMXxkyB4', title: 'Combine 2025 pt9' }
-        ],
-        2024: [
-            { id: 'W4ux4DjZVBo', title: '2024 Video 1' }, { id: '7NTD0m9g6js', title: '2024 Video 2' },
-            { id: 'Rjg3Y6bxQ5A', title: '2024 Video 3' }, { id: '-gBptw3BmFg', title: '2024 Video 4' },
-            { id: 'jE7QnxQ85FA', title: '2024 Video 5' }, { id: '8bLzeI5zQ8w', title: '2024 Video 6' },
-            { id: 'T2uT50SjwPQ', title: '2024 Video 7' }
-        ],
+        2026: [{ id: 'zJtycX-e5hg', title: '2026 Video 1' }, { id: 'p4tLDVhYPMs', title: '2026 Video 2' }],
+        2025: [{ id: 'QDbLYQWL9Uc', title: 'Combine 2025 pt1' }, { id: 'IqcXkIwQKNg', title: 'Combine 2025 pt2' }, { id: 'UaWTUPAhAPQ', title: 'Combine 2025 pt3' }, { id: 'saPK13MCYq0', title: 'Combine 2025 pt4' }, { id: 'PgUK4bmnt_M', title: 'Combine 2025 pt5' }, { id: '97Z13uwFJc0', title: 'Combine 2025 pt6' }, { id: 'AkK_nKafvt4', title: 'Combine 2025 pt7' }, { id: 'ku7TOkLlAN8', title: 'Combine 2025 pt8' }, { id: 'fETRMXxkyB4', title: 'Combine 2025 pt9' }],
+        2024: [{ id: 'W4ux4DjZVBo', title: '2024 Video 1' }, { id: '7NTD0m9g6js', title: '2024 Video 2' }, { id: 'Rjg3Y6bxQ5A', title: '2024 Video 3' }, { id: '-gBptw3BmFg', title: '2024 Video 4' }, { id: 'jE7QnxQ85FA', title: '2024 Video 5' }, { id: '8bLzeI5zQ8w', title: '2024 Video 6' }, { id: 'T2uT50SjwPQ', title: '2024 Video 7' }],
         2023: [{ id: 'MTnuTXIR8HQ', title: '2023 Short 1' }, { id: 'UJNrzNSC0JE', title: '2023 Short 2' }],
         '2022-legacy': []
     };
 
     const combineByYear = {
-        2026: [
-            { name: 'Dustin', time: '2:48.01', place: 1 }, { name: 'Isai', time: '2:59.16', place: 2 },
-            { name: 'Ariel', time: '2:59.27', place: 3 }, { name: 'Igoe', time: '3:05.86', place: 4 },
-            { name: 'Tony', time: '3:10.50', place: 5 }, { name: 'Pico', time: '3:18.61', place: 6 },
-            { name: 'Eddie', time: '3:25.33', place: 7 }, { name: 'Gabe', time: '4:04.43', place: 8 },
-            { name: 'Jared', time: '4:44.07', place: 9 }, { name: 'Andy', time: '5:41.27', place: 10 }
-        ],
-        2025: [
-            { name: 'Tony', time: '1:56.09', place: 1 }, { name: 'Ariel', time: '2:18.17', place: 2 },
-            { name: 'Andy', time: '2:26.81', place: 3 }, { name: 'Eddie', time: '2:28.86', place: 4 },
-            { name: 'Pico', time: '2:34.04', place: 5 }, { name: 'Dustin', time: '2:35.82', place: 6 },
-            { name: 'Isai', time: '2:51.01', place: 7 }, { name: 'Gabe', time: '3:24.16', place: 8 },
-            { name: 'Jared', time: '3:30.90', place: 9 }, { name: 'Mike', time: '4:18.20', place: 10 }
-        ],
-        2024: [
-            { name: 'Isai', time: '1:28.9', place: 1 }, { name: 'Gabe', time: '1:32', place: 2 },
-            { name: 'Pico', time: '1:36', place: 3 }, { name: 'Jared', time: '1:45.76', place: 4 },
-            { name: 'Eddie', time: '1:59.35', place: 5 }, { name: 'Igor', time: '2:01.79', place: 6 },
-            { name: 'Andy', time: '2:07', place: 7 }, { name: 'Dustin', time: '2:08.44', place: 8 },
-            { name: 'Ariel', time: '3:34.02', place: 9 }, { name: 'Tony', time: '5:28', place: 10 }
-        ],
+        2026: [{ name: 'Dustin', time: '2:48.01', place: 1 }, { name: 'Isai', time: '2:59.16', place: 2 }, { name: 'Ariel', time: '2:59.27', place: 3 }, { name: 'Igoe', time: '3:05.86', place: 4 }, { name: 'Tony', time: '3:10.50', place: 5 }, { name: 'Pico', time: '3:18.61', place: 6 }, { name: 'Eddie', time: '3:25.33', place: 7 }, { name: 'Gabe', time: '4:04.43', place: 8 }, { name: 'Jared', time: '4:44.07', place: 9 }, { name: 'Andy', time: '5:41.27', place: 10 }],
+        2025: [{ name: 'Tony', time: '1:56.09', place: 1 }, { name: 'Ariel', time: '2:18.17', place: 2 }, { name: 'Andy', time: '2:26.81', place: 3 }, { name: 'Eddie', time: '2:28.86', place: 4 }, { name: 'Pico', time: '2:34.04', place: 5 }, { name: 'Dustin', time: '2:35.82', place: 6 }, { name: 'Isai', time: '2:51.01', place: 7 }, { name: 'Gabe', time: '3:24.16', place: 8 }, { name: 'Jared', time: '3:30.90', place: 9 }, { name: 'Mike', time: '4:18.20', place: 10 }],
+        2024: [{ name: 'Isai', time: '1:28.9', place: 1 }, { name: 'Gabe', time: '1:32', place: 2 }, { name: 'Pico', time: '1:36', place: 3 }, { name: 'Jared', time: '1:45.76', place: 4 }, { name: 'Eddie', time: '1:59.35', place: 5 }, { name: 'Igor', time: '2:01.79', place: 6 }, { name: 'Andy', time: '2:07', place: 7 }, { name: 'Dustin', time: '2:08.44', place: 8 }, { name: 'Ariel', time: '3:34.02', place: 9 }, { name: 'Tony', time: '5:28', place: 10 }],
         2023: [], '2022-legacy': []
     };
 
@@ -60,47 +28,14 @@
             { src: '/archive/2026/PXL_20260905_220919139.jpg', tag: 'Draft Day', title: '2026 Draft Day Photo 2' },
             { src: '/archive/2026/PXL_20260905_224143253.jpg', tag: 'Draft Day', title: '2026 Draft Day Photo 3' },
             { src: '/archive/2026/PXL_20260906_043902859.jpg', tag: 'Draft Day', title: '2026 Draft Day Photo 4' },
-            { src: '/archive/2026/IMG_20260906_110151.heic', tag: 'Draft Day', title: '2026 Draft Day Photo 5' },
-            { src: '/archive/2026/IMG_20260906_110151%20(1).heic', tag: 'Draft Day', title: '2026 Draft Day Photo 6' }
+            { src: '/archive/2026/IMG_20260906_113007.heic', tag: 'Draft Day', title: '2026 Draft Day Photo 5' },
+            { src: '/archive/2026/IMG_20260906_113007%20(1).heic', tag: 'Draft Day', title: '2026 Draft Day Photo 6' },
+            { src: '/archive/2026/IMG_20260906_113008.heic', tag: 'Draft Day', title: '2026 Draft Day Photo 7' }
         ],
-        2025: [
-            { src: '/archive/2025/PXL_20250830_222034437.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 1' },
-            { src: '/archive/2025/PXL_20250830_225012923.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 2' },
-            { src: '/archive/2025/PXL_20250831_025137414.MP.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 3' },
-            { src: '/archive/2025/PXL_20250831_043646757.MP.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 4' },
-            { src: '/archive/2025/IMG_20250831_100127.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 5' },
-            { src: '/archive/2025/PXL_20250824_002112997.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 6' },
-            { src: '/archive/2025/PXL_20250824_002617390.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 7' },
-            { src: '/archive/2025/PXL_20250824_010417066.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 8' },
-            { src: '/archive/2025/PXL_20250824_015847634.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 9' }
-        ],
-        2024: [
-            { src: '/archive/2024/PXL_20240831_213916522.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 1' },
-            { src: '/archive/2024/PXL_20240831_215631799.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 2' },
-            { src: '/archive/2024/PXL_20240901_044423976.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 3' },
-            { src: '/archive/2024/PXL_20250824_002112997.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 4' },
-            { src: '/archive/2024/PXL_20250824_002617390.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 5' },
-            { src: '/archive/2024/PXL_20250824_003037345.MP.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 6' },
-            { src: '/archive/2024/PXL_20250824_010417066.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 7' },
-            { src: '/archive/2024/PXL_20250824_015847634.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 8' }
-        ],
-        2023: [
-            { src: '/archive/2023/IMG_20230902_131002_01.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 1' },
-            { src: '/archive/2023/PXL_20230903_053041349.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 2' },
-            { src: '/archive/2023/PXL_20230903_053055439.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 3' },
-            { src: '/archive/2023/PXL_20230903_053059462.MP.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 4' },
-            { src: '/archive/2023/PXL_20230903_151113654.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 5' }
-        ],
-        '2022-legacy': [
-            { src: '/archive/2022-legacy/PXL_20220827_224438267.jpg', tag: 'League History', title: '2022 Legacy Photo 1' },
-            { src: '/archive/2022-legacy/PXL_20220828_045811908.NIGHT.jpg', tag: 'League History', title: '2022 Legacy Photo 2' },
-            { src: '/archive/2022-legacy/PXL_20210822_005518501.MP.jpg', tag: 'League History', title: '2021 Legacy Photo 1' },
-            { src: '/archive/2022-legacy/PXL_20210822_005929187.MP.jpg', tag: 'League History', title: '2021 Legacy Photo 2' },
-            { src: '/archive/2022-legacy/PXL_20210822_010340081.MP.jpg', tag: 'League History', title: '2021 Legacy Photo 3' },
-            { src: '/archive/2022-legacy/PXL_20210822_010346969.jpg', tag: 'League History', title: '2021 Legacy Photo 4' },
-            { src: '/archive/2022-legacy/PXL_20210822_010541654.jpg', tag: 'League History', title: '2021 Legacy Photo 5' },
-            { src: '/archive/2022-legacy/PXL_20210822_074046487.jpg', tag: 'League History', title: '2021 Legacy Photo 6' }
-        ]
+        2025: [{ src: '/archive/2025/PXL_20250830_222034437.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 1' }, { src: '/archive/2025/PXL_20250830_225012923.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 2' }, { src: '/archive/2025/PXL_20250831_025137414.MP.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 3' }, { src: '/archive/2025/PXL_20250831_043646757.MP.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 4' }, { src: '/archive/2025/IMG_20250831_100127.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 5' }, { src: '/archive/2025/PXL_20250824_002112997.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 6' }, { src: '/archive/2025/PXL_20250824_002617390.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 7' }, { src: '/archive/2025/PXL_20250824_010417066.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 8' }, { src: '/archive/2025/PXL_20250824_015847634.jpg', tag: 'Draft Day', title: '2025 Draft Day Photo 9' }],
+        2024: [{ src: '/archive/2024/PXL_20240831_213916522.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 1' }, { src: '/archive/2024/PXL_20240831_215631799.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 2' }, { src: '/archive/2024/PXL_20240901_044423976.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 3' }, { src: '/archive/2024/PXL_20250824_002112997.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 4' }, { src: '/archive/2024/PXL_20250824_002617390.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 5' }, { src: '/archive/2024/PXL_20250824_003037345.MP.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 6' }, { src: '/archive/2024/PXL_20250824_010417066.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 7' }, { src: '/archive/2024/PXL_20250824_015847634.jpg', tag: 'Draft Day', title: '2024 Draft Day Photo 8' }],
+        2023: [{ src: '/archive/2023/IMG_20230902_131002_01.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 1' }, { src: '/archive/2023/PXL_20230903_053041349.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 2' }, { src: '/archive/2023/PXL_20230903_053055439.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 3' }, { src: '/archive/2023/PXL_20230903_053059462.MP.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 4' }, { src: '/archive/2023/PXL_20230903_151113654.jpg', tag: 'Draft Day', title: '2023 Draft Day Photo 5' }],
+        '2022-legacy': [{ src: '/archive/2022-legacy/PXL_20220827_224438267.jpg', tag: 'League History', title: '2022 Legacy Photo 1' }, { src: '/archive/2022-legacy/PXL_20220828_045811908.NIGHT.jpg', tag: 'League History', title: '2022 Legacy Photo 2' }, { src: '/archive/2022-legacy/PXL_20210822_005518501.MP.jpg', tag: 'League History', title: '2021 Legacy Photo 1' }, { src: '/archive/2022-legacy/PXL_20210822_005929187.MP.jpg', tag: 'League History', title: '2021 Legacy Photo 2' }, { src: '/archive/2022-legacy/PXL_20210822_010340081.MP.jpg', tag: 'League History', title: '2021 Legacy Photo 3' }, { src: '/archive/2022-legacy/PXL_20210822_010346969.jpg', tag: 'League History', title: '2021 Legacy Photo 4' }, { src: '/archive/2022-legacy/PXL_20210822_010541654.jpg', tag: 'League History', title: '2021 Legacy Photo 5' }, { src: '/archive/2022-legacy/PXL_20210822_074046487.jpg', tag: 'League History', title: '2021 Legacy Photo 6' }]
     };
 
     $: isLegacy = activeYear === '2022-legacy';
