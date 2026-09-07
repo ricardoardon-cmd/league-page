@@ -39,7 +39,7 @@
 <style>
     #home { min-height: 100vh; background: var(--f3f3f3); color: inherit; }
     .dashboard { width: 100%; max-width: 1250px; margin: 0 auto; padding: 35px 25px 60px; box-sizing: border-box; }
-    .hero { position: relative; min-height: 310px; padding: 35px; margin-bottom: 25px; border-radius: 18px; overflow: hidden; color: #fff; background: linear-gradient(to top, rgba(0,0,0,.72) 0%, rgba(0,0,0,.20) 55%, rgba(0,0,0,.10) 100%), url('/league-photo.jpg'); background-size: cover; background-position: center 22%; box-shadow: 0 8px 25px rgba(0,0,0,.18); }
+    .hero { position: relative; min-height: 310px; padding: 35px; margin-bottom: 25px; border-radius: 18px; overflow: hidden; color: #fff; background: linear-gradient(to top, rgba(0,0,0,.72) 0%, rgba(0,0,0,.20) 55%, rgba(0,0,0,.10) 100%), url('/archive/2026/PXL_20260906_043902859.jpg'); background-size: cover; background-position: center 22%; box-shadow: 0 8px 25px rgba(0,0,0,.18); }
     .heroTop { min-height: 240px; display: flex; justify-content: flex-start; align-items: flex-end; position: relative; width: 100%; }
     .heroBrand { width: 100%; font-size: 1.45rem; font-weight: 700; letter-spacing: .01em; white-space: nowrap; text-shadow: 0 2px 10px rgba(0,0,0,.8); }
     .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
