@@ -9,20 +9,6 @@
     export let playersData;
 
     let activeView = 'boards';
-
-    const draftVideos2026 = [
-        { id: '3lW1jlQn6Ro', type: 'short' },
-        { id: 'mcVM-MMHISk', type: 'short' },
-        { id: 'xUCaAXhql3A', type: 'short' },
-        { id: 'G_8b9a_lo4U', type: 'short' },
-        { id: 'f9nBIDZNxT0', type: 'video' },
-        { id: 'OKn2xf7G73E', type: 'video' },
-        { id: 'YmYGgCPmwb8', type: 'video' },
-        { id: 'PeCdTDtmQr4', type: 'video' },
-        { id: 'u86uYkYKpLk', type: 'video' },
-        { id: 'oplcUl5xIkg', type: 'video' },
-        { id: 'HDzTPcrx6kk', type: 'video' }
-    ];
 </script>
 
 <style>
@@ -46,14 +32,7 @@
     .historyYear { width:95%; max-width:1100px; margin:0 auto 10px; display:flex; align-items:center; gap:10px; }
     .historyYearLine { flex:1; height:1px; background:var(--ccc); }
     .historyYearLabel { font-size:.78rem; font-weight:850; letter-spacing:.8px; text-transform:uppercase; opacity:.6; white-space:nowrap; }
-    .videoArchive { width:95%; max-width:1100px; margin:18px auto 0; }
-    .videoArchiveHeader { margin-bottom:12px; }
-    .videoArchiveTitle { margin:3px 0 0; font-size:1.05rem; font-weight:850; }
-    .videoGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
-    .videoCard { overflow:hidden; border:1px solid var(--ccc); border-radius:14px; background:var(--fff); box-shadow:0 3px 12px rgba(0,0,0,.08); }
-    .videoFrame { display:block; width:100%; aspect-ratio:16/9; border:0; background:#000; }
-    .videoLabel { padding:9px 12px; font-size:.72rem; font-weight:800; opacity:.7; }
-    @media(max-width:700px){.draftsPage{padding:20px 8px 50px}.pageHeader h1{font-size:2rem}.sectionHeader{width:97%}.loadingCard,.errorCard,.emptyCard{width:97%;padding:26px 16px}.viewTabs{margin-bottom:20px}.viewTabs button{padding:8px 13px;font-size:.7rem}.videoArchive{width:97%}.videoGrid{grid-template-columns:1fr;gap:12px}}
+    @media(max-width:700px){.draftsPage{padding:20px 8px 50px}.pageHeader h1{font-size:2rem}.sectionHeader{width:97%}.loadingCard,.errorCard,.emptyCard{width:97%;padding:26px 16px}.viewTabs{margin-bottom:20px}.viewTabs button{padding:8px 13px;font-size:.7rem}}
 </style>
 
 <div class="draftsPage">
@@ -90,22 +69,6 @@
                                     <div class="historyYear"><div class="historyYearLine"></div><div class="historyYearLabel">{previousDraft.year} Draft</div><div class="historyYearLine"></div></div>
                                 {/if}
                                 <Draft draftData={previousDraft} previous={true} {leagueTeamManagers} year={previousDraft.year} {players} />
-                                {#if Number(previousDraft.year) === 2026}
-                                    <div class="videoArchive">
-                                        <div class="videoArchiveHeader">
-                                            <div class="sectionEyebrow">Draft day archive</div>
-                                            <div class="videoArchiveTitle">🎥 2026 Draft Videos</div>
-                                        </div>
-                                        <div class="videoGrid">
-                                            {#each draftVideos2026 as video, videoIndex}
-                                                <div class="videoCard">
-                                                    <iframe class="videoFrame" src={`https://www.youtube.com/embed/${video.id}`} title={`2026 GGL Draft video ${videoIndex + 1}`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-                                                    <div class="videoLabel">{video.type === 'short' ? 'Draft Short' : 'Draft Video'} #{videoIndex + 1}</div>
-                                                </div>
-                                            {/each}
-                                        </div>
-                                    </div>
-                                {/if}
                             </div>
                         {/each}
                     </div>
