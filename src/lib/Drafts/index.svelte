@@ -4,7 +4,6 @@
     import Draft from './Draft.svelte';
     import DraftAnalysis from './DraftAnalysis.svelte';
 
-    export let upcomingDraftData;
     export let previousDraftsData;
     export let leagueTeamManagersData;
     export let playersData;
@@ -29,7 +28,6 @@
     .errorCard { border-color:#d66565; }
     .emptyIcon { font-size:2.6rem; margin-bottom:10px; }
     .emptyCard h3 { margin:0; font-size:1.25rem; }
-    .emptyCard p { margin:8px auto 0; max-width:520px; line-height:1.55; opacity:.65; }
     .historyList { display:flex; flex-direction:column; gap:34px; }
     .historyYear { width:95%; max-width:1100px; margin:0 auto 10px; display:flex; align-items:center; gap:10px; }
     .historyYearLine { flex:1; height:1px; background:var(--ccc); }
@@ -59,39 +57,26 @@
         {/await}
     {:else}
         <section class="section">
-            <div class="sectionHeader"><div><div class="sectionEyebrow">On the clock next</div><div class="sectionTitle">Upcoming Draft</div></div></div>
-            {#await waitForAll(upcomingDraftData, leagueTeamManagersData, playersData)}
-                <div class="loadingCard"><strong>Retrieving upcoming draft...</strong><div class="loadingBar"><LinearProgress indeterminate /></div></div>
-            {:then [upcomingDraft, leagueTeamManagers, { players }]}
-                {#if upcomingDraft}
-                    <Draft draftData={upcomingDraft} {leagueTeamManagers} year={upcomingDraft.year} {players} />
-                {:else}
-                    <div class="emptyCard"><div class="emptyIcon">🕒</div><h3>Upcoming draft not available yet</h3><p>Once Sleeper creates the next GGL draft, the order will appear here automatically.</p></div>
-                {/if}
-            {:catch error}
-                <div class="errorCard">Something went wrong loading the upcoming draft: {error.message}</div>
-            {/await}
-        </section>
-
-        <section class="section">
-            <div class="sectionHeader"><div><div class="sectionEyebrow">League archive</div><div class="sectionTitle">Previous Drafts</div></div></div>
+            <div class="sectionHeader"><div><div class="sectionEyebrow">Most recent</div><div class="sectionTitle">Latest Draft</div></div></div>
             {#await waitForAll(previousDraftsData, leagueTeamManagersData, playersData)}
-                <div class="loadingCard"><strong>Retrieving previous drafts...</strong><div class="loadingBar"><LinearProgress indeterminate /></div></div>
+                <div class="loadingCard"><strong>Retrieving draft history...</strong><div class="loadingBar"><LinearProgress indeterminate /></div></div>
             {:then [previousDrafts, leagueTeamManagers, { players }]}
                 {#if previousDrafts?.length}
                     <div class="historyList">
-                        {#each previousDrafts as previousDraft}
+                        {#each previousDrafts as previousDraft, index}
                             <div>
-                                <div class="historyYear"><div class="historyYearLine"></div><div class="historyYearLabel">{previousDraft.year} Draft</div><div class="historyYearLine"></div></div>
+                                {#if index > 0}
+                                    <div class="historyYear"><div class="historyYearLine"></div><div class="historyYearLabel">{previousDraft.year} Draft</div><div class="historyYearLine"></div></div>
+                                {/if}
                                 <Draft draftData={previousDraft} previous={true} {leagueTeamManagers} year={previousDraft.year} {players} />
                             </div>
                         {/each}
                     </div>
                 {:else}
-                    <div class="emptyCard"><div class="emptyIcon">📚</div><h3>No previous drafts found</h3></div>
+                    <div class="emptyCard"><div class="emptyIcon">📚</div><h3>No completed drafts found</h3></div>
                 {/if}
             {:catch error}
-                <div class="errorCard">Something went wrong loading previous drafts: {error.message}</div>
+                <div class="errorCard">Something went wrong loading draft history: {error.message}</div>
             {/await}
         </section>
     {/if}
