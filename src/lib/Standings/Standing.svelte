@@ -11,7 +11,6 @@
 <style>
     .row {
         display: grid;
-
         grid-template-columns:
             60px
             minmax(240px, 1fr)
@@ -19,14 +18,12 @@
             110px
             110px
             100px;
-
         align-items: center;
         gap: 10px;
         padding: 15px 16px;
         margin-bottom: 8px;
         border-radius: 12px;
         background: var(--f8f8f8);
-
         transition:
             transform 0.15s ease,
             box-shadow 0.15s ease;
@@ -94,6 +91,10 @@
         text-align: center;
     }
 
+    .mobileStats {
+        display: none;
+    }
+
     .streak {
         font-weight: 750;
         text-align: center;
@@ -114,11 +115,10 @@
     @media (max-width: 800px) {
         .row {
             display: grid;
-            grid-template-columns: 42px 1fr auto;
+            grid-template-columns: 42px minmax(0, 1fr) auto;
             grid-template-areas:
                 "rank team record"
-                "rank team streak";
-
+                "rank team mobileStats";
             padding: 14px;
         }
 
@@ -135,15 +135,22 @@
             text-align: right;
         }
 
+        .stat,
         .streak {
-            grid-area: streak;
-            text-align: right;
-            font-size: 0.8rem;
-            opacity: 0.7;
+            display: none;
         }
 
-        .stat {
-            display: none;
+        .mobileStats {
+            grid-area: mobileStats;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 4px;
+            font-family: "Roboto Mono", monospace;
+            font-size: 0.7rem;
+            font-weight: 700;
+            opacity: 0.68;
+            white-space: nowrap;
         }
 
         .avatar {
@@ -164,7 +171,6 @@
     class="row"
 >
     <div class:preseasonRank={preseason} class="rank">
-
         {#if preseason}
             —
         {:else if rank === 1}
@@ -176,7 +182,6 @@
         {:else}
             {rank}
         {/if}
-
     </div>
 
     <div
@@ -188,7 +193,6 @@
             })
         }
     >
-
         {#if team?.avatar}
             <img
                 class="avatar"
@@ -198,7 +202,6 @@
         {/if}
 
         <div class="teamInfo">
-
             <div class="teamName">
                 {team?.name ?? 'Unknown Team'}
             </div>
@@ -208,14 +211,11 @@
                     {team.manager}
                 </div>
             {/if}
-
         </div>
-
     </div>
 
     <div class="record">
         {standing.wins ?? 0}-{standing.losses ?? 0}
-
         {#if Number(standing.ties ?? 0) > 0}
             -{standing.ties}
         {/if}
@@ -231,5 +231,10 @@
 
     <div class="streak">
         {standing.streak ?? '—'}
+    </div>
+
+    <div class="mobileStats">
+        <span>PF {Number(standing.fpts ?? 0).toFixed(1)}</span>
+        <span>PA {Number(standing.fptsAgainst ?? 0).toFixed(1)}</span>
     </div>
 </div>
