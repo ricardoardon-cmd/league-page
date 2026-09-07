@@ -1,7 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import { gotoManager, getLeagueTransactions } from '$lib/utils/helper';
-    import { getTeamFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
+    import { getTeamFromTeamManagers, renderManagerNames } from '$lib/utils/helperFunctions/universalFunctions';
 
     export let player;
     export let rosterID = null;
@@ -46,6 +46,20 @@
             );
         } catch (error) {
             return null;
+        }
+    };
+
+    const safeManagers = (id, season) => {
+        if (id == null || !leagueTeamManagers) return '';
+
+        try {
+            return renderManagerNames(
+                leagueTeamManagers,
+                Number(id),
+                season
+            );
+        } catch (error) {
+            return '';
         }
     };
 
@@ -95,7 +109,7 @@
 
                     history.push({
                         year: draftData.year,
-                        team: draftedRosterID ? safeTeam(draftedRosterID, draftData.year) : null,
+                        managerName: draftedRosterID ? safeManagers(draftedRosterID, draftData.year) : '',
                         pick: getDraftPickLabel(draftData, draftCol, rowIndex, colIndex),
                         round: rowIndex + 1,
                         tradedPick: Boolean(draftCol?.newOwner)
@@ -518,7 +532,7 @@
                                 <div class="historyYear">{draftEvent.year}</div>
                                 <div class="historyPick">{draftEvent.pick}</div>
                                 <div>
-                                    <div class="historyTeam">{draftEvent.team?.name || 'Unknown GGL Team'}</div>
+                                    <div class="historyTeam">{draftEvent.managerName || 'Unknown Manager'}</div>
                                     <div class="historyMeta">
                                         Round {draftEvent.round}{draftEvent.tradedPick ? ' · Traded pick' : ''}
                                     </div>
