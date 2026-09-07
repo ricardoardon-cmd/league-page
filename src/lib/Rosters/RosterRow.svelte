@@ -90,7 +90,7 @@
     }
 </style>
 
-<Row class:clickablePlayer={Boolean(player.id)} onclick={openPlayer}>
+<Row class={player.id ? 'clickablePlayer' : ''} onclick={openPlayer}>
 	<Cell class="slot playerCell"><span class="pos {playerSLotClass}">{playerSlot}</span></Cell>
 	{#if player.avatar}
 		<Cell class="avatar playerCell">
