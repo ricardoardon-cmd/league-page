@@ -1,10 +1,19 @@
 <script>
-    import { leagueName } from '$lib/utils/helper';
+    import { leagueName, getNflState } from '$lib/utils/helper';
     import ManagerRow from './ManagerRow.svelte';
 
     export let managers, leagueTeamManagers;
 
     let innerWidth;
+    const nflStateData = getNflState();
+
+    const seasonPhase = (state) => {
+        if (!state) return 'Season';
+        if (state.season_type === 'regular') return `Week ${state.week}`;
+        if (state.season_type === 'post') return 'Postseason';
+        if (state.season_type === 'pre') return 'Preseason';
+        return 'Season';
+    };
 </script>
 
 <svelte:window bind:innerWidth={innerWidth} />
@@ -112,7 +121,13 @@
 
         <div class="leagueStatus">
             <span class="statusDot"></span>
-            2026 Season · Pre-Draft
+            {#await nflStateData}
+                2026 Season
+            {:then state}
+                {state.season || 2026} Season · {seasonPhase(state)}
+            {:catch}
+                2026 Season
+            {/await}
         </div>
 
     </div>
@@ -126,6 +141,7 @@
                     {manager}
                     {leagueTeamManagers}
                     {key}
+                    {nflStateData}
                 />
             {/each}
 
