@@ -14,6 +14,9 @@
     let transactionsLoading = false;
     let transactionsError = '';
 
+    let standardFinish = null;
+    let standardFinishSeason = null;
+
     const playerName = (selectedPlayer) => {
         if (!selectedPlayer) return 'Unknown Player';
         const fullName = `${selectedPlayer.fn || ''} ${selectedPlayer.ln || ''}`.trim();
@@ -60,6 +63,34 @@
             );
         } catch (error) {
             return '';
+        }
+    };
+
+    const loadSleeperStandardFinish = async () => {
+        if (!player?.id) return;
+
+        const currentSeason = Number(
+            leagueTeamManagers?.currentSeason || new Date().getFullYear()
+        );
+        const season = currentSeason - 1;
+        standardFinishSeason = season;
+        standardFinish = null;
+
+        try {
+            const response = await fetch(
+                `https://api.sleeper.com/stats/nfl/player/${player.id}?season=${season}&season_type=regular&grouping=season`
+            );
+
+            if (!response.ok) return;
+
+            const sleeperStats = await response.json();
+            const positionRank = sleeperStats?.stats?.pos_rank_std;
+
+            if (positionRank != null && Number(positionRank) > 0) {
+                standardFinish = `${player.pos || ''}${positionRank}`;
+            }
+        } catch (error) {
+            console.error('Unable to load Sleeper standard finish', error);
         }
     };
 
@@ -217,6 +248,7 @@
 
     onMount(() => {
         ensureTransactionsLoaded();
+        loadSleeperStandardFinish();
     });
 </script>
 
@@ -297,6 +329,18 @@
         font-size: 0.78rem;
         font-weight: 800;
         color: var(--pos-color, inherit);
+    }
+
+    .sleeperFinish {
+        display: inline-block;
+        margin-top: 9px;
+        padding: 5px 10px;
+        border: 1px solid var(--ccc);
+        border-radius: 999px;
+        background: var(--fff);
+        font-size: 0.7rem;
+        font-weight: 850;
+        color: inherit;
     }
 
     .modalBody {
@@ -509,6 +553,11 @@
             <div class="modalMeta">
                 {player.pos}{player.t ? ` · ${player.t}` : ''}
             </div>
+            {#if standardFinish}
+                <div class="sleeperFinish">
+                    Sleeper {standardFinishSeason} STD Finish · {standardFinish}
+                </div>
+            {/if}
         </div>
 
         <div class="modalBody">
