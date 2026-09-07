@@ -147,7 +147,9 @@
 
         if(!asyncStandingsData?.standingsInfo) {
             standings = buildPreseasonStandings(leagueTeamManagers,year);
-            preseason = true; loading = false; return;
+            preseason = Number(year) !== Number(leagueTeamManagers?.currentSeason);
+            loading = false;
+            return;
         }
 
         const { standingsInfo, yearData } = asyncStandingsData;
@@ -155,7 +157,9 @@
         let finalStandings = Object.values(standingsInfo || {});
         if(!finalStandings.length) {
             standings = buildPreseasonStandings(leagueTeamManagers,year);
-            preseason = true; loading = false; return;
+            preseason = Number(year) !== Number(leagueTeamManagers?.currentSeason);
+            loading = false;
+            return;
         }
 
         const gamesHaveStarted = finalStandings.some((standing) => {
@@ -163,8 +167,10 @@
             return gamesPlayed > 0 || Number(standing.fpts || 0) > 0;
         });
         if(!gamesHaveStarted) {
-            standings = buildPreseasonStandings(leagueTeamManagers,year);
-            preseason = true; loading = false; return;
+            standings = finalStandings;
+            preseason = Number(year) !== Number(leagueTeamManagers?.currentSeason);
+            loading = false;
+            return;
         }
 
         for(const sortType of sortOrder) {
