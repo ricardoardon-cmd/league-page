@@ -6,7 +6,7 @@
         getTeamNameFromTeamManagers
     } from "$lib/utils/helperFunctions/universalFunctions";
 
-    export let manager, leagueTeamManagers, key;
+    export let manager, leagueTeamManagers, key, nflStateData;
 
     let retired = false;
     let rosterID = manager.roster;
@@ -25,6 +25,14 @@
     const teamName = getTeamNameFromTeamManagers(leagueTeamManagers, rosterID, year);
     const rivalName = manager.rival?.name || null;
     const tradeInterest = manager.tradingScale ? `${manager.tradingScale}/10` : null;
+
+    const seasonPhase = (state) => {
+        if (!state) return 'Season';
+        if (state.season_type === 'regular') return `Week ${state.week}`;
+        if (state.season_type === 'post') return 'Postseason';
+        if (state.season_type === 'pre') return 'Preseason';
+        return 'Season';
+    };
 </script>
 
 <style>
@@ -89,7 +97,17 @@
 
     <div class:retiredStatus={retired} class="seasonStatus">
         <span class="statusDot"></span>
-        {#if retired}Former Manager{:else}Active · Pre-Draft{/if}
+        {#if retired}
+            Former Manager
+        {:else}
+            {#await nflStateData}
+                Active
+            {:then state}
+                Active · {seasonPhase(state)}
+            {:catch}
+                Active
+            {/await}
+        {/if}
     </div>
 
     <div class="quickFacts">
