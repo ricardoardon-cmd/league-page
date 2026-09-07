@@ -16,7 +16,6 @@
 
     const playerName = (selectedPlayer) => {
         if (!selectedPlayer) return 'Unknown Player';
-
         const fullName = `${selectedPlayer.fn || ''} ${selectedPlayer.ln || ''}`.trim();
         if (fullName) return fullName;
         if (selectedPlayer.pos === 'DEF') return selectedPlayer.t || 'Defense';
@@ -89,19 +88,14 @@
 
             draftRows.forEach((draftRow, rowIndex) => {
                 (draftRow || []).forEach((draftCol, colIndex) => {
-                    if (!draftCol?.player || String(draftCol.player) !== String(playerID)) {
-                        return;
-                    }
+                    if (!draftCol?.player || String(draftCol.player) !== String(playerID)) return;
 
                     const originalRosterID = draftData?.draftOrder?.[colIndex];
                     const draftedRosterID = draftCol?.newOwner || originalRosterID || null;
 
                     history.push({
                         year: draftData.year,
-                        rosterID: draftedRosterID ? Number(draftedRosterID) : null,
-                        team: draftedRosterID
-                            ? safeTeam(draftedRosterID, draftData.year)
-                            : null,
+                        team: draftedRosterID ? safeTeam(draftedRosterID, draftData.year) : null,
                         pick: getDraftPickLabel(draftData, draftCol, rowIndex, colIndex),
                         round: rowIndex + 1,
                         tradedPick: Boolean(draftCol?.newOwner)
@@ -110,9 +104,7 @@
             });
         }
 
-        return history.sort(
-            (a, b) => Number(b.year || 0) - Number(a.year || 0)
-        );
+        return history.sort((a, b) => Number(b.year || 0) - Number(a.year || 0));
     };
 
     const ensureTransactionsLoaded = async () => {
@@ -154,9 +146,7 @@
                     if (destinationIndex < 0) continue;
 
                     const originIndex = move.findIndex((cell) => cell === 'origin');
-                    const fromRosterID = originIndex >= 0
-                        ? transactionRosters[originIndex]
-                        : null;
+                    const fromRosterID = originIndex >= 0 ? transactionRosters[originIndex] : null;
                     const toRosterID = transactionRosters[destinationIndex] ?? null;
 
                     history.push({
@@ -178,8 +168,7 @@
                     const cell = move[ix];
                     if (!cell?.player || String(cell.player) !== targetPlayerID) continue;
 
-                    const transactionRosterID =
-                        transactionRosters[ix] ?? transactionRosters[0] ?? null;
+                    const transactionRosterID = transactionRosters[ix] ?? transactionRosters[0] ?? null;
                     const action = String(cell.type || 'Transaction');
 
                     history.push({
@@ -225,17 +214,17 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 18px;
+        padding: 10px;
         box-sizing: border-box;
-        background: rgba(0, 0, 0, 0.58);
+        background: rgba(0, 0, 0, 0.64);
     }
 
     .playerModal {
         width: 100%;
         max-width: 520px;
-        max-height: calc(100vh - 36px);
+        max-height: calc(100vh - 20px);
         overflow-y: auto;
-        border-radius: 22px;
+        border-radius: 20px;
         background: var(--fff);
         border: 1px solid var(--ccc);
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
@@ -250,7 +239,7 @@
 
     .modalTop {
         position: relative;
-        padding: 28px 24px 22px;
+        padding: 24px 18px 18px;
         text-align: center;
         border-top: 4px solid var(--pos-color, var(--blueOne));
         border-bottom: 1px solid var(--ccc);
@@ -259,8 +248,8 @@
 
     .modalClose {
         position: absolute;
-        top: 12px;
-        right: 12px;
+        top: 10px;
+        right: 10px;
         width: 34px;
         height: 34px;
         border: 1px solid var(--ccc);
@@ -273,38 +262,33 @@
     }
 
     .modalAvatar {
-        width: 92px;
-        height: 92px;
+        width: 126px;
+        height: 126px;
         margin: 0 auto 12px;
         border-radius: 50%;
         background-position: center;
         background-repeat: no-repeat;
-        background-size: auto 92px;
+        background-size: auto 126px;
         background-color: var(--fff);
-        border: 2px solid var(--ccc);
+        border: 3px solid var(--pos-color, var(--ccc));
     }
 
     .modalName {
-        font-size: 1.5rem;
+        font-size: 1.55rem;
         font-weight: 900;
     }
 
     .modalMeta {
         margin-top: 5px;
         font-size: 0.78rem;
-        font-weight: 750;
+        font-weight: 800;
         color: var(--pos-color, inherit);
     }
 
-    .modalBody { padding: 18px; }
-
-    .detailGrid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
+    .modalBody {
+        padding: 14px;
     }
 
-    .detailCard,
     .ownerCard,
     .historyItem,
     .transactionItem {
@@ -312,12 +296,11 @@
         border: 1px solid var(--ccc);
     }
 
-    .detailCard {
-        padding: 13px;
-        border-radius: 13px;
+    .ownerCard {
+        padding: 14px;
+        border-radius: 14px;
     }
 
-    .detailLabel,
     .ownerTitle,
     .historyHeading {
         font-weight: 850;
@@ -326,16 +309,9 @@
         opacity: 0.5;
     }
 
-    .detailLabel { font-size: 0.62rem; }
-    .detailValue { margin-top: 4px; font-size: 0.88rem; font-weight: 850; }
-
-    .ownerCard {
-        margin-top: 12px;
-        padding: 15px;
-        border-radius: 14px;
+    .ownerTitle {
+        font-size: 0.65rem;
     }
-
-    .ownerTitle { font-size: 0.65rem; }
 
     .ownerButton {
         width: 100%;
@@ -351,21 +327,35 @@
     }
 
     .historySection,
-    .transactionSection { margin-top: 14px; }
-    .transactionSection { margin-top: 16px; }
-    .historyHeading { margin-bottom: 8px; font-size: 0.68rem; }
-    .historyList { display: flex; flex-direction: column; gap: 8px; }
+    .transactionSection {
+        margin-top: 14px;
+    }
+
+    .historyHeading {
+        margin-bottom: 8px;
+        font-size: 0.68rem;
+    }
+
+    .historyList {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
 
     .historyItem {
         display: grid;
-        grid-template-columns: 58px 72px minmax(0, 1fr);
+        grid-template-columns: 52px 66px minmax(0, 1fr);
         align-items: center;
-        gap: 9px;
-        padding: 11px 12px;
+        gap: 8px;
+        padding: 10px;
         border-radius: 12px;
     }
 
-    .historyYear { font-size: 0.78rem; font-weight: 850; }
+    .historyYear {
+        font-size: 0.78rem;
+        font-weight: 850;
+    }
+
     .historyPick {
         padding: 4px 7px;
         border-radius: 999px;
@@ -406,25 +396,30 @@
 
     .transactionItem {
         display: grid;
-        grid-template-columns: 72px minmax(0, 1fr) auto;
+        grid-template-columns: 68px minmax(0, 1fr) auto;
         align-items: center;
-        gap: 10px;
-        padding: 11px 12px;
+        gap: 8px;
+        padding: 10px;
         border-radius: 12px;
     }
 
-    .transactionItem + .transactionItem { margin-top: 8px; }
+    .transactionItem + .transactionItem {
+        margin-top: 8px;
+    }
+
     .transactionAction {
         font-size: 0.67rem;
         font-weight: 900;
         letter-spacing: 0.45px;
         text-transform: uppercase;
     }
+
     .transactionTrade { color: var(--blueOne); }
     .transactionAdd { color: #00a995; }
     .transactionDrop { color: #ff2a6d; }
     .transactionMain { min-width: 0; }
     .transactionTeams { font-size: 0.77rem; font-weight: 800; line-height: 1.25; }
+
     .transactionBid {
         padding: 4px 7px;
         border-radius: 999px;
@@ -436,9 +431,47 @@
     }
 
     @media (max-width: 620px) {
-        .detailGrid { grid-template-columns: 1fr; }
-        .transactionItem { grid-template-columns: 62px minmax(0, 1fr); }
-        .transactionBid { grid-column: 2; justify-self: start; }
+        .modalBackdrop {
+            padding: 6px;
+        }
+
+        .playerModal {
+            max-height: calc(100vh - 12px);
+            border-radius: 16px;
+        }
+
+        .modalTop {
+            padding: 18px 12px 14px;
+        }
+
+        .modalAvatar {
+            width: 116px;
+            height: 116px;
+            background-size: auto 116px;
+        }
+
+        .modalName {
+            font-size: 1.35rem;
+        }
+
+        .modalBody {
+            padding: 10px;
+        }
+
+        .historyItem {
+            grid-template-columns: 48px 60px minmax(0, 1fr);
+            gap: 7px;
+            padding: 9px;
+        }
+
+        .transactionItem {
+            grid-template-columns: 58px minmax(0, 1fr);
+        }
+
+        .transactionBid {
+            grid-column: 2;
+            justify-self: start;
+        }
     }
 </style>
 
@@ -465,25 +498,6 @@
         </div>
 
         <div class="modalBody">
-            <div class="detailGrid">
-                <div class="detailCard">
-                    <div class="detailLabel">Position</div>
-                    <div class="detailValue">{player.pos || '—'}</div>
-                </div>
-                <div class="detailCard">
-                    <div class="detailLabel">NFL Team</div>
-                    <div class="detailValue">{player.t || 'Free Agent'}</div>
-                </div>
-                <div class="detailCard">
-                    <div class="detailLabel">GGL Status</div>
-                    <div class="detailValue">Rostered</div>
-                </div>
-                <div class="detailCard">
-                    <div class="detailLabel">GGL Drafts</div>
-                    <div class="detailValue">{draftHistory.length}</div>
-                </div>
-            </div>
-
             <div class="ownerCard">
                 <div class="ownerTitle">Current GGL Team</div>
                 {#if ownerTeam}
