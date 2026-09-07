@@ -1,7 +1,7 @@
 <script>
     import Button, { Group, Label } from '@smui/button';
     import LinearProgress from '@smui/linear-progress';
-    import {loadPlayers, getLeagueTransactions} from '$lib/utils/helper';
+    import {loadPlayers, getLeagueTransactions, getNflState} from '$lib/utils/helper';
     import Roster from '../Rosters/Roster.svelte';
     import TransactionsPage from '../Transactions/TransactionsPage.svelte';
     import { goto } from '$app/navigation';
@@ -9,10 +9,11 @@
     import ManagerCareerStats from './ManagerCareerStats.svelte';
     import ManagerHeadToHead from './ManagerHeadToHead.svelte';
     import { onMount } from 'svelte';
-    import { getDatesActive, getRosterIDFromManagerID, getTeamNameFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
+    import { getDatesActive, getRosterIDFromManagerID, getTeamNameFromTeamManagers, getAvatarFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
 
     export let manager, managers, rostersData, leagueTeamManagers, rosterPositions, transactionsData, awards, records;
 
+    const nflState = getNflState();
     let transactions = transactionsData.transactions;
 
     $: viewManager = managers[manager];
@@ -25,6 +26,8 @@
         ? getRosterIDFromManagerID(leagueTeamManagers, viewManager.managerID)
         : {rosterID: viewManager.roster, year: null});
 
+    $: currentTeamName = getTeamNameFromTeamManagers(leagueTeamManagers, rosterID, year);
+    $: currentTeamLogo = getAvatarFromTeamManagers(leagueTeamManagers, rosterID, year);
     $: teamTransactions = transactions.filter(t => t.rosters.includes(parseInt(rosterID)));
     $: roster = rosters[rosterID];
     $: coOwners = year && rosterID
@@ -36,6 +39,14 @@
 
     let players, playersInfo;
     let loading = true;
+
+    const seasonPhase = (state) => {
+        if (!state) return 'Season';
+        if (state.season_type === 'regular') return `Week ${state.week}`;
+        if (state.season_type === 'post') return 'Postseason';
+        if (state.season_type === 'pre') return 'Preseason';
+        return 'Season';
+    };
 
     const refreshTransactions = async () => {
         const newTransactions = await getLeagueTransactions(false, true);
@@ -101,15 +112,17 @@
     .profileStatus { display: inline-flex; align-items: center; gap: 7px; margin-top: 18px; padding: 6px 13px; border-radius: 20px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; border: 1px solid var(--ccc); background: var(--f3f3f3); }
     .statusDot { width: 8px; height: 8px; border-radius: 50%; background: #2e9d50; }
     .profileName { margin: 18px 0 0; font-size: 2.5em; font-weight: 800; line-height: 1.05; }
-    .teamSub { margin-top: 10px; font-size: .4em; line-height: 1em; color: #666; opacity: .65; }
-    .teamSub i { display: block; margin-top: 3px; font-size: 1.35em; font-weight: 800; font-style: normal; opacity: 1; }
+    .managerRole { margin-top: 8px; font-size: .72rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; opacity: .42; }
     .profileMeta { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-top: 20px; }
     .metaItem { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; font-size: .78rem; background: var(--f3f3f3); border: 1px solid var(--ccc); }
     .metaRival { cursor: pointer; color: inherit; font-family: inherit; }
     .metaRival:hover { border-color: var(--aaa); box-shadow: 0 0 5px 1px var(--ccc); }
     .metaTeam, .metaRivalImage { height: 25px; width: 25px; object-fit: cover; border-radius: 50%; }
     .tradeValue { color: var(--blueOne); font-weight: 800; }
-    .profileTagline { margin: 24px auto 0; padding-top: 18px; max-width: 620px; border-top: 1px solid var(--ccc); font-size: 1rem; line-height: 1.5; text-align: center; }
+    .teamIdentity { margin: 28px auto 0; padding-top: 22px; max-width: 620px; border-top: 1px solid var(--ccc); display:flex; flex-direction:column; align-items:center; gap:10px; }
+    .teamLogo { width:84px; height:84px; border-radius:18px; object-fit:cover; border:1px solid var(--ccc); background:var(--f3f3f3); box-shadow:0 4px 14px rgba(0,0,0,.12); }
+    .teamIdentityLabel { font-size:.66rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; opacity:.45; }
+    .teamIdentityName { font-size:1.45rem; font-weight:850; line-height:1.15; }
     .managerControls { width: 100%; max-width: 800px; margin: 0 auto 18px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
     .profileNav { margin: 0; text-align: center; }
     .managerSelectWrap { width: 100%; max-width: 390px; position: relative; }
@@ -127,7 +140,8 @@
         :global(.selectionButtons span) { font-size: .8em; }
         .managerControls { width: 97%; }
         .managerSelectWrap { max-width: 330px; }
-        .profileTagline { font-size: .92rem; }
+        .teamIdentityName { font-size:1.25rem; }
+        .teamLogo { width:72px; height:72px; }
     }
     @media (max-width: 435px) { :global(.selectionButtons span) { line-height: 1.2em; font-size: .8em; } }
 </style>
@@ -160,12 +174,12 @@
 
         <div class="profileHero">
             <img class="managerPhoto" src={viewManager.photo} alt={viewManager.name} />
-            <div class="profileStatus"><span class="statusDot"></span>2026 · Pre-Draft</div>
+            <div class="profileStatus"><span class="statusDot"></span>{#await nflState}2026{:then state}{state.season} · {seasonPhase(state)}{:catch}2026 · Season{/await}</div>
             <h2 class="profileName">
                 {viewManager.name}
                 {#if commissioner}<span class="commissionerBadge"><span>C</span></span>{/if}
             </h2>
-            <div class="teamSub">{coOwners ? 'Co-' : ''}Manager of<i>{getTeamNameFromTeamManagers(leagueTeamManagers, rosterID, year)}</i></div>
+            <div class="managerRole">{coOwners ? 'Co-Manager' : 'Manager'}</div>
             <div class="profileMeta">
                 {#if viewManager.location}<div class="metaItem">📍 {viewManager.location}</div>{/if}
                 {#if viewManager.managerID && datesActive.start}
@@ -186,7 +200,11 @@
                     </button>
                 {/if}
             </div>
-            {#if viewManager.bio}<div class="profileTagline">{@html viewManager.bio}</div>{/if}
+            <div class="teamIdentity">
+                {#if currentTeamLogo}<img class="teamLogo" src={currentTeamLogo} alt={`${currentTeamName} logo`} />{/if}
+                <div class="teamIdentityLabel">Current Team</div>
+                <div class="teamIdentityName">{currentTeamName}</div>
+            </div>
         </div>
     </div>
 
