@@ -325,7 +325,7 @@
 
             <div class="summaryItem">
                 <div class="label">⚔️ Game To Watch</div>
-                <div class="value">{closest ? numericRound(Math.abs(closest.scoreOne - closest.scoreTwo)) : 0} pts apart</div>
+                <div class="value">{closest ? `${closest.teamOne.name} vs ${closest.teamTwo.name}` : '—'}</div>
             </div>
 
             <div class="summaryItem">
