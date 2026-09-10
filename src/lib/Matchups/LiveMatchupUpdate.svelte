@@ -11,47 +11,80 @@
     export let leagueTeamManagers;
 
     let playerSpotlightLabel = 'Player Of The Night';
-    onMount(() => {
-        const update = () => { const now=new Date(); playerSpotlightLabel=now.getDay()===0&&now.getHours()>=9&&now.getHours()<17?'Player Of The Day':'Player Of The Night'; };
-        update(); const timer=setInterval(update,60000); return()=>clearInterval(timer);
-    });
+    let liveInjuries = {};
 
-    const numericRound=v=>Number(round(Number(v)||0));
-    const sum=(v=[])=>v.reduce((t,n)=>t+(Number(n)||0),0);
-    const actual=e=>numericRound(sum(e?.points||[]));
-    const safeTeam=id=>{try{return getTeamFromTeamManagers(leagueTeamManagers,Number(id),year)||{name:`Team ${id}`}}catch(e){return{name:`Team ${id}`}}};
-    const projection=e=>numericRound((e?.starters||[]).reduce((t,id)=>{const v=Number(players?.[id]?.wi?.[displayWeek]?.p);return t+(Number.isFinite(v)?v:0)},0));
-    const playerName=id=>{const p=players?.[id];if(!p)return`Player ${id}`;if(p.pos==='DEF')return p.ln||p.fn||String(id).toUpperCase();return`${p.fn||''} ${p.ln||''}`.trim()||`Player ${id}`};
-    const topScorer=e=>{const s=e?.starters||[],pts=e?.points||[];let best=null;s.forEach((id,i)=>{const score=Number(pts[i]||0);if(!id||id==0||score<=0)return;if(!best||score>best.points)best={name:playerName(id),points:numericRound(score),projection:numericRound(Number(players?.[id]?.wi?.[displayWeek]?.p)||0)}});return best};
-
-    const makeUpdate=m=>{
-        const a=m?.[0],b=m?.[1];if(!a||!b)return null;
-        const one={team:safeTeam(a.roster_id),score:actual(a),projection:projection(a)},two={team:safeTeam(b.roster_id),score:actual(b),projection:projection(b)};
-        const ta=topScorer(a),tb=topScorer(b),top=!ta?tb:!tb?ta:ta.points>=tb.points?ta:tb;
-        const leader=one.score===two.score?null:one.score>two.score?one:two,trailer=leader===one?two:one;
-        const favorite=one.projection===two.projection?null:one.projection>two.projection?one:two;
-        const margin=numericRound(Math.abs(one.score-two.score)),projectedMargin=numericRound(Math.abs(one.projection-two.projection));
-        const total=one.score+two.score,isEarly=total<35,isUpset=leader&&favorite&&leader!==favorite&&projectedMargin>=3;
-        let tag='📈 EARLY EDGE',tone='normal',text='';
-        if(!leader){tag='⚔️ DEAD EVEN';tone='close';text=`${one.team.name} and ${two.team.name} are tied right now. This one is completely up for grabs.`}
-        else if(isUpset){tag='🚨 UPSET BREWING';tone='upset';text=`${leader.team.name} has flipped the script and leads ${favorite.team.name} by ${margin} after entering as a ${projectedMargin}-point underdog. ${isEarly?'It is early, but the favorite is already playing from behind.':'The favorite is officially in danger.'}`}
-        else if(margin>=30){tag='💥 BLOWOUT DEVELOPING';tone='blowout';text=`${leader.team.name} has opened a ${margin}-point lead over ${trailer.team.name}. What started as a matchup is turning into a beatdown.`}
-        else if(margin<=5){tag='😬 LEAD IN DANGER';tone='close';text=`${leader.team.name} leads by only ${margin}. ${trailer.team.name} is within striking distance and this is one score swing away from changing hands.`}
-        else if(favorite===trailer&&margin>=8){tag='🔥 COMEBACK WATCH';tone='comeback';text=`${trailer.team.name} was the pregame favorite but trails by ${margin}. The projected winner now needs a comeback to avoid the upset.`}
-        else if(margin>=20){tag='🔥 TAKING CONTROL';tone='hot';text=`${leader.team.name} has built a ${margin}-point advantage over ${trailer.team.name} and is beginning to separate.`}
-        else{text=`${leader.team.name} owns a ${margin}-point lead over ${trailer.team.name}. ${favorite===leader?'So far, the projected favorite is backing up the pregame numbers.':'The live scoreboard is running against the pregame expectation.'}`}
-        if(top)text+=` ${top.name} leads the matchup's starters with ${top.points} points.`;
-        text+=matchupInjurySentence(a,b,players,displayWeek,one.team.name,two.team.name,'live');
-        return{teamOne:one.team,teamTwo:two.team,scoreOne:one.score,scoreTwo:two.score,projectionOne:one.projection,projectionTwo:two.projection,top,tag,tone,text,margin,leader,trailer,favorite,total};
+    const refreshInjuries = async () => {
+        try {
+            const res = await fetch('/api/player_injuries', { cache: 'no-store' });
+            if (res.ok) liveInjuries = await res.json();
+        } catch (error) {
+            // Keep the newsroom working if Sleeper injury data is temporarily unavailable.
+        }
     };
 
-    $: updates=(matchupArray||[]).map(makeUpdate).filter(Boolean);
-    $: highest=updates.flatMap(i=>[{team:i.teamOne,points:i.scoreOne},{team:i.teamTwo,points:i.scoreTwo}]).sort((a,b)=>b.points-a.points)[0];
-    $: closest=[...updates].sort((a,b)=>a.margin-b.margin)[0];
-    $: topPlayer=updates.map(i=>i.top).filter(Boolean).sort((a,b)=>b.points-a.points)[0];
-    $: upset=updates.find(i=>i.tone==='upset');
-    $: liveStories=(()=>{const s=[];if(upset)s.push({label:'🚨 Upset Brewing',text:`${upset.leader.team.name} is currently threatening to knock off projected favorite ${upset.favorite.team.name}.`});const blow=[...updates].filter(i=>i.margin>=30).sort((a,b)=>b.margin-a.margin)[0];if(blow)s.push({label:'💥 Blowout Developing',text:`${blow.leader.team.name} owns the biggest live lead of the week at ${blow.margin} points.`});const comeback=updates.find(i=>i.favorite&&i.leader&&i.favorite!==i.leader&&i.margin>=8);if(comeback)s.push({label:'🔥 Comeback Watch',text:`${comeback.favorite.team.name} entered favored but now has a ${comeback.margin}-point hole to climb out of.`});if(closest&&closest.margin<=7)s.push({label:'👀 One to Watch',text:`${closest.teamOne.name} vs ${closest.teamTwo.name} is the tightest matchup on the board, separated by just ${closest.margin} points.`});if(topPlayer&&topPlayer.projection>0&&topPlayer.points>=topPlayer.projection+10)s.push({label:'🏆 Statement Performance',text:`${topPlayer.name} already has ${topPlayer.points} points, ${numericRound(topPlayer.points-topPlayer.projection)} above his pregame projection.`});return s.slice(0,4)})();
-    $: liveVerdict=(()=>{if(!updates.length)return'';const pieces=[];if(highest)pieces.push(`${highest.team.name} currently sets the scoring pace with ${highest.points}`);if(upset)pieces.push(`${upset.leader.team.name} has an upset brewing against ${upset.favorite.team.name}`);if(closest&&closest.margin<=7)pieces.push(`${closest.teamOne.name} and ${closest.teamTwo.name} are locked in the week's tightest fight`);return pieces.length?`${pieces.join('; ')}. The live board can still change, but these are the stories defining Week ${displayWeek} right now.`:''})();
+    onMount(() => {
+        const updateLabel = () => {
+            const now = new Date();
+            playerSpotlightLabel = now.getDay() === 0 && now.getHours() >= 9 && now.getHours() < 17
+                ? 'Player Of The Day'
+                : 'Player Of The Night';
+        };
+
+        updateLabel();
+        refreshInjuries();
+        const labelTimer = setInterval(updateLabel, 60000);
+        const injuryTimer = setInterval(refreshInjuries, 120000);
+
+        return () => {
+            clearInterval(labelTimer);
+            clearInterval(injuryTimer);
+        };
+    });
+
+    $: newsroomPlayers = (() => {
+        const merged = { ...players };
+        for (const [id, injury] of Object.entries(liveInjuries || {})) {
+            merged[id] = { ...(players?.[id] || {}), ...injury };
+        }
+        return merged;
+    })();
+
+    const numericRound = v => Number(round(Number(v) || 0));
+    const sum = (v = []) => v.reduce((t, n) => t + (Number(n) || 0), 0);
+    const actual = e => numericRound(sum(e?.points || []));
+    const safeTeam = id => { try { return getTeamFromTeamManagers(leagueTeamManagers, Number(id), year) || { name: `Team ${id}` }; } catch (e) { return { name: `Team ${id}` }; } };
+    const projection = e => numericRound((e?.starters || []).reduce((t, id) => { const v = Number(players?.[id]?.wi?.[displayWeek]?.p); return t + (Number.isFinite(v) ? v : 0); }, 0));
+    const playerName = id => { const p = players?.[id]; if (!p) return `Player ${id}`; if (p.pos === 'DEF') return p.ln || p.fn || String(id).toUpperCase(); return `${p.fn || ''} ${p.ln || ''}`.trim() || `Player ${id}`; };
+    const topScorer = e => { const s = e?.starters || [], pts = e?.points || []; let best = null; s.forEach((id, i) => { const score = Number(pts[i] || 0); if (!id || id == 0 || score <= 0) return; if (!best || score > best.points) best = { name: playerName(id), points: numericRound(score), projection: numericRound(Number(players?.[id]?.wi?.[displayWeek]?.p) || 0) }; }); return best; };
+
+    const makeUpdate = m => {
+        const a = m?.[0], b = m?.[1]; if (!a || !b) return null;
+        const one = { team: safeTeam(a.roster_id), score: actual(a), projection: projection(a) }, two = { team: safeTeam(b.roster_id), score: actual(b), projection: projection(b) };
+        const ta = topScorer(a), tb = topScorer(b), top = !ta ? tb : !tb ? ta : ta.points >= tb.points ? ta : tb;
+        const leader = one.score === two.score ? null : one.score > two.score ? one : two, trailer = leader === one ? two : one;
+        const favorite = one.projection === two.projection ? null : one.projection > two.projection ? one : two;
+        const margin = numericRound(Math.abs(one.score - two.score)), projectedMargin = numericRound(Math.abs(one.projection - two.projection));
+        const total = one.score + two.score, isEarly = total < 35, isUpset = leader && favorite && leader !== favorite && projectedMargin >= 3;
+        let tag = '📈 EARLY EDGE', tone = 'normal', text = '';
+        if (!leader) { tag = '⚔️ DEAD EVEN'; tone = 'close'; text = `${one.team.name} and ${two.team.name} are tied right now. This one is completely up for grabs.`; }
+        else if (isUpset) { tag = '🚨 UPSET BREWING'; tone = 'upset'; text = `${leader.team.name} has flipped the script and leads ${favorite.team.name} by ${margin} after entering as a ${projectedMargin}-point underdog. ${isEarly ? 'It is early, but the favorite is already playing from behind.' : 'The favorite is officially in danger.'}`; }
+        else if (margin >= 30) { tag = '💥 BLOWOUT DEVELOPING'; tone = 'blowout'; text = `${leader.team.name} has opened a ${margin}-point lead over ${trailer.team.name}. What started as a matchup is turning into a beatdown.`; }
+        else if (margin <= 5) { tag = '😬 LEAD IN DANGER'; tone = 'close'; text = `${leader.team.name} leads by only ${margin}. ${trailer.team.name} is within striking distance and this is one score swing away from changing hands.`; }
+        else if (favorite === trailer && margin >= 8) { tag = '🔥 COMEBACK WATCH'; tone = 'comeback'; text = `${trailer.team.name} was the pregame favorite but trails by ${margin}. The projected winner now needs a comeback to avoid the upset.`; }
+        else if (margin >= 20) { tag = '🔥 TAKING CONTROL'; tone = 'hot'; text = `${leader.team.name} has built a ${margin}-point advantage over ${trailer.team.name} and is beginning to separate.`; }
+        else { text = `${leader.team.name} owns a ${margin}-point lead over ${trailer.team.name}. ${favorite === leader ? 'So far, the projected favorite is backing up the pregame numbers.' : 'The live scoreboard is running against the pregame expectation.'}`; }
+        if (top) text += ` ${top.name} leads the matchup's starters with ${top.points} points.`;
+        text += matchupInjurySentence(a, b, newsroomPlayers, displayWeek, one.team.name, two.team.name, 'live');
+        return { teamOne: one.team, teamTwo: two.team, scoreOne: one.score, scoreTwo: two.score, projectionOne: one.projection, projectionTwo: two.projection, top, tag, tone, text, margin, leader, trailer, favorite, total };
+    };
+
+    $: updates = (matchupArray || []).map(makeUpdate).filter(Boolean);
+    $: highest = updates.flatMap(i => [{ team: i.teamOne, points: i.scoreOne }, { team: i.teamTwo, points: i.scoreTwo }]).sort((a, b) => b.points - a.points)[0];
+    $: closest = [...updates].sort((a, b) => a.margin - b.margin)[0];
+    $: topPlayer = updates.map(i => i.top).filter(Boolean).sort((a, b) => b.points - a.points)[0];
+    $: upset = updates.find(i => i.tone === 'upset');
+    $: liveStories = (() => { const s = []; if (upset) s.push({ label: '🚨 Upset Brewing', text: `${upset.leader.team.name} is currently threatening to knock off projected favorite ${upset.favorite.team.name}.` }); const blow = [...updates].filter(i => i.margin >= 30).sort((a, b) => b.margin - a.margin)[0]; if (blow) s.push({ label: '💥 Blowout Developing', text: `${blow.leader.team.name} owns the biggest live lead of the week at ${blow.margin} points.` }); const comeback = updates.find(i => i.favorite && i.leader && i.favorite !== i.leader && i.margin >= 8); if (comeback) s.push({ label: '🔥 Comeback Watch', text: `${comeback.favorite.team.name} entered favored but now has a ${comeback.margin}-point hole to climb out of.` }); if (closest && closest.margin <= 7) s.push({ label: '👀 One to Watch', text: `${closest.teamOne.name} vs ${closest.teamTwo.name} is the tightest matchup on the board, separated by just ${closest.margin} points.` }); if (topPlayer && topPlayer.projection > 0 && topPlayer.points >= topPlayer.projection + 10) s.push({ label: '🏆 Statement Performance', text: `${topPlayer.name} already has ${topPlayer.points} points, ${numericRound(topPlayer.points - topPlayer.projection)} above his pregame projection.` }); return s.slice(0, 4); })();
+    $: liveVerdict = (() => { if (!updates.length) return ''; const pieces = []; if (highest) pieces.push(`${highest.team.name} currently sets the scoring pace with ${highest.points}`); if (upset) pieces.push(`${upset.leader.team.name} has an upset brewing against ${upset.favorite.team.name}`); if (closest && closest.margin <= 7) pieces.push(`${closest.teamOne.name} and ${closest.teamTwo.name} are locked in the week's tightest fight`); return pieces.length ? `${pieces.join('; ')}. The live board can still change, but these are the stories defining Week ${displayWeek} right now.` : ''; })();
 </script>
 
 <style>
