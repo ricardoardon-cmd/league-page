@@ -1,6 +1,7 @@
 <script>
     import { round } from '$lib/utils/helper';
     import { getTeamFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
+    import { matchupInjurySentence } from './injuryStoryUtils.js';
 
     export let matchupArray = [];
     export let matchupWeeks = [];
@@ -166,6 +167,15 @@
             const aProjection = n(proj(a));
             const bProjection = n(proj(b));
             const meeting = priorMeeting(a.roster_id, b.roster_id);
+            const injuryText = matchupInjurySentence(
+                a,
+                b,
+                players,
+                displayWeek,
+                A.name,
+                B.name,
+                'pregame'
+            );
 
             let score = 20 - Math.abs(aProjection - bProjection) + Math.max(0, 12 - (aRank + bRank));
             if (meeting) score += 5;
@@ -177,7 +187,8 @@
                     text:
                         `${A.name} vs ${B.name} gets the spotlight. ` +
                         `The projection is ${aProjection}-${bProjection}` +
-                        `${meeting ? `, and these teams already have history from Week ${meeting.week}` : ''}.`
+                        `${meeting ? `, and these teams already have history from Week ${meeting.week}` : ''}.` +
+                        injuryText
                 };
             }
 
