@@ -1,4 +1,5 @@
 <script>
+    import { onMount } from 'svelte';
     import { round } from '$lib/utils/helper';
     import { getTeamFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
 
@@ -7,6 +8,20 @@
     export let displayWeek;
     export let year;
     export let leagueTeamManagers;
+
+    let playerSpotlightLabel = 'Player Of The Night';
+
+    onMount(() => {
+        const updatePlayerSpotlightLabel = () => {
+            const now = new Date();
+            const isSundayDaytime = now.getDay() === 0 && now.getHours() >= 9 && now.getHours() < 17;
+            playerSpotlightLabel = isSundayDaytime ? 'Player Of The Day' : 'Player Of The Night';
+        };
+
+        updatePlayerSpotlightLabel();
+        const timer = setInterval(updatePlayerSpotlightLabel, 60000);
+        return () => clearInterval(timer);
+    });
 
     const numericRound = (v) => Number(round(Number(v) || 0));
     const sum = (v = []) => v.reduce((t, n) => t + (Number(n) || 0), 0);
@@ -329,7 +344,7 @@
             </div>
 
             <div class="summaryItem">
-                <div class="label">⭐ Player Of The Night</div>
+                <div class="label">⭐ {playerSpotlightLabel}</div>
                 <div class="value">{topPlayer ? `${topPlayer.name} · ${topPlayer.points}` : '—'}</div>
             </div>
 
