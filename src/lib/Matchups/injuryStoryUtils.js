@@ -22,29 +22,20 @@ const meaningfulStatus = (player) => {
     if (injuryStatus) return injuryStatus;
 
     const status = normalize(player?.status);
-    const statusLower = lower(status);
-    if (statusLower.includes('injured reserve') || statusLower === 'ir' || statusLower.includes('physically unable') || statusLower === 'pup') return status;
+    const value = lower(status);
+    if (value.includes('injured reserve') || value === 'ir' || value.includes('physically unable') || value === 'pup') return status;
     return '';
 };
 
 const statusPriority = (status) => {
     const value = lower(status);
-    if (value.includes('injured reserve') || value === 'ir') return 6;
-    if (value.includes('out')) return 5;
-    if (value.includes('doubt')) return 4;
-    if (value.includes('question')) return 3;
-    if (value.includes('pup') || value.includes('physically unable')) return 3;
+    if (value.includes('injured reserve') || value === 'ir') return 7;
+    if (value === 'out' || value.includes(' out')) return 6;
+    if (value.includes('doubt')) return 5;
+    if (value.includes('question')) return 4;
+    if (value.includes('pup') || value.includes('physically unable')) return 4;
     if (value.includes('probable')) return 1;
     return status ? 2 : 0;
-};
-
-const practicePriority = (practice) => {
-    const value = lower(practice);
-    if (!value) return 0;
-    if (value.includes('did not') || value === 'dnp') return 3;
-    if (value.includes('limited')) return 2;
-    if (value.includes('full')) return 1;
-    return 1;
 };
 
 const getPractice = (player) => normalize(player?.practice_participation || player?.practiceParticipation || player?.practice_status);
@@ -55,51 +46,79 @@ const makeInjury = (id, player, week) => {
     const status = meaningfulStatus(player);
     const practice = getPractice(player);
     const bodyPart = getBodyPart(player);
-    const priority = Math.max(statusPriority(status), practicePriority(practice));
+    const priority = statusPriority(status);
     if (!priority) return null;
-    return { id, name: playerName(player, id), status, practice, bodyPart, projection: projection(player, week), priority };
+    return {
+        id,
+        name: playerName(player, id),
+        status,
+        practice,
+        bodyPart,
+        projection: projection(player, week),
+        priority
+    };
 };
 
 export const getEntryInjuries = (entry, players = {}, week) => {
     const starters = entry?.starters || [];
-    return starters.map((id) => makeInjury(id, players?.[id], week)).filter(Boolean).sort((a, b) => b.priority - a.priority || b.projection - a.projection || a.name.localeCompare(b.name));
+    return starters
+        .map((id) => makeInjury(id, players?.[id], week))
+        .filter(Boolean)
+        .sort((a, b) => b.priority - a.priority || b.projection - a.projection || a.name.localeCompare(b.name));
 };
 
-const describe = (injury, phase) => {
+const injuryPhrase = (injury) => {
     const status = lower(injury.status);
-    const body = injury.bodyPart ? ` with a ${injury.bodyPart} issue` : '';
+    const body = injury.bodyPart ? ` (${injury.bodyPart})` : '';
 
-    if (phase === 'live' && (status === 'out' || status.includes('out'))) {
-        return `${injury.name} is now listed OUT${body}`;
+    if (status.includes('injured reserve') || status === 'ir') return `${injury.name} is on IR${body}`;
+    if (status === 'out' || status.includes(' out')) return `${injury.name} is OUT${body}`;
+    if (status.includes('doubt')) return `${injury.name} is doubtful${body}`;
+    if (status.includes('question')) return `${injury.name} is questionable${body}`;
+    return `${injury.name} carries a ${injury.status} designation${body}`;
+};
+
+const teamNarrative = (teamName, injuries, phase) => {
+    if (!injuries.length) return '';
+
+    const primary = injuries[0];
+    const secondary = injuries[1];
+    const primaryPhrase = injuryPhrase(primary);
+    const secondPhrase = secondary ? injuryPhrase(secondary) : '';
+    const projectionText = primary.projection >= 8
+        ? `, a major piece of the projected lineup at ${primary.projection} points`
+        : '';
+
+    if (phase === 'live') {
+        if (lower(primary.status).includes('out')) {
+            return `${teamName} has a real availability problem: ${primaryPhrase}${projectionText}${secondPhrase ? `, while ${secondPhrase}` : ''}. That puts more pressure on the rest of the lineup as this matchup develops.`;
+        }
+        return `${teamName} is also playing with some uncertainty. ${primaryPhrase}${projectionText}${secondPhrase ? `, and ${secondPhrase}` : ''}, giving this matchup another variable to watch as the scores come in.`;
     }
 
-    const details = [];
-    if (injury.status) details.push(`listed ${injury.status}`);
-    if (injury.bodyPart) details.push(`with a ${injury.bodyPart} issue`);
-    if (injury.practice) {
-        const practice = lower(injury.practice);
-        if (practice.includes('did not') || practice === 'dnp') details.push('and did not practice');
-        else if (practice.includes('limited')) details.push('and was limited in practice');
+    if (phase === 'postgame') {
+        return `${teamName}'s injury situation was part of the backdrop: ${primaryPhrase}${secondPhrase ? `, with ${secondPhrase}` : ''}.`;
     }
-    return details.length ? `${injury.name} is ${details.join(' ')}` : '';
+
+    return `${teamName} enters with an injury concern: ${primaryPhrase}${projectionText}${secondPhrase ? `, and ${secondPhrase}` : ''}.`;
 };
 
 export const matchupInjurySentence = (firstEntry, secondEntry, players = {}, week, firstTeamName, secondTeamName, phase = 'pregame') => {
-    const first = getEntryInjuries(firstEntry, players, week)[0];
-    const second = getEntryInjuries(secondEntry, players, week)[0];
-    const injuries = [first ? { ...first, teamName: firstTeamName } : null, second ? { ...second, teamName: secondTeamName } : null]
-        .filter(Boolean)
-        .sort((a, b) => b.priority - a.priority || b.projection - a.projection)
-        .slice(0, 2);
+    const first = getEntryInjuries(firstEntry, players, week).slice(0, 2);
+    const second = getEntryInjuries(secondEntry, players, week).slice(0, 2);
+    if (!first.length && !second.length) return '';
 
-    if (!injuries.length) return '';
-    const clauses = injuries.map((injury) => {
-        const description = describe(injury, phase);
-        return description ? `${injury.teamName}: ${description}` : '';
-    }).filter(Boolean);
-    if (!clauses.length) return '';
+    const sides = [
+        { teamName: firstTeamName, injuries: first },
+        { teamName: secondTeamName, injuries: second }
+    ].filter((side) => side.injuries.length);
 
-    if (phase === 'live') return ` Injury update: ${clauses.join('; ')}.`;
-    if (phase === 'postgame') return ` Injury context: ${clauses.join('; ')}.`;
-    return ` One lineup factor to watch: ${clauses.join('; ')}.`;
+    sides.sort((a, b) => {
+        const ai = a.injuries[0];
+        const bi = b.injuries[0];
+        return bi.priority - ai.priority || bi.projection - ai.projection;
+    });
+
+    const narratives = sides.map((side) => teamNarrative(side.teamName, side.injuries, phase));
+    return narratives.length ? ` ${narratives.join(' ')}` : '';
 };
