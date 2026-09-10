@@ -5,6 +5,7 @@
     import WeeklyRecapExtras from './WeeklyRecapExtras.svelte';
     import TradeDeadlineWatch from './TradeDeadlineWatch.svelte';
     import PlayoffRaceStorylines from './PlayoffRaceStorylines.svelte';
+    import HeadToHeadStorylines from './HeadToHeadStorylines.svelte';
     import LiveMatchupUpdate from './LiveMatchupUpdate.svelte';
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
@@ -90,6 +91,9 @@
             {#if Number(displayWeek) < Number(week)}
                 <WeeklyRecapExtras {matchupArray} {players} {displayWeek} />
             {:else}
+                {#if Number(displayWeek) >= 2}
+                    <HeadToHeadStorylines {matchupArray} {displayWeek} {year} {leagueTeamManagers} />
+                {/if}
                 {#if Number(displayWeek) >= 7 && Number(displayWeek) <= 11}
                     <TradeDeadlineWatch {matchupWeeks} {displayWeek} {year} {playoffTeams} {leagueTeamManagers} />
                 {/if}
