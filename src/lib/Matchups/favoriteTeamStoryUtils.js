@@ -64,7 +64,7 @@ export const favoriteTeamStory = (firstEntry, secondEntry, players = {}, week, p
 
     const candidate = conflicts.find((item) => {
         if (phase === 'pregame') return item.projection >= 7;
-        if (phase === 'live') return item.points >= 4 || (item.points > 0 && item.projection >= 8);
+        if (phase === 'live') return item.points >= 4 || item.projection >= 8;
         return item.points >= 8;
     });
     if (!candidate) return null;
@@ -73,6 +73,16 @@ export const favoriteTeamStory = (firstEntry, secondEntry, players = {}, week, p
     const v = variant(manager, id, week, phase);
 
     if (phase === 'live') {
+        if (points <= 0) {
+            const waitingVariants = [
+                `${manager.name} has a loyalty test still waiting in the wings. ${name} has not scored yet, but the ${nflTeam} starter is sitting in the opponent's lineup with a ${projected}-point projection. If he gets going, ${manager.name} will be rooting against one of his own.`,
+                `The uncomfortable part of this matchup may still be ahead for ${manager.name}. ${name} represents the ${nflTeam}, ${manager.name}'s favorite NFL team, and carries a ${projected}-point projection for the opponent even though he has not scored yet.`,
+                `${manager.name} normally wants big things from the ${nflTeam}, but not from ${name} tonight. He is still at zero, yet his ${projected}-point projection means the favorite-team threat is very much alive in the opposing lineup.`,
+                `Friendly fire is loaded but has not gone off yet. ${name} is a ${nflTeam} player sitting across from ${manager.name} with a ${projected}-point projection. Every future point could make this rooting situation a lot more painful.`
+            ];
+            return { label: v % 2 ? '❤️ Loyalty Test' : '😬 Rooting Against His Own', text: waitingVariants[v], conflict: candidate };
+        }
+
         const variants = [
             `${manager.name} is getting the worst kind of production from the ${nflTeam}. ${name} has ${points} fantasy points for the opponent, turning a player from ${manager.name}'s favorite NFL team into an enemy for the night.`,
             `This is a brutal loyalty test for ${manager.name}. ${name} is wearing ${nflTeam} colors and has already scored ${points} points for the other fantasy sideline. Every real-life celebration comes with a fantasy-football price.`,
