@@ -34,25 +34,14 @@
 			.videoArrow,
 			.photoArrow { z-index: 1 !important; }
 
-			/* Live newsroom headings: black on light cards, white on dark cards. */
+			/* The theme already defines --g000 as black in light mode and white in dark mode. */
 			.analysisTag,
 			.scoreLine,
 			.scoreLine .teamOne,
 			.scoreLine .teamTwo,
 			.scoreLine .score {
-				color: #111 !important;
+				color: var(--g000) !important;
 				text-shadow: none !important;
-			}
-
-			@media (prefers-color-scheme: dark) {
-				.analysisTag,
-				.scoreLine,
-				.scoreLine .teamOne,
-				.scoreLine .teamTwo,
-				.scoreLine .score {
-					color: #fff !important;
-					text-shadow: none !important;
-				}
 			}
 
 			#ggl-splash {
