@@ -4,6 +4,7 @@
     import WeeklyMatchupAnalysis from './WeeklyMatchupAnalysis.svelte';
     import WeeklyRecapExtras from './WeeklyRecapExtras.svelte';
     import TradeDeadlineWatch from './TradeDeadlineWatch.svelte';
+    import PlayoffRaceStorylines from './PlayoffRaceStorylines.svelte';
     import LiveMatchupUpdate from './LiveMatchupUpdate.svelte';
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
@@ -88,8 +89,13 @@
             <WeeklyMatchupAnalysis {matchupArray} {matchupWeeks} {displayWeek} currentWeek={week} {players} {year} {regularSeasonLength} {playoffTeams} {leagueTeamManagers} />
             {#if Number(displayWeek) < Number(week)}
                 <WeeklyRecapExtras {matchupArray} {players} {displayWeek} />
-            {:else if Number(displayWeek) >= 7 && Number(displayWeek) <= 11}
-                <TradeDeadlineWatch {matchupWeeks} {displayWeek} {year} {playoffTeams} {leagueTeamManagers} />
+            {:else}
+                {#if Number(displayWeek) >= 7 && Number(displayWeek) <= 11}
+                    <TradeDeadlineWatch {matchupWeeks} {displayWeek} {year} {playoffTeams} {leagueTeamManagers} />
+                {/if}
+                {#if Number(displayWeek) >= 7 && Number(displayWeek) <= Number(regularSeasonLength)}
+                    <PlayoffRaceStorylines {matchupArray} {matchupWeeks} {displayWeek} {year} {playoffTeams} {regularSeasonLength} {leagueTeamManagers} />
+                {/if}
             {/if}
         {/if}
     {/if}
