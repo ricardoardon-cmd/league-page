@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import { round } from '$lib/utils/helper';
     import { getTeamFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
+    import { matchupInjurySentence } from './injuryStoryUtils.js';
 
     export let matchupArray = [];
     export let players = {};
@@ -40,6 +41,7 @@
         else if(margin>=20){tag='🔥 TAKING CONTROL';tone='hot';text=`${leader.team.name} has built a ${margin}-point advantage over ${trailer.team.name} and is beginning to separate.`}
         else{text=`${leader.team.name} owns a ${margin}-point lead over ${trailer.team.name}. ${favorite===leader?'So far, the projected favorite is backing up the pregame numbers.':'The live scoreboard is running against the pregame expectation.'}`}
         if(top)text+=` ${top.name} leads the matchup's starters with ${top.points} points.`;
+        text+=matchupInjurySentence(a,b,players,displayWeek,one.team.name,two.team.name,'live');
         return{teamOne:one.team,teamTwo:two.team,scoreOne:one.score,scoreTwo:two.score,projectionOne:one.projection,projectionTwo:two.projection,top,tag,tone,text,margin,leader,trailer,favorite,total};
     };
 
@@ -48,7 +50,7 @@
     $: closest=[...updates].sort((a,b)=>a.margin-b.margin)[0];
     $: topPlayer=updates.map(i=>i.top).filter(Boolean).sort((a,b)=>b.points-a.points)[0];
     $: upset=updates.find(i=>i.tone==='upset');
-    $: liveStories=(()=>{const s=[];if(upset)s.push({label:'🚨 Upset Brewing',text:`${upset.leader.team.name} is currently threatening to knock off projected favorite ${upset.favorite.team.name}.`});const blow=[...updates].filter(i=>i.margin>=30).sort((a,b)=>b.margin-a.margin)[0];if(blow)s.push({label:'💥 Blowout Developing',text:`${blow.leader.team.name} owns the biggest live lead of the week at ${blow.margin} points.`});const comeback=updates.find(i=>i.tone==='comeback');if(comeback)s.push({label:'🔥 Comeback Watch',text:`${comeback.favorite.team.name} entered favored but now has a ${comeback.margin}-point hole to climb out of.`});if(closest&&closest.margin<=7)s.push({label:'👀 One to Watch',text:`${closest.teamOne.name} vs ${closest.teamTwo.name} is the tightest matchup on the board, separated by just ${closest.margin} points.`});if(topPlayer&&topPlayer.projection>0&&topPlayer.points>=topPlayer.projection+10)s.push({label:'🏆 Statement Performance',text:`${topPlayer.name} already has ${topPlayer.points} points, ${numericRound(topPlayer.points-topPlayer.projection)} above his pregame projection.`});return s.slice(0,4)})();
+    $: liveStories=(()=>{const s=[];if(upset)s.push({label:'🚨 Upset Brewing',text:`${upset.leader.team.name} is currently threatening to knock off projected favorite ${upset.favorite.team.name}.`});const blow=[...updates].filter(i=>i.margin>=30).sort((a,b)=>b.margin-a.margin)[0];if(blow)s.push({label:'💥 Blowout Developing',text:`${blow.leader.team.name} owns the biggest live lead of the week at ${blow.margin} points.`});const comeback=updates.find(i=>i.favorite&&i.leader&&i.favorite!==i.leader&&i.margin>=8);if(comeback)s.push({label:'🔥 Comeback Watch',text:`${comeback.favorite.team.name} entered favored but now has a ${comeback.margin}-point hole to climb out of.`});if(closest&&closest.margin<=7)s.push({label:'👀 One to Watch',text:`${closest.teamOne.name} vs ${closest.teamTwo.name} is the tightest matchup on the board, separated by just ${closest.margin} points.`});if(topPlayer&&topPlayer.projection>0&&topPlayer.points>=topPlayer.projection+10)s.push({label:'🏆 Statement Performance',text:`${topPlayer.name} already has ${topPlayer.points} points, ${numericRound(topPlayer.points-topPlayer.projection)} above his pregame projection.`});return s.slice(0,4)})();
     $: liveVerdict=(()=>{if(!updates.length)return'';const pieces=[];if(highest)pieces.push(`${highest.team.name} currently sets the scoring pace with ${highest.points}`);if(upset)pieces.push(`${upset.leader.team.name} has an upset brewing against ${upset.favorite.team.name}`);if(closest&&closest.margin<=7)pieces.push(`${closest.teamOne.name} and ${closest.teamTwo.name} are locked in the week's tightest fight`);return pieces.length?`${pieces.join('; ')}. The live board can still change, but these are the stories defining Week ${displayWeek} right now.`:''})();
 </script>
 
