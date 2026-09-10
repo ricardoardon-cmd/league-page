@@ -2,6 +2,7 @@
 	import { Icon } from '@smui/tab';
     import Matchup from './Matchup.svelte'
     import WeeklyMatchupAnalysis from './WeeklyMatchupAnalysis.svelte';
+    import WeeklyRecapExtras from './WeeklyRecapExtras.svelte';
     import LiveMatchupUpdate from './LiveMatchupUpdate.svelte';
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
@@ -84,6 +85,9 @@
             <LiveMatchupUpdate {matchupArray} {players} {displayWeek} {year} {leagueTeamManagers} />
         {:else}
             <WeeklyMatchupAnalysis {matchupArray} {matchupWeeks} {displayWeek} currentWeek={week} {players} {year} {regularSeasonLength} {playoffTeams} {leagueTeamManagers} />
+            {#if Number(displayWeek) < Number(week)}
+                <WeeklyRecapExtras {matchupArray} {players} {displayWeek} />
+            {/if}
         {/if}
     {/if}
 
