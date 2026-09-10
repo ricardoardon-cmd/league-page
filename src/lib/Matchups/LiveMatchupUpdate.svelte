@@ -13,9 +13,18 @@
     let playerSpotlightLabel = 'Player Of The Night';
     let liveInjuries = {};
 
+    const liveStarterIds = () => [...new Set(
+        (matchupArray || [])
+            .flatMap((matchup) => (matchup || []).flatMap((entry) => entry?.starters || []))
+            .filter((id) => id && id != 0)
+            .map(String)
+    )];
+
     const refreshInjuries = async () => {
         try {
-            const res = await fetch(`/api/player_injuries?t=${Date.now()}`, { cache: 'no-store' });
+            const ids = liveStarterIds();
+            const query = ids.length ? `&ids=${encodeURIComponent(ids.join(','))}` : '';
+            const res = await fetch(`/api/player_injuries?t=${Date.now()}${query}`, { cache: 'no-store' });
             if (res.ok) liveInjuries = await res.json();
         } catch (error) {
             // Injury data should never stop the rest of the newsroom from rendering.
@@ -264,27 +273,27 @@
 <style>
     .liveCard { width: 95%; max-width: 900px; margin: 0 auto 24px; padding: 20px; box-sizing: border-box; border: 1px solid var(--ccc); border-radius: 16px; background: var(--fff); box-shadow: 0 4px 14px rgba(0,0,0,.06); }
     .header { text-align: center; margin-bottom: 16px; }
-    .eyebrow { font-size: .72rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; opacity: .55; }
+    .eyebrow { font-size: .72rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; opacity: .72; }
     h4 { margin: 5px 0 0; font-size: 1.35rem; }
-    .sub { margin-top: 5px; font-size: .7rem; opacity: .55; }
+    .sub { margin-top: 5px; font-size: .7rem; opacity: .62; }
     .summary { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin-bottom: 16px; }
     .summaryItem, .story, .game { padding: 12px; border-radius: 12px; background: var(--f3f3f3); }
-    .label { font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; opacity: .55; }
+    .label { font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; opacity: .78; }
     .value { margin-top: 4px; font-size: .86rem; font-weight: 850; }
     .stories, .games { display: grid; gap: 10px; }
     .stories { margin-bottom: 16px; }
     .storyText { margin-top: 5px; font-size: .78rem; line-height: 1.55; font-weight: 600; }
-    .analysisTag { margin-bottom: 9px; text-align: center; font-size: .62rem; font-weight: 900; letter-spacing: .65px; opacity: .72; }
-    .scoreLine { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 8px; font-weight: 850; }
+    .analysisTag { margin-bottom: 9px; text-align: center; font-size: .65rem; font-weight: 900; letter-spacing: .7px; opacity: .95; color: var(--ddd); }
+    .scoreLine { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 8px; font-weight: 900; color: var(--ddd); }
     .teamOne { text-align: right; }
     .teamTwo { text-align: left; }
-    .score { white-space: nowrap; font-size: 1.05rem; }
-    .projections { margin-top: 5px; text-align: center; font-size: .67rem; opacity: .55; }
+    .score { white-space: nowrap; font-size: 1.05rem; color: var(--ddd); }
+    .projections { margin-top: 5px; text-align: center; font-size: .67rem; opacity: .62; }
     .note { margin-top: 11px; text-align: left; font-size: .8rem; line-height: 1.6; }
     .verdict { margin-top: 16px; padding: 15px; border: 1px solid var(--ccc); border-radius: 12px; }
     .verdictTitle { font-size: .72rem; font-weight: 900; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
     .verdictText { font-size: .82rem; line-height: 1.55; font-weight: 600; }
-    @media(max-width:600px) { .liveCard { width: 100%; padding: 15px 12px; } .scoreLine { font-size: .8rem; } .score { font-size: .95rem; } .note, .storyText { font-size: .74rem; } }
+    @media(max-width:600px) { .liveCard { width: 100%; padding: 15px 12px; } .scoreLine { font-size: .84rem; } .score { font-size: .98rem; } .note, .storyText { font-size: .74rem; } }
 </style>
 
 {#if updates.length}
