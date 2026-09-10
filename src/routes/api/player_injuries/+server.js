@@ -21,33 +21,51 @@ const normalizeInjury = (player = {}) => ({
     news_updated: player.news_updated || player.updated_at || player.updated || null
 });
 
-export async function GET({ setHeaders }) {
+const hasMeaningfulInjury = (injury = {}) => Boolean(
+    injury.injury_status ||
+    injury.practice_participation ||
+    injury.injury_body_part ||
+    injury.injury_notes ||
+    ['IR', 'PUP'].includes(injury.status)
+);
+
+export async function GET({ url, setHeaders }) {
     const injuries = {};
+    const ids = [...new Set(
+        (url.searchParams.get('ids') || '')
+            .split(',')
+            .map((id) => id.trim())
+            .filter((id) => /^\d+$/.test(id))
+    )].slice(0, 40);
 
-    // Sleeper's injury-specific feed updates faster than the full player map when available.
-    try {
-        const injuryRes = await fetch('https://api.sleeper.app/v1/players/injuries', {
-            compress: true,
-            headers: { 'cache-control': 'no-cache' }
-        });
+    // For the players actually starting in the live GGL matchups, ask Sleeper
+    // for each player directly. This avoids depending only on the large player
+    // map, which Sleeper documents as data that can be cached for a day.
+    if (ids.length) {
+        const responses = await Promise.allSettled(
+            ids.map(async (id) => {
+                const res = await fetch(`https://api.sleeper.app/v1/players/nfl/${id}?t=${Date.now()}`, {
+                    compress: true,
+                    headers: { 'cache-control': 'no-cache' }
+                });
 
-        if (injuryRes.ok) {
-            const injuryData = await injuryRes.json();
-            const rows = Array.isArray(injuryData)
-                ? injuryData
-                : Object.values(injuryData || {});
+                if (!res.ok) return null;
+                const player = await res.json();
+                return { id, player };
+            })
+        );
 
-            for (const row of rows) {
-                const id = row?.player_id || row?.id;
-                if (!id) continue;
-                injuries[String(id)] = normalizeInjury(row);
-            }
+        for (const response of responses) {
+            if (response.status !== 'fulfilled' || !response.value) continue;
+            const { id, player } = response.value;
+            const normalized = normalizeInjury(player);
+            if (hasMeaningfulInjury(normalized)) injuries[id] = normalized;
         }
-    } catch (error) {
-        // Fall through to the standard Sleeper player endpoint below.
     }
 
-    const res = await fetch('https://api.sleeper.app/v1/players/nfl', {
+    // Fallback: use the public player map for any status the individual-player
+    // lookups did not return. This keeps pregame designations such as Q/D/IR.
+    const res = await fetch(`https://api.sleeper.app/v1/players/nfl?t=${Date.now()}`, {
         compress: true,
         headers: { 'cache-control': 'no-cache' }
     });
@@ -58,23 +76,14 @@ export async function GET({ setHeaders }) {
 
     if (res.ok) {
         const playerData = await res.json();
+        const candidateIds = ids.length ? ids : Object.keys(playerData);
 
-        for (const id in playerData) {
+        for (const id of candidateIds) {
+            if (injuries[id]) continue;
             const player = playerData[id];
+            if (!player) continue;
             const normalized = normalizeInjury(player);
-            const hasInjury =
-                normalized.injury_status ||
-                normalized.practice_participation ||
-                normalized.injury_body_part ||
-                normalized.injury_notes ||
-                ['IR', 'PUP'].includes(normalized.status);
-
-            if (!hasInjury) continue;
-
-            injuries[id] = {
-                ...normalized,
-                ...(injuries[id] || {})
-            };
+            if (hasMeaningfulInjury(normalized)) injuries[id] = normalized;
         }
     }
 
