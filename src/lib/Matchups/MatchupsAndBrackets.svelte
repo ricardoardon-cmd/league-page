@@ -4,7 +4,7 @@
     import Brackets from './Brackets.svelte';
     import Button, { Group, Label } from '@smui/button';
     import { goto } from '$app/navigation';
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import { getLeagueData, loadPlayers } from '$lib/utils/helper';
     import { leagueID } from '$lib/utils/leagueInfo';
 
@@ -16,6 +16,7 @@
     export let playersData;
 
     const MAX_MATCHUP_WEEK = 18;
+    const LIVE_REFRESH_MS = 60000;
 
     let players;
     let matchupWeeks = [];
@@ -32,6 +33,8 @@
     let selectedYear;
     let currentSeason;
     let currentMatchupsInfo;
+    let liveRefreshTimer;
+    let focusHandler;
 
     const groupMatchups = (rawMatchups = []) => {
         const grouped = {};
@@ -97,6 +100,50 @@
                 week: index + 1
             }))
             .filter((item) => Object.keys(item.matchups).length);
+    };
+
+    const refreshCurrentWeek = async () => {
+        if (
+            loading ||
+            seasonLoading ||
+            Number(selectedYear) !== Number(currentSeason)
+        ) return;
+
+        const season = seasonOptions.find(
+            (item) => Number(item.year) === Number(currentSeason)
+        );
+        if (!season) return;
+
+        const currentWeek = Number(currentMatchupsInfo?.week || week || queryWeek || 1);
+
+        try {
+            const response = await fetch(
+                `https://api.sleeper.app/v1/league/${season.leagueID}/matchups/${currentWeek}?t=${Date.now()}`,
+                { cache: 'no-store' }
+            );
+            if (!response.ok) return;
+
+            const rawWeek = await response.json();
+            const grouped = groupMatchups(rawWeek);
+            if (!Object.keys(grouped).length) return;
+
+            const refreshedWeek = { week: currentWeek, matchups: grouped };
+            const existingIndex = matchupWeeks.findIndex(
+                (item) => Number(item.week) === currentWeek
+            );
+
+            if (existingIndex >= 0) {
+                matchupWeeks = matchupWeeks.map((item, index) =>
+                    index === existingIndex ? refreshedWeek : item
+                );
+            } else {
+                matchupWeeks = [...matchupWeeks, refreshedWeek].sort(
+                    (a, b) => Number(a.week) - Number(b.week)
+                );
+            }
+        } catch (error) {
+            // Keep the last good scores if Sleeper is temporarily unavailable.
+        }
     };
 
     const getAvailableWeeks = () =>
@@ -194,9 +241,21 @@
 
         loading = false;
 
+        await refreshCurrentWeek();
+        liveRefreshTimer = setInterval(refreshCurrentWeek, LIVE_REFRESH_MS);
+        focusHandler = () => refreshCurrentWeek();
+        window.addEventListener('focus', focusHandler);
+
         if (playersInfo.stale) {
             const newPlayersInfo = await loadPlayers(null, true);
             players = newPlayersInfo.players;
+        }
+    });
+
+    onDestroy(() => {
+        if (liveRefreshTimer) clearInterval(liveRefreshTimer);
+        if (typeof window !== 'undefined' && focusHandler) {
+            window.removeEventListener('focus', focusHandler);
         }
     });
 
